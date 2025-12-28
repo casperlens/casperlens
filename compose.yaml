@@ -1,0 +1,60 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: ./Dockerfile
+    volumes:
+      - ../uploads:/server/uploads
+    develop:
+      watch:
+        - action: rebuild
+          path: ./server/
+          target: /server
+        - action: rebuild
+          path: ./server/Cargo.lock
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    depends_on:
+      - database
+    env_file:
+      - ./server/.env
+    networks:
+      - network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: ./Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_URL:  https://localhost:8000/api/v1
+    env_file:
+      - ./web/.env
+    depends_on:
+      - server
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    networks:
+      - network
+
+  database:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: casperlens
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - network
+
+volumes:
+  postgres-data:
+
+networks:
+    network:
+        driver: bridge
