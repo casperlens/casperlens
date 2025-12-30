@@ -1,8 +1,8 @@
 -- Add migration script here
 CREATE TABLE users (
     id UUID PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
+    email TEXT UNIQUE,
+    password TEXT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
