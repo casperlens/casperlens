@@ -6,15 +6,14 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE contracts (
-    id UUID PRIMARY KEY,
+CREATE TABLE contract_packages (
+    package_hash TEXT PRIMARY KEY,
     user_id UUID NULL REFERENCES users(id) ON DELETE SET NULL,
-    name TEXT NOT NULL,
-    contract_hash TEXT NOT NULL,
-    package_hash TEXT NOT NULL,
+    contract_name TEXT NOT NULL,
+    owner_id TEXT NOT NULL,
     network TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    age TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE UNIQUE INDEX contracts_unique_hash_network
-ON contracts (contract_hash, network);
+ON contract_packages (owner_id, package_hash, network);
