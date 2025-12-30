@@ -1,17 +1,10 @@
--- Add migration script here
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 CREATE TABLE contract_packages (
     package_hash TEXT PRIMARY KEY,
-    user_id UUID NULL REFERENCES users(id) ON DELETE SET NULL,
+    user_id UUID UNIQUE NOT NULL,
     contract_name TEXT NOT NULL,
     owner_id TEXT NOT NULL,
     network TEXT NOT NULL,
+    lock_status BOOLEAN NOT NULL DEFAULT TRUE,
     age TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
