@@ -1,1 +1,3 @@
-pub(crate) mod register;
+pub(crate) mod package;
+pub(crate) mod metadata;
+

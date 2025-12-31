@@ -1,4 +1,5 @@
 mod config;
+mod constants;
 mod middleware;
 mod models;
 mod routers;
@@ -20,7 +21,7 @@ async fn main() -> io::Result<()> {
     dotenv().ok();
 
     let pool = create_db_pool().await;
-    let app = create_router(Arc::new(AppState { db : pool.clone() }));
+    let app = create_router(Arc::new(AppState { db : pool.clone(), config: config::load_config() }));
     let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
     println!("Server running on http://{}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await.expect("Unable to bind to address {addr}");

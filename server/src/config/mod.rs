@@ -6,14 +6,14 @@ use sqlx::PgPool;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
-struct Config {
+pub struct Config {
     pub(crate) database_url: String,
     pub(crate) jwt_secret: String,
     pub(crate) web_url: String,
     pub(crate) node_address: String,
 }
 
-fn load_config() -> Config {
+pub fn load_config() -> Config {
     dotenv().ok();
 
     let config = Config {
