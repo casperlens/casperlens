@@ -1,15 +1,24 @@
-use std::{env, sync::Arc};
-
-use axum::{Router, routing::{get, post}};
+use crate::{
+    config::{self, AppState},
+    middleware::cors::get_cors_config,
+    routers::{contract::register_contract, health::health_check},
+};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
-
-use crate::{config::{self, AppState}, middleware::cors::get_cors_config, routers::{contract::register_contract, health::health_check}};
+use std::sync::Arc;
 
 pub fn create_router(app_state: Arc<AppState>) -> Router {
+
     let cors = get_cors_config();
     let router: Router = Router::new()
         .route("/api/v1/health", get(health_check))
-        .route("/api/v1/u/:user_id/contract/register", post(register_contract))
+        .route(
+            "/api/v1/u/user_id/contract/register",
+            post(register_contract),
+        )
         .with_state(app_state)
         .layer(cors);
     router
