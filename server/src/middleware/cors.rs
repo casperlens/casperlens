@@ -1,12 +1,11 @@
-use std::env;
-
 use axum::http::{Method, header};
 use tower_http::cors::CorsLayer;
 
-pub fn get_cors_config() -> CorsLayer {
-    let web_url =
-        env::var("WEB_URL").map_or_else(|_| "http://localhost:3000".to_string(), |f| f);
+use crate::config;
 
+pub fn get_cors_config() -> CorsLayer {
+    let config = config::load_config();
+    let web_url = config.web_url.clone();
     let allowed_origins = vec![web_url.parse().unwrap()];
 
     let allowed_methods = vec![Method::GET, Method::POST, Method::OPTIONS];
