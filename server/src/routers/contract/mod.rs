@@ -34,8 +34,14 @@ pub async fn register_contract(
 ) -> impl IntoResponse {
     match resolve_network(&payload.network.to_string()) {
         Some(network) => {
+            let node_address: String; 
+            if network == "testnet" {
+                node_address = state.config.testnet_node_address.clone();
+            } else {
+                node_address = state.config.mainnet_node_address.clone();
+            }
             let contract_package_details = get_contract_package_details(
-                state.config.node_address.clone(),
+                node_address,
                 payload.package_hash.clone(),
             )
             .await;
