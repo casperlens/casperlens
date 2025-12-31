@@ -10,7 +10,8 @@ pub struct Config {
     pub(crate) database_url: String,
     pub(crate) jwt_secret: String,
     pub(crate) web_url: String,
-    pub(crate) node_address: String,
+    pub(crate) mainnet_node_address: String,
+    pub(crate) testnet_node_address: String,
 }
 
 pub fn load_config() -> Config {
@@ -20,7 +21,8 @@ pub fn load_config() -> Config {
         database_url: env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env"),
         jwt_secret: env::var("JWT_SECRET").expect("JWT_SECRET is not set in .env"),
         web_url: env::var("WEB_URL").expect("WEB_URL is not set in .env"),
-        node_address: env::var("NODE_ADDRESS").expect("NODE_ADDRESS is not set in .env"),
+        mainnet_node_address: env::var("MAINNET_NODE_ADDRESS").unwrap_or("https://node.mainnet.casper.network".to_string()),
+        testnet_node_address: env::var("TESTNET_NODE_ADDRESS").unwrap_or("https://node.testnet.casper.network".to_string()),
     };
     config
 }
