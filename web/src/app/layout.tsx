@@ -1,6 +1,7 @@
 import { Provider } from "jotai";
 import type { Metadata } from "next";
 import "./globals.css";
+import { UserSessionInit } from "@/components/UserSessionInit";
 
 export const metadata: Metadata = {
   title: "CasperLens - Blockchain Observability Platform",
@@ -15,8 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col bg-black text-white antialiased">
+        <UserSessionInit />
         <Provider>
-          {children}
+          {/* Global app container */}
+          <div className="min-h-screen">
+            {children}
+          </div>
         </Provider>
       </body>
     </html>
