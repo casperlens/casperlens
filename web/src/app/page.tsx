@@ -1,6 +1,7 @@
-export default function Home() {
+'use client';
+
+export default function LandingPage() {
   return (
-    <>
-    </>
+    <></>
   );
 }
