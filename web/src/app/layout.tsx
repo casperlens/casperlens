@@ -14,9 +14,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col bg-black text-white antialiased">
+      <body className="min-h-screen flex flex-col bg-black text-white antialiased root">
         <Provider>
-          {children}
+          <main className="p-5">
+            {children}
+          </main>
         </Provider>
       </body>
     </html>

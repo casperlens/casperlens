@@ -1,17 +1,17 @@
-interface ContractRegister {
+export interface ContractRegister {
   package_hash: string;
   package_name: string;
   network: 'mainnet' | 'testnet';
 }
 
-interface ContractRegisterRes {
+export interface ContractRegisterRes {
   success: true;
   message: string;
   error: string | null;
   data: null;
 }
 
-interface ContractSchema {
+export interface ContractOverview {
   package_hash: string;
   contract_name: string;
   owner_id: string;
@@ -20,7 +20,7 @@ interface ContractSchema {
   age: number;
 }
 
-interface Contract {
+export interface Contract {
   package_hash: string;
   contract_name: string;
   owner_id: string;
@@ -30,7 +30,7 @@ interface Contract {
   versions: Version[];
 }
 
-interface Version {
+export interface Version {
   protocol_major_version: number,
   contract_version: number,
   contract_package_hash: string,
