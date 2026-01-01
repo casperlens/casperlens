@@ -17,16 +17,6 @@ odra-build = { version = "2.4.0", features = [], default-features = false }
 odra-cli = { version = "2.4.0", features = [], default-features = false }
 
 [[bin]]
-name = "casperlens_contract_build_contract"
-path = "bin/build_contract.rs"
-test = false
-
-[[bin]]
-name = "casperlens_contract_build_schema"
-path = "bin/build_schema.rs"
-test = false
-
-[[bin]]
 name = "casperlens_contract_cli"
 path = "bin/cli.rs"
 test = false
