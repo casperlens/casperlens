@@ -11,7 +11,7 @@ export interface ContractRegisterRes {
   data: null;
 }
 
-export interface ContractSchema {
+export interface ContractOverview {
   package_hash: string;
   contract_name: string;
   owner_id: string;
