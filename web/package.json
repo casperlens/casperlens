@@ -10,9 +10,12 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@base-ui/react": "^1.0.0",
+    "jotai": "^2.16.1",
     "next": "16.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "valibot": "^1.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
