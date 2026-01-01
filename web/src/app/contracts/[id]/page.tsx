@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import { ContractOverview, Version } from "@/types";
 import { ScrollArea, Tabs } from "@base-ui/react";
 import { useState } from "react";
 
 export default function ContractDetailsPage() {
-  const [activeTab, setActiveTab] = useState('lifecycles');
+  const [activeTab, setActiveTab] = useState("lifecycles");
 
   // Mock contract data
   const contractData: ContractOverview = {
@@ -97,11 +97,16 @@ export default function ContractDetailsPage() {
   ];
 
   return (
-    <div className="min-h-screen p-8" style={{ backgroundColor: "#0f0f0f", color: "#e0e0e0" }}>
+    <div
+      className="min-h-screen p-8"
+      style={{ backgroundColor: "#0f0f0f", color: "#e0e0e0" }}
+    >
       <div className="">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">{contractData.contract_name}</h1>
+          <h1 className="text-4xl font-bold mb-2">
+            {contractData.contract_name}
+          </h1>
           <p style={{ color: "#a0a0a0" }}>Contract Details & Versions</p>
         </div>
 
@@ -115,39 +120,63 @@ export default function ContractDetailsPage() {
             <ScrollArea.Viewport className="h-full">
               <ScrollArea.Content>
                 {/* Contract Name */}
-                <div className="mb-6 pb-6 border-b" style={{ borderColor: "#2a2a2a" }}>
+                <div
+                  className="mb-6 pb-6 border-b"
+                  style={{ borderColor: "#2a2a2a" }}
+                >
                   <p style={{ color: "#888888" }} className="text-sm mb-2">
                     Contract Name
                   </p>
-                  <p className="font-medium break-all">{contractData.contract_name}</p>
+                  <p className="font-medium break-all">
+                    {contractData.contract_name}
+                  </p>
                 </div>
 
                 {/* Package Hash */}
-                <div className="mb-6 pb-6 border-b" style={{ borderColor: "#2a2a2a" }}>
+                <div
+                  className="mb-6 pb-6 border-b"
+                  style={{ borderColor: "#2a2a2a" }}
+                >
                   <p style={{ color: "#888888" }} className="text-sm mb-2">
                     Package Hash
                   </p>
-                  <p className="font-mono text-xs break-all">{contractData.package_hash}</p>
+                  <p className="font-mono text-xs break-all">
+                    {contractData.package_hash}
+                  </p>
                 </div>
 
                 {/* Owner ID */}
-                <div className="mb-6 pb-6 border-b" style={{ borderColor: "#2a2a2a" }}>
+                <div
+                  className="mb-6 pb-6 border-b"
+                  style={{ borderColor: "#2a2a2a" }}
+                >
                   <p style={{ color: "#888888" }} className="text-sm mb-2">
                     Owner ID
                   </p>
-                  <p className="font-mono text-xs break-all">{contractData.owner_id}</p>
+                  <p className="font-mono text-xs break-all">
+                    {contractData.owner_id}
+                  </p>
                 </div>
 
                 {/* Network */}
-                <div className="mb-6 pb-6 border-b" style={{ borderColor: "#2a2a2a" }}>
+                <div
+                  className="mb-6 pb-6 border-b"
+                  style={{ borderColor: "#2a2a2a" }}
+                >
                   <p style={{ color: "#888888" }} className="text-sm mb-2">
                     Network
                   </p>
                   <span
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium"
                     style={{
-                      backgroundColor: contractData.network === 'mainnet' ? '#1a3a1a' : '#3a2a1a',
-                      color: contractData.network === 'mainnet' ? '#51cf66' : '#ffa500',
+                      backgroundColor:
+                        contractData.network === "mainnet"
+                          ? "#1a3a1a"
+                          : "#3a2a1a",
+                      color:
+                        contractData.network === "mainnet"
+                          ? "#51cf66"
+                          : "#ffa500",
                     }}
                   >
                     {contractData.network}
@@ -155,23 +184,31 @@ export default function ContractDetailsPage() {
                 </div>
 
                 {/* Lock Status */}
-                <div className="mb-6 pb-6 border-b" style={{ borderColor: "#2a2a2a" }}>
+                <div
+                  className="mb-6 pb-6 border-b"
+                  style={{ borderColor: "#2a2a2a" }}
+                >
                   <p style={{ color: "#888888" }} className="text-sm mb-2">
                     Lock Status
                   </p>
                   <span
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium"
                     style={{
-                      backgroundColor: contractData.lock_status ? '#3a1a1a' : '#1a3a1a',
-                      color: contractData.lock_status ? '#ff6b6b' : '#51cf66',
+                      backgroundColor: contractData.lock_status
+                        ? "#3a1a1a"
+                        : "#1a3a1a",
+                      color: contractData.lock_status ? "#ff6b6b" : "#51cf66",
                     }}
                   >
-                    {contractData.lock_status ? 'Locked' : 'Unlocked'}
+                    {contractData.lock_status ? "Locked" : "Unlocked"}
                   </span>
                 </div>
 
                 {/* Age */}
-                <div className="mb-6 pb-6 border-b" style={{ borderColor: "#2a2a2a" }}>
+                <div
+                  className="mb-6 pb-6 border-b"
+                  style={{ borderColor: "#2a2a2a" }}
+                >
                   <p style={{ color: "#888888" }} className="text-sm mb-2">
                     Age
                   </p>
@@ -180,22 +217,29 @@ export default function ContractDetailsPage() {
 
                 {/* Current Version */}
                 <div className="mb-6">
-                  <p style={{ color: "#888888" }} className="text-sm mb-3 font-semibold">
+                  <p
+                    style={{ color: "#888888" }}
+                    className="text-sm mb-3 font-semibold"
+                  >
                     Current Version
                   </p>
                   <div className="space-y-3 text-sm">
                     <div>
                       <p style={{ color: "#888888" }}>Version</p>
-                      <p className="font-medium">{versionData.contract_version}</p>
+                      <p className="font-medium">
+                        {versionData.contract_version}
+                      </p>
                     </div>
                     <div>
                       <p style={{ color: "#888888" }}>Protocol Version</p>
-                      <p className="font-mono text-xs">{versionData.protocol_version}</p>
+                      <p className="font-mono text-xs">
+                        {versionData.protocol_version}
+                      </p>
                     </div>
                     <div>
                       <p style={{ color: "#888888" }}>Disabled</p>
                       <p className="font-medium">
-                        {versionData.disabled ? 'Yes' : 'No'}
+                        {versionData.disabled ? "Yes" : "No"}
                       </p>
                     </div>
                   </div>
@@ -211,13 +255,22 @@ export default function ContractDetailsPage() {
           <Tabs.Root className="flex-1 flex flex-col gap-3 border-2 border-[#2a2a2a]">
             {/* Tab Navigation */}
             <Tabs.List className="flex gap-3 p-4 border-b-2 border-[#2a2a2a]">
-              <Tabs.Tab value="lifetime" className={`px-2 py-1 rounded data-active:bg-gray-800`}>
+              <Tabs.Tab
+                value="lifetime"
+                className={`px-2 py-1 rounded data-active:bg-gray-800`}
+              >
                 Lifecycles
               </Tabs.Tab>
-              <Tabs.Tab value="diff" className={`px-2 py-1 rounded data-active:bg-gray-800`}>
+              <Tabs.Tab
+                value="diff"
+                className={`px-2 py-1 rounded data-active:bg-gray-800`}
+              >
                 Diff
               </Tabs.Tab>
-              <Tabs.Tab value="metric" className={`px-2 py-1 rounded data-active:bg-gray-800`}>
+              <Tabs.Tab
+                value="metric"
+                className={`px-2 py-1 rounded data-active:bg-gray-800`}
+              >
                 Metrics
               </Tabs.Tab>
             </Tabs.List>
@@ -245,7 +298,9 @@ export default function ContractDetailsPage() {
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <p className="font-semibold">Version {lifecycle.version}</p>
+                          <p className="font-semibold">
+                            Version {lifecycle.version}
+                          </p>
                           <p style={{ color: "#888888" }} className="text-sm">
                             {new Date(lifecycle.timestamp).toLocaleString()}
                           </p>
@@ -253,15 +308,22 @@ export default function ContractDetailsPage() {
                         <span
                           className="px-3 py-1 rounded-full text-xs font-medium"
                           style={{
-                            backgroundColor: lifecycle.status === 'deployed' ? '#1a3a1a' : '#2a3a1a',
-                            color: lifecycle.status === 'deployed' ? '#51cf66' : '#ffa500',
+                            backgroundColor:
+                              lifecycle.status === "deployed"
+                                ? "#1a3a1a"
+                                : "#2a3a1a",
+                            color:
+                              lifecycle.status === "deployed"
+                                ? "#51cf66"
+                                : "#ffa500",
                           }}
                         >
                           {lifecycle.status}
                         </span>
                       </div>
                       <p style={{ color: "#888888" }} className="text-sm">
-                        Hash: <span className="font-mono">{lifecycle.hash}</span>
+                        Hash:{" "}
+                        <span className="font-mono">{lifecycle.hash}</span>
                       </p>
                     </div>
                   ))}
@@ -270,7 +332,9 @@ export default function ContractDetailsPage() {
 
               {/* Diff Tab */}
               <Tabs.Panel value="diff">
-                <h3 className="text-lg font-bold mb-4">Changes in Latest Version</h3>
+                <h3 className="text-lg font-bold mb-4">
+                  Changes in Latest Version
+                </h3>
                 <div className="space-y-3">
                   {diffData.map((diff, idx) => (
                     <div
@@ -279,28 +343,28 @@ export default function ContractDetailsPage() {
                       style={{
                         backgroundColor: "#1a1a1a",
                         borderLeftColor:
-                          diff.type === 'added'
-                            ? '#51cf66'
-                            : diff.type === 'removed'
-                              ? '#ff6b6b'
-                              : '#ffa500',
+                          diff.type === "added"
+                            ? "#51cf66"
+                            : diff.type === "removed"
+                              ? "#ff6b6b"
+                              : "#ffa500",
                       }}
                     >
                       <span
                         className="px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5"
                         style={{
                           backgroundColor:
-                            diff.type === 'added'
-                              ? '#1a3a1a'
-                              : diff.type === 'removed'
-                                ? '#3a1a1a'
-                                : '#2a3a1a',
+                            diff.type === "added"
+                              ? "#1a3a1a"
+                              : diff.type === "removed"
+                                ? "#3a1a1a"
+                                : "#2a3a1a",
                           color:
-                            diff.type === 'added'
-                              ? '#51cf66'
-                              : diff.type === 'removed'
-                                ? '#ff6b6b'
-                                : '#ffa500',
+                            diff.type === "added"
+                              ? "#51cf66"
+                              : diff.type === "removed"
+                                ? "#ff6b6b"
+                                : "#ffa500",
                         }}
                       >
                         {diff.type}
@@ -327,7 +391,10 @@ export default function ContractDetailsPage() {
                       <p style={{ color: "#888888" }} className="text-sm mb-2">
                         {metric.label}
                       </p>
-                      <p className="text-2xl font-bold" style={{ color: "#4a9eff" }}>
+                      <p
+                        className="text-2xl font-bold"
+                        style={{ color: "#4a9eff" }}
+                      >
                         {metric.value}
                       </p>
                     </div>

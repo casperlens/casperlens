@@ -5,7 +5,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CasperLens - Blockchain Observability Platform",
-  description: "Comprehensive observability platform for tracking and monitoring smart contracts on the Casper blockchain network",
+  description:
+    "Comprehensive observability platform for tracking and monitoring smart contracts on the Casper blockchain network",
 };
 
 export default function RootLayout({
@@ -19,9 +20,7 @@ export default function RootLayout({
         <UserSessionInit />
         <Provider>
           {/* Global app container */}
-          <div className="min-h-screen">
-            {children}
-          </div>
+          <div className="min-h-screen">{children}</div>
         </Provider>
       </body>
     </html>

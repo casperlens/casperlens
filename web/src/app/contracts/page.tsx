@@ -1,11 +1,15 @@
-'use client';
+"use client";
 
-import { ContractOverview } from "@/types";
+import { useState } from "react";
+
+import type { ContractOverview } from "@/types";
 import { Button } from "@base-ui/react";
 import { useRouter } from "next/navigation";
+import { ContractRegisterForm } from "@/components/ContractRegisterForm";
 
 export default function ContractPage() {
   const router = useRouter();
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const contractList: ContractOverview[] = [
     {
       package_hash: "hash1",
@@ -60,11 +64,27 @@ export default function ContractPage() {
   const handleClick = (packageHash: string) => {
     console.log(`View details for contract with package hash: ${packageHash}`);
     router.push(`/contracts/${packageHash}`);
-  }
+  };
 
   return (
     <div className="px-6 py-12">
       <div className="mx-auto">
+        <div className="mb-8 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-300">
+            Contract Packages
+          </h1>
+          <Button
+            onClick={() => setShowRegisterModal(true)}
+            className="bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          >
+            Register Contract
+          </Button>
+        </div>
+
+        {showRegisterModal && (
+          <ContractRegisterForm onClose={() => setShowRegisterModal(false)} />
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {contractList.map((contract) => (
             <div
@@ -79,15 +99,14 @@ export default function ContractPage() {
                   <p className="text-xs break-all mb-1 text-gray-400">
                     {contract.package_hash}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {contract.owner_id}
-                  </p>
+                  <p className="text-xs text-gray-500">{contract.owner_id}</p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status
-                    ? 'bg-red-900 text-red-400'
-                    : 'bg-green-900 text-green-400'
-                    }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${
+                    contract.lock_status
+                      ? "bg-red-900 text-red-400"
+                      : "bg-green-900 text-green-400"
+                  }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
@@ -100,7 +119,10 @@ export default function ContractPage() {
                   </span>
                   <span className="text-gray-500">{contract.age}d</span>
                 </div>
-                <Button className="text-xs border rounded-lg px-2 py-1 text-white hover:bg-gray-700 transition-colors cursor-pointer" onClick={() => handleClick(contract.package_hash)}>
+                <Button
+                  className="text-xs border rounded-lg px-2 py-1 text-white hover:bg-gray-700 transition-colors cursor-pointer"
+                  onClick={() => handleClick(contract.package_hash)}
+                >
                   View
                 </Button>
               </div>
