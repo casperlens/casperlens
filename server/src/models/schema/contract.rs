@@ -65,7 +65,7 @@ pub struct APIMetaResponse<T> {
     pub data: T,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ContractVersionSchema {
     pub protocol_major_version: u32,
     pub contract_version: u32,

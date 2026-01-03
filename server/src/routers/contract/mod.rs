@@ -57,7 +57,6 @@ pub async fn get_contract_diff(
 ) -> impl IntoResponse {
     let package_hash = normalize_hash(&package_hash);
 
-    // get v1 from DB to check existence and getting contract hash and network.
     let v1_db = match get_contract_version(&state.db, &package_hash, query.v1, query.v1_maj).await {
         Ok(Some(v)) => v,
         Ok(None) => {
@@ -83,7 +82,6 @@ pub async fn get_contract_diff(
         }
     };
 
-    // Get v2 from DB
     let v2_db = match get_contract_version(&state.db, &package_hash, query.v2, query.v2_maj).await {
         Ok(Some(v)) => v,
         Ok(None) => {
@@ -109,7 +107,6 @@ pub async fn get_contract_diff(
         }
     };
 
-    // I'll make a quick query to get the network for the package_hash.
     let network_row = sqlx::query!(
         "SELECT network FROM contract_packages WHERE package_hash = $1",
         package_hash
@@ -176,7 +173,6 @@ pub async fn get_contract_diff(
             }
         };
 
-    // Update v1 and v2 schemas with chain data
     let mut v1 = v1_db;
     v1.entry_points = v1_contract.entry_points().clone().take_entry_points();
     v1.named_keys = v1_contract.named_keys().clone();
@@ -289,8 +285,6 @@ pub async fn register_contract(
                         age,
                     );
 
-                    // Fetch versions details from node
-
                     let versions_details = match get_contract_versions_details(
                         &node_address,
                         &network,
@@ -317,19 +311,14 @@ pub async fn register_contract(
 
                     match insert_contract_package(&state.db, &contract_package).await {
                         Ok(()) => {
-                            // Insert versions
-
                             if let Err(e) =
                                 insert_contract_package_versions(&state.db, versions_details).await
                             {
                                 return Json(ApiResponse {
                                     success: false,
-
                                     message: "Contract registered but failed to store versions"
                                         .to_string(),
-
                                     error: Some(e.to_string()),
-
                                     data: None::<String>,
                                 })
                                 .into_response();
@@ -337,12 +326,9 @@ pub async fn register_contract(
 
                             return Json(ApiResponse {
                                 success: true,
-
                                 message: "Contract and its versions registered successfully"
                                     .to_string(),
-
                                 error: None::<String>,
-
                                 data: None::<String>,
                             })
                             .into_response();
@@ -351,11 +337,8 @@ pub async fn register_contract(
                         Err(_) => {
                             return Json(ApiResponse {
                                 success: false,
-
                                 message: "Failed to register contract".to_string(),
-
                                 error: Some("Database error".to_string()),
-
                                 data: None::<String>,
                             })
                             .into_response();
@@ -365,11 +348,8 @@ pub async fn register_contract(
 
                 Err(error) => Json(ApiResponse {
                     success: false,
-
                     message: "Failed to register contract".to_string(),
-
                     error: Some(format!("Contract package query error: {error}")),
-
                     data: None::<String>,
                 })
                 .into_response(),
@@ -378,11 +358,8 @@ pub async fn register_contract(
 
         None => Json(ApiResponse {
             success: false,
-
             message: "Invalid network provided".to_string(),
-
             error: Some("Network must be one of: mainnet, testnet, localnet".to_string()),
-
             data: None::<String>,
         })
         .into_response(),
