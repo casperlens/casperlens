@@ -16,7 +16,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
     let router: Router = Router::new()
         .route("/api/v1/health", get(health_check))
         .route(
-            "/api/v1/u/user_id/contract/register",
+            "/api/v1/u/{user_id}/contract/register",
             post(register_contract),
         )
         .with_state(app_state)
