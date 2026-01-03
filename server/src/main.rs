@@ -3,13 +3,13 @@ mod constants;
 mod middleware;
 mod models;
 mod routers;
-mod utils;
 mod services;
-use std::sync::Arc;
+mod utils;
+use dotenvy::dotenv;
+use sqlx::migrate::Migrator;
 use std::io;
 use std::net::SocketAddr;
-use sqlx::migrate::Migrator;
-use dotenvy::dotenv;
+use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 use tracing::Level;
 
@@ -26,11 +26,19 @@ async fn main() -> io::Result<()> {
         .init();
     dotenv().ok();
     let pool = create_db_pool().await;
-    let app = create_router(Arc::new(AppState { db : pool.clone(), config: config::load_config() }));
+    let app = create_router(Arc::new(AppState {
+        db: pool.clone(),
+        config: config::load_config(),
+    }));
     let app = app.layer(TraceLayer::new_for_http());
     let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
     println!("Server running on http://{}", addr);
-    let listener = tokio::net::TcpListener::bind(addr).await.expect("Unable to bind to address {addr}");
-    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .expect("Unable to bind to address {addr}");
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
 }
-

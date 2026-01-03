@@ -1,2 +1,2 @@
-pub(crate) mod health;
 pub(crate) mod contract;
+pub(crate) mod health;

@@ -1,10 +1,15 @@
 use casper_types::contracts::EntryPoints;
 
-use crate::models::schema::contract::{ContractEntryPointDiff, ContractNamedKeysDiff, ContractVersionDiff, ContractVersionDiffMeta, ContractVersionSchema};
-
+use crate::models::schema::contract::{
+    ContractEntryPointDiff, ContractNamedKeysDiff, ContractVersionDiff, ContractVersionDiffMeta,
+    ContractVersionSchema,
+};
 
 /// Get the diff for v1 to v2 transition, with v1 being the older version and v2 being newer version
-pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVersionSchema) -> Result<ContractVersionDiff, String> {
+pub async fn get_contract_version_diff(
+    v1: ContractVersionSchema,
+    v2: ContractVersionSchema,
+) -> Result<ContractVersionDiff, String> {
     // Contract validation
     let v1_package_hash = &v1.contract_package_hash;
     let v2_package_hash = &v2.contract_package_hash;
@@ -12,10 +17,16 @@ pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVe
         return Err("Contracts do not belong to same package".to_string());
     }
     if &v1.contract_version > &v2.contract_version {
-        return Err(format!("Contract {} is older than contract {}", &v1.contract_version, &v2.contract_hash));
+        return Err(format!(
+            "Contract {} is older than contract {}",
+            &v1.contract_version, &v2.contract_hash
+        ));
     }
     if &v1.contract_version == &v2.contract_version {
-        return Err(format!("Contract {} is same as contract {}", &v1.contract_version, &v2.contract_hash));
+        return Err(format!(
+            "Contract {} is same as contract {}",
+            &v1.contract_version, &v2.contract_hash
+        ));
     }
 
     // Compute diff in v1 and v2
@@ -55,9 +66,15 @@ pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVe
     let mut named_keys_diff = vec![];
 
     for key in v1.named_keys.names() {
-        let v1_val = v1.named_keys.get(&key.to_string()).expect("key from keys()");
+        let v1_val = v1
+            .named_keys
+            .get(&key.to_string())
+            .expect("key from keys()");
         match v2.named_keys.get(&key.to_string()) {
-            None => named_keys_diff.push(ContractNamedKeysDiff::Removed{key: key.to_string(), value: v1_val.clone()}),
+            None => named_keys_diff.push(ContractNamedKeysDiff::Removed {
+                key: key.to_string(),
+                value: v1_val.clone(),
+            }),
             Some(v2_val) if v1_val != v2_val => {
                 named_keys_diff.push(ContractNamedKeysDiff::Modified {
                     key: key.to_string(),
@@ -72,7 +89,10 @@ pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVe
     for key in v2.named_keys.names() {
         if v1.named_keys.get(key).is_none() {
             let v2_val = v2.named_keys.get(key).expect("key from keys()");
-            named_keys_diff.push(ContractNamedKeysDiff::Added{key: key.to_string(), value: v2_val.clone()});
+            named_keys_diff.push(ContractNamedKeysDiff::Added {
+                key: key.to_string(),
+                value: v2_val.clone(),
+            });
         }
     }
     let v1_diff_meta = ContractVersionDiffMeta {
@@ -80,7 +100,7 @@ pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVe
         wasm_hash: v1.contract_wasm_hash.clone(),
         timestamp: v1.age,
         contract_version: v1.contract_version,
-        is_disabled: v1.disabled
+        is_disabled: v1.disabled,
     };
 
     let v2_diff_meta = ContractVersionDiffMeta {
@@ -88,7 +108,7 @@ pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVe
         wasm_hash: v2.contract_wasm_hash.clone(),
         timestamp: v2.age,
         contract_version: v2.contract_version,
-        is_disabled: v2.disabled
+        is_disabled: v2.disabled,
     };
 
     let contract_version_diff = ContractVersionDiff {
@@ -96,7 +116,7 @@ pub async fn get_contract_version_diff(v1: ContractVersionSchema, v2: ContractVe
         v2: v2_diff_meta,
         contract_package_hash: v1_package_hash.to_string(),
         entry_points: entry_point_diffs,
-        named_keys: named_keys_diff,       
+        named_keys: named_keys_diff,
     };
     Ok(contract_version_diff)
 }

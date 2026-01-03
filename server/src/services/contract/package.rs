@@ -14,20 +14,18 @@ pub async fn get_contract_package_details(
     node_address: String,
     package_hash: String,
 ) -> Result<ContractPackage, String> {
-    let raw_package_hash = package_hash
-        .strip_prefix("hash-")
-        .unwrap_or(&package_hash);
-    
+    let raw_package_hash = package_hash.strip_prefix("hash-").unwrap_or(&package_hash);
+
     if raw_package_hash.len() != 64 || !raw_package_hash.chars().all(|c| c.is_ascii_hexdigit()) {
         return Err(format!(
             "Invalid contract package hash format: {}",
             package_hash
         ));
     }
-    
+
     let package_hash = format!("hash-{}", raw_package_hash);
     let state_root_hash = get_state_root_hash(&node_address).await?;
-    
+
     if state_root_hash.len() != 64 || !state_root_hash.chars().all(|c| c.is_ascii_hexdigit()) {
         return Err(format!(
             "Invalid state root hash returned by node: {}",
@@ -113,7 +111,6 @@ pub async fn get_contract_versions_details(
     }
     Ok(contract_versions_data)
 }
-
 
 /// Get contract version details
 pub async fn get_contract_version_details(

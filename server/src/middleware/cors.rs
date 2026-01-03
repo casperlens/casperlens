@@ -19,7 +19,7 @@ pub fn get_cors_config() -> CorsLayer {
         header::ACCESS_CONTROL_ALLOW_HEADERS,
         header::ACCESS_CONTROL_ALLOW_CREDENTIALS,
         header::ACCESS_CONTROL_ALLOW_METHODS,
-        "Credentials".parse().unwrap()
+        "Credentials".parse().unwrap(),
     ];
 
     CorsLayer::new()

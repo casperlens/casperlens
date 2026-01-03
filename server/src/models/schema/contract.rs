@@ -108,7 +108,7 @@ pub struct ContractVersionDiff {
     #[serde(flatten)]
     pub entry_points: Vec<ContractEntryPointDiff>,
     #[serde(flatten)]
-    pub named_keys: Vec<ContractNamedKeysDiff>
+    pub named_keys: Vec<ContractNamedKeysDiff>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -117,9 +117,8 @@ pub struct ContractVersionDiffMeta {
     pub timestamp: DateTime<Utc>,
     pub contract_version: u32,
     pub is_disabled: bool,
-    pub wasm_hash: String
+    pub wasm_hash: String,
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ContractEntryPointDiff {
@@ -127,7 +126,6 @@ pub enum ContractEntryPointDiff {
     Removed(EntryPoint),
     Modified { from: EntryPoint, to: EntryPoint },
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ContractNamedKeysDiff {
