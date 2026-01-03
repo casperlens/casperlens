@@ -3,10 +3,9 @@ use std::sync::Arc;
 use crate::{
     config::AppState,
     models::{
-        api::{ApiResponse, contract::RegisterContractRequest},
-        schema::contract::ContractPackage,
+        api::{ApiResponse, contract::RegisterContractRequest}, schema::contract::ContractPackageSchema,
     },
-    services::{contract::{metadata::get_contract_package_metadata, package::{get_contract_package_details}}, database::contract::insert_contract_package},
+    services::{contract::{metadata::get_contract_package_metadata, package::get_contract_package_details}, database::contract::insert_contract_package},
 };
 use axum::{
     extract::{Json, Path, State},
@@ -47,7 +46,11 @@ pub async fn register_contract(
             .await;
             match contract_package_details {
                 Ok(data) => {
-                    let package_meta = get_contract_package_metadata(&network, &payload.package_hash).await;
+                    let mut package_hash: String = payload.package_hash.clone();
+                    if let Some(stripped) = package_hash.strip_prefix("hash-") {
+                        package_hash = stripped.to_string();
+                    }
+                    let package_meta = get_contract_package_metadata(&network, &package_hash).await;
                     if let Err(e) = package_meta {
                         return Json(ApiResponse {
                                 success: false,
@@ -58,7 +61,6 @@ pub async fn register_contract(
                             .into_response();
                     };
                     let package_meta = package_meta.unwrap();
-                    let package_hash = payload.package_hash.clone();
                     let user_id = user_id.clone();
                     let contract_name = payload.package_name.clone();
                     let owner_id = package_meta.owner_public_key.clone();
@@ -74,7 +76,7 @@ pub async fn register_contract(
                             .into_response();
                     };
                     let age = age.unwrap();
-                    let contract_package = ContractPackage::new(
+                    let contract_package = ContractPackageSchema::new(
                         package_hash,
                         user_id,
                         contract_name,

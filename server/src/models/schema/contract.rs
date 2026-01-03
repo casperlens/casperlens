@@ -1,20 +1,11 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use casper_types::{Key, NamedKeys, contracts::EntryPoint};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use serde_json;
-
-
-#[derive(Debug, Deserialize, Serialize)]
-pub enum Network {
-    #[serde(rename = "mainnet")]
-    Mainnet,
-    
-    #[serde(rename = "testnet")]
-    Testnet,
-}
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ContractPackage {
+pub struct ContractPackageSchema {
     pub package_hash: String,
     pub user_id: Uuid,
     pub contract_name: String,
@@ -24,9 +15,17 @@ pub struct ContractPackage {
     pub age: DateTime<Utc>,
 }
 
-impl ContractPackage {
-    pub fn new(package_hash: String, user_id: Uuid, contract_name: String, owner_id: String, network: String, lock_status: bool, age: DateTime<Utc>) -> Self {
-        ContractPackage {
+impl ContractPackageSchema {
+    pub fn new(
+        package_hash: String,
+        user_id: Uuid,
+        contract_name: String,
+        owner_id: String,
+        network: String,
+        lock_status: bool,
+        age: DateTime<Utc>,
+    ) -> Self {
+        ContractPackageSchema {
             package_hash,
             user_id,
             contract_name,
@@ -62,6 +61,77 @@ pub struct ContractPackageMeta {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ContractPackageMetaResponse {
-    pub data: ContractPackageMeta,
+pub struct APIMetaResponse<T> {
+    pub data: T,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ContractVersionSchema {
+    pub protocol_major_version: u32,
+    pub contract_version: u32,
+    pub contract_package_hash: String,
+    pub contract_hash: String,
+    pub contract_wasm_hash: String,
+    pub user_id: Uuid,
+    pub protocol_version: String,
+    pub entry_points: Vec<EntryPoint>,
+    pub named_keys: NamedKeys,
+    pub disabled: bool,
+    pub age: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ContractVersionMeta {
+    pub contract_hash: String,
+    pub contract_package_hash: String,
+    #[serde(skip)]
+    pub deploy_hash: String,
+    #[serde(skip)]
+    pub block_height: u64,
+    #[serde(skip)]
+    pub contract_type_id: Option<serde_json::Value>,
+    pub timestamp: DateTime<Utc>,
+    pub contract_version: u32,
+    pub is_disabled: bool,
+
+    #[serde(skip)]
+    pub contract_package: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ContractVersionDiff {
+    #[serde(flatten)]
+    pub v1: ContractVersionDiffMeta,
+    #[serde(flatten)]
+    pub v2: ContractVersionDiffMeta,
+    pub contract_package_hash: String,
+    #[serde(flatten)]
+    pub entry_points: Vec<ContractEntryPointDiff>,
+    #[serde(flatten)]
+    pub named_keys: Vec<ContractNamedKeysDiff>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ContractVersionDiffMeta {
+    pub contract_hash: String,
+    pub timestamp: DateTime<Utc>,
+    pub contract_version: u32,
+    pub is_disabled: bool,
+    pub wasm_hash: String
+}
+
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ContractEntryPointDiff {
+    Added(EntryPoint),
+    Removed(EntryPoint),
+    Modified { from: EntryPoint, to: EntryPoint },
+}
+
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ContractNamedKeysDiff {
+    Added { key: String, value: Key },
+    Removed { key: String, value: Key },
+    Modified { key: String, from: Key, to: Key },
 }
