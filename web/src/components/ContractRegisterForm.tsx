@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@base-ui/react";
+import { useState } from "react";
 import type { ContractRegister, ContractRegisterRes } from "@/types";
 
 interface ContractRegisterFormProps {
@@ -45,15 +45,19 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
       if (packageHash.startsWith("hash-")) {
         packageHash = packageHash.substring(5);
       }
-      
+
       // Validate hash format (should be hex only)
       if (!/^[a-fA-F0-9]+$/.test(packageHash)) {
-        throw new Error("Invalid package hash format. Should only contain hexadecimal characters (0-9, a-f, A-F).");
+        throw new Error(
+          "Invalid package hash format. Should only contain hexadecimal characters (0-9, a-f, A-F).",
+        );
       }
-      
+
       // Additional check for any dots or special characters
-      if (packageHash.includes('.') || packageHash.includes('-')) {
-        throw new Error("Package hash should not contain dots or dashes. Remove any special characters.");
+      if (packageHash.includes(".") || packageHash.includes("-")) {
+        throw new Error(
+          "Package hash should not contain dots or dashes. Remove any special characters.",
+        );
       }
 
       const payload = {
@@ -62,19 +66,14 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
         network: formData.network,
       };
 
-      
-
-      const response = await fetch(
-        `/api/v1/u/${userId}/contract/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(payload),
+      const response = await fetch(`/api/v1/u/${userId}/contract/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
 
       const result: ContractRegisterRes = await response.json();
 
@@ -88,13 +87,20 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
       } else {
         // Provide more user-friendly error messages
         let errorMessage = result.error || "Registration failed";
-        
-        if (errorMessage.includes("Base16DecodeError") || errorMessage.includes("InvalidByte")) {
-          errorMessage = "Invalid contract package hash. This hash may not exist on the selected network or may not be a valid contract package hash.";
-        } else if (errorMessage.includes("does not correspond to contract package")) {
-          errorMessage = "This hash is not a valid contract package on the selected network.";
+
+        if (
+          errorMessage.includes("Base16DecodeError") ||
+          errorMessage.includes("InvalidByte")
+        ) {
+          errorMessage =
+            "Invalid contract package hash. This hash may not exist on the selected network or may not be a valid contract package hash.";
+        } else if (
+          errorMessage.includes("does not correspond to contract package")
+        ) {
+          errorMessage =
+            "This hash is not a valid contract package on the selected network.";
         }
-        
+
         setError(errorMessage);
       }
     } catch (err) {
@@ -155,7 +161,8 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
               className="w-full px-3 py-2 bg-black border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Enter either: hash-abcdef123... or just abcdef123... (hexadecimal only)
+              Enter either: hash-abcdef123... or just abcdef123... (hexadecimal
+              only)
             </p>
           </div>
 

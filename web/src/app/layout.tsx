@@ -1,6 +1,6 @@
-import { UserSessionInit } from "@/components/UserSessionInit";
 import { Provider } from "jotai";
 import type { Metadata } from "next";
+import { UserSessionInit } from "@/components/UserSessionInit";
 import "./globals.css";
 
 export const metadata: Metadata = {

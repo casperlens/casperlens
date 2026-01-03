@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
-import { ContractRegisterForm } from "@/components/ContractRegisterForm";
-import type { ContractOverview } from "@/types";
 import { Button } from "@base-ui/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ContractRegisterForm } from "@/components/ContractRegisterForm";
+import type { ContractOverview } from "@/types";
 
 export default function ContractPage() {
   const router = useRouter();
@@ -99,13 +98,12 @@ export default function ContractPage() {
                   <p className="text-xs break-all mb-1 text-subtle">
                     {contract.package_hash}
                   </p>
-                  <p className="text-xs text-muted">
-                    {contract.owner_id}
-                  </p>
+                  <p className="text-xs text-muted">{contract.owner_id}</p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status ? 'badge-locked' : 'badge-unlocked'
-                    }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${
+                    contract.lock_status ? "badge-locked" : "badge-unlocked"
+                  }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
@@ -113,7 +111,9 @@ export default function ContractPage() {
               <div className="grow"></div>
               <div className="flex justify-between items-end">
                 <div className="flex gap-3 text-xs">
-                  <span className={`inline-block px-2 py-1 rounded-full font-medium ${contract.network === 'mainnet' ? 'badge-mainnet' : 'badge-testnet'}`}>
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full font-medium ${contract.network === "mainnet" ? "badge-mainnet" : "badge-testnet"}`}
+                  >
                     {contract.network}
                   </span>
                   <span className="text-muted">{contract.age}d</span>

@@ -1,7 +1,7 @@
 "use client";
 
-import { ContractOverview, Version } from "@/types";
 import { ScrollArea, Tabs } from "@base-ui/react";
+import type { ContractOverview, Version } from "@/types";
 
 export default function ContractDetailsPage() {
   // Mock contract data
@@ -98,7 +98,9 @@ export default function ContractDetailsPage() {
       <div>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">{contractData.contract_name}</h1>
+          <h1 className="text-4xl font-bold mb-2">
+            {contractData.contract_name}
+          </h1>
           <p className="text-tertiary">Contract Details & Versions</p>
         </div>
 
@@ -112,25 +114,33 @@ export default function ContractDetailsPage() {
                 {/* Contract Name */}
                 <div className="mb-6 pb-6 border-b border-primary">
                   <p className="text-muted text-sm mb-2">Contract Name</p>
-                  <p className="font-medium break-all">{contractData.contract_name}</p>
+                  <p className="font-medium break-all">
+                    {contractData.contract_name}
+                  </p>
                 </div>
 
                 {/* Package Hash */}
                 <div className="mb-6 pb-6 border-b border-primary">
                   <p className="text-muted text-sm mb-2">Package Hash</p>
-                  <p className="font-mono text-xs break-all">{contractData.package_hash}</p>
+                  <p className="font-mono text-xs break-all">
+                    {contractData.package_hash}
+                  </p>
                 </div>
 
                 {/* Owner ID */}
                 <div className="mb-6 pb-6 border-b border-primary">
                   <p className="text-muted text-sm mb-2">Owner ID</p>
-                  <p className="font-mono text-xs break-all">{contractData.owner_id}</p>
+                  <p className="font-mono text-xs break-all">
+                    {contractData.owner_id}
+                  </p>
                 </div>
 
                 {/* Network */}
                 <div className="mb-6 pb-6 border-b border-primary">
                   <p className="text-muted text-sm mb-2">Network</p>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${contractData.network === 'mainnet' ? 'badge-mainnet' : 'badge-testnet'}`}>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${contractData.network === "mainnet" ? "badge-mainnet" : "badge-testnet"}`}
+                  >
                     {contractData.network}
                   </span>
                 </div>
@@ -138,8 +148,10 @@ export default function ContractDetailsPage() {
                 {/* Lock Status */}
                 <div className="mb-6 pb-6 border-b border-primary">
                   <p className="text-muted text-sm mb-2">Lock Status</p>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${contractData.lock_status ? 'badge-locked' : 'badge-unlocked'}`}>
-                    {contractData.lock_status ? 'Locked' : 'Unlocked'}
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${contractData.lock_status ? "badge-locked" : "badge-unlocked"}`}
+                  >
+                    {contractData.lock_status ? "Locked" : "Unlocked"}
                   </span>
                 </div>
 
@@ -151,19 +163,27 @@ export default function ContractDetailsPage() {
 
                 {/* Current Version */}
                 <div className="mb-6">
-                  <p className="text-muted text-sm mb-3 font-semibold">Current Version</p>
+                  <p className="text-muted text-sm mb-3 font-semibold">
+                    Current Version
+                  </p>
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-muted">Version</p>
-                      <p className="font-medium">{versionData.contract_version}</p>
+                      <p className="font-medium">
+                        {versionData.contract_version}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted">Protocol Version</p>
-                      <p className="font-mono text-xs">{versionData.protocol_version}</p>
+                      <p className="font-mono text-xs">
+                        {versionData.protocol_version}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted">Disabled</p>
-                      <p className="font-medium">{versionData.disabled ? 'Yes' : 'No'}</p>
+                      <p className="font-medium">
+                        {versionData.disabled ? "Yes" : "No"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -178,13 +198,22 @@ export default function ContractDetailsPage() {
           <Tabs.Root className="flex-1 flex flex-col gap-3 border-2 border-primary">
             {/* Tab Navigation */}
             <Tabs.List className="flex gap-3 p-4 border-b-2 border-primary">
-              <Tabs.Tab value="lifetime" className="px-2 py-1 rounded data-active:bg-gray-850">
+              <Tabs.Tab
+                value="lifetime"
+                className="px-2 py-1 rounded data-active:bg-gray-850"
+              >
                 Lifecycles
               </Tabs.Tab>
-              <Tabs.Tab value="diff" className="px-2 py-1 rounded data-active:bg-gray-850">
+              <Tabs.Tab
+                value="diff"
+                className="px-2 py-1 rounded data-active:bg-gray-850"
+              >
                 Diff
               </Tabs.Tab>
-              <Tabs.Tab value="metric" className="px-2 py-1 rounded data-active:bg-gray-850">
+              <Tabs.Tab
+                value="metric"
+                className="px-2 py-1 rounded data-active:bg-gray-850"
+              >
                 Metrics
               </Tabs.Tab>
             </Tabs.List>
@@ -196,20 +225,28 @@ export default function ContractDetailsPage() {
                 <h3 className="text-lg font-bold mb-4">Version Lifecycles</h3>
                 <div className="space-y-4">
                   {lifecycleData.map((lifecycle, idx) => (
-                    <div key={idx} className="p-4 rounded-lg border bg-tertiary border-primary">
+                    <div
+                      key={idx}
+                      className="p-4 rounded-lg border bg-tertiary border-primary"
+                    >
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <p className="font-semibold">Version {lifecycle.version}</p>
+                          <p className="font-semibold">
+                            Version {lifecycle.version}
+                          </p>
                           <p className="text-muted text-sm">
                             {new Date(lifecycle.timestamp).toLocaleString()}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${lifecycle.status === 'deployed' ? 'badge-deployed' : 'badge-upgraded'}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${lifecycle.status === "deployed" ? "badge-deployed" : "badge-upgraded"}`}
+                        >
                           {lifecycle.status}
                         </span>
                       </div>
                       <p className="text-muted text-sm">
-                        Hash: <span className="font-mono">{lifecycle.hash}</span>
+                        Hash:{" "}
+                        <span className="font-mono">{lifecycle.hash}</span>
                       </p>
                     </div>
                   ))}
@@ -228,20 +265,21 @@ export default function ContractDetailsPage() {
                       className="p-4 rounded-lg border-l-4 flex items-start gap-3 bg-tertiary"
                       style={{
                         borderLeftColor:
-                          diff.type === 'added'
-                            ? 'var(--color-success)'
-                            : diff.type === 'removed'
-                              ? 'var(--color-error)'
-                              : 'var(--color-warning)',
+                          diff.type === "added"
+                            ? "var(--color-success)"
+                            : diff.type === "removed"
+                              ? "var(--color-error)"
+                              : "var(--color-warning)",
                       }}
                     >
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${diff.type === 'added'
-                          ? 'badge-success'
-                          : diff.type === 'removed'
-                            ? 'badge-error'
-                            : 'badge-warning'
-                          }`}
+                        className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
+                          diff.type === "added"
+                            ? "badge-success"
+                            : diff.type === "removed"
+                              ? "badge-error"
+                              : "badge-warning"
+                        }`}
                       >
                         {diff.type}
                       </span>
@@ -256,9 +294,14 @@ export default function ContractDetailsPage() {
                 <h3 className="text-lg font-bold mb-4">Contract Metrics</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {metricsData.map((metric, idx) => (
-                    <div key={idx} className="p-4 rounded-lg border bg-tertiary border-primary">
+                    <div
+                      key={idx}
+                      className="p-4 rounded-lg border bg-tertiary border-primary"
+                    >
                       <p className="text-muted text-sm mb-2">{metric.label}</p>
-                      <p className="text-2xl font-bold text-blue-400">{metric.value}</p>
+                      <p className="text-2xl font-bold text-blue-400">
+                        {metric.value}
+                      </p>
                     </div>
                   ))}
                 </div>
