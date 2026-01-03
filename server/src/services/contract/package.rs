@@ -34,24 +34,7 @@ pub async fn get_contract_package_details(
             state_root_hash
         ));
     }
-    
-    let response = casper_client::cli::query_global_state(
-        "",
-        &node_address,
-        0,
-        "",
-        &state_root_hash,
-        &package_hash,
-        "",
-    )
-    .await
-    .map_err(|e| format!("Casper node query failed: {}", e))?;
-    
-    match response.result.stored_value.as_contract_package() {
-        Some(pkg) => Ok(pkg.to_owned()),
-        None => Err(
-            "The provided hash does not correspond to a ContractPackage".to_string(),
-        ),
+
     let package_response = casper_client::cli::query_global_state(
         "",
         &node_address,
