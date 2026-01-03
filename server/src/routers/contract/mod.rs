@@ -25,6 +25,14 @@ fn resolve_network(network: &String) -> Option<String> {
     }
 }
 
+fn normalize_hash(input: &str) -> String {
+    if input.starts_with("hash-") {
+        input.to_string()
+    } else {
+        format!("hash-{}", input)
+    }
+}
+
 #[axum::debug_handler]
 pub async fn register_contract(
     state: State<Arc<AppState>>,
@@ -33,17 +41,20 @@ pub async fn register_contract(
 ) -> impl IntoResponse {
     match resolve_network(&payload.network.to_string()) {
         Some(network) => {
+            let package_hash = normalize_hash(&payload.package_hash);
             let node_address: String; 
             if network == "testnet" {
                 node_address = state.config.testnet_node_address.clone();
             } else {
                 node_address = state.config.mainnet_node_address.clone();
             }
+            
             let contract_package_details = get_contract_package_details(
                 node_address,
-                payload.package_hash.clone(),
+                package_hash.clone(),
             )
             .await;
+            
             match contract_package_details {
                 Ok(data) => {
                     let mut package_hash: String = payload.package_hash.clone();
@@ -55,12 +66,13 @@ pub async fn register_contract(
                         return Json(ApiResponse {
                                 success: false,
                                 message: "Failed to register contract".to_string(),
-                                error: Some(format!("Failed to get contract package metadata: {}", e.to_string())),
+                                error: Some(format!("Failed to get contract package metadata: {}", e)),
                                 data: None::<String>,
                             })
                             .into_response();
-                    };
+                    }
                     let package_meta = package_meta.unwrap();
+                    let package_hash = package_hash.clone();
                     let user_id = user_id.clone();
                     let contract_name = payload.package_name.clone();
                     let owner_id = package_meta.owner_public_key.clone();
@@ -70,11 +82,11 @@ pub async fn register_contract(
                         return Json(ApiResponse {
                                 success: false,
                                 message: "Failed to register contract".to_string(),
-                                error: Some(format!("Failed to parse date: {}", e.to_string())),
+                                error: Some(format!("Failed to parse date: {}", e)),
                                 data: None::<String>,
                             })
                             .into_response();
-                    };
+                    }
                     let age = age.unwrap();
                     let contract_package = ContractPackageSchema::new(
                         package_hash,
@@ -114,7 +126,7 @@ pub async fn register_contract(
                 Err(error) => Json(ApiResponse {
                     success: false,
                     message: "Failed to register contract".to_string(),
-                    error: Some(format!("Database error: {error}")),
+                    error: Some(format!("Contract package query error: {error}")),
                     data: None::<String>,
                 })
                 .into_response(),
