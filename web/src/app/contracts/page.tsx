@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
+import { ContractRegisterForm } from "@/components/ContractRegisterForm";
 import type { ContractOverview } from "@/types";
 import { Button } from "@base-ui/react";
 import { useRouter } from "next/navigation";
-import { ContractRegisterForm } from "@/components/ContractRegisterForm";
 
 export default function ContractPage() {
   const router = useRouter();
@@ -67,7 +67,7 @@ export default function ContractPage() {
   };
 
   return (
-    <div className="px-6 py-12">
+    <div className="px-6 py-12 bg-app">
       <div className="mx-auto">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-300">
@@ -89,24 +89,23 @@ export default function ContractPage() {
           {contractList.map((contract) => (
             <div
               key={contract.package_hash}
-              className="min-w-md rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col h-56 border bg-[#0e0e0e] text-gray-300 border-gray-800"
+              className="min-w-md rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col h-56 border bg-card border-primary"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 text-gray-300">
+                  <h3 className="font-bold text-lg mb-2 text-primary">
                     {contract.contract_name}
                   </h3>
-                  <p className="text-xs break-all mb-1 text-gray-400">
+                  <p className="text-xs break-all mb-1 text-subtle">
                     {contract.package_hash}
                   </p>
-                  <p className="text-xs text-gray-500">{contract.owner_id}</p>
+                  <p className="text-xs text-muted">
+                    {contract.owner_id}
+                  </p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${
-                    contract.lock_status
-                      ? "bg-red-900 text-red-400"
-                      : "bg-green-900 text-green-400"
-                  }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status ? 'badge-locked' : 'badge-unlocked'
+                    }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
@@ -114,10 +113,10 @@ export default function ContractPage() {
               <div className="grow"></div>
               <div className="flex justify-between items-end">
                 <div className="flex gap-3 text-xs">
-                  <span className="inline-block px-2 py-1 rounded-full font-medium bg-blue-900 text-blue-400">
+                  <span className={`inline-block px-2 py-1 rounded-full font-medium ${contract.network === 'mainnet' ? 'badge-mainnet' : 'badge-testnet'}`}>
                     {contract.network}
                   </span>
-                  <span className="text-gray-500">{contract.age}d</span>
+                  <span className="text-muted">{contract.age}d</span>
                 </div>
                 <Button
                   className="text-xs border rounded-lg px-2 py-1 text-white hover:bg-gray-700 transition-colors cursor-pointer"

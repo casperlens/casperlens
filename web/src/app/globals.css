@@ -1,52 +1,225 @@
 @import "tailwindcss";
 
+@theme {
+    /* Gray scale palette */
+    --color-gray-950: #0a0a0a;
+    --color-gray-900: #0f0f0f;
+    --color-gray-850: #1a1a1a;
+    --color-gray-800: #2a2a2a;
+    --color-gray-700: #3a3a3a;
+    --color-gray-600: #555555;
+    --color-gray-500: #888888;
+    --color-gray-400: #999999;
+    --color-gray-300: #a0a0a0;
+    --color-gray-200: #b0b0b0;
+    --color-gray-100: #e0e0e0;
+    --color-gray-50: #f5f5f5;
+
+    /* Status colors - Success/Green */
+    --color-success-dark: #1a3a1a;
+    --color-success: #51cf66;
+    --color-success-light: #69db7c;
+
+    /* Status colors - Error/Red */
+    --color-error-dark: #3a1a1a;
+    --color-error: #ff6b6b;
+    --color-error-light: #ff8787;
+
+    /* Status colors - Warning/Orange */
+    --color-warning-dark: #3a2a1a;
+    --color-warning: #ffa500;
+    --color-warning-light: #ffb733;
+
+    /* Primary/Blue colors */
+    --color-primary-dark: #1a2a3a;
+    --color-primary-darker: #2a3a4a;
+    --color-primary: #4a9eff;
+    --color-primary-light: #60a5fa;
+    --color-primary-lighter: #3b82f6;
+
+    /* Background colors */
+    --color-bg-primary: #0f0f0f;
+    --color-bg-secondary: #0e0e0e;
+    --color-bg-tertiary: #1a1a1a;
+    --color-bg-card: #0e0e0e;
+
+    /* Border colors */
+    --color-border-primary: #2a2a2a;
+    --color-border-secondary: #3a3a3a;
+    --color-border-light: #555555;
+
+    /* Text colors */
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #b0b0b0;
+    --color-text-tertiary: #a0a0a0;
+    --color-text-muted: #888888;
+    --color-text-subtle: #999999;
+
+    /* Network specific colors */
+    --color-mainnet-bg: #1a3a1a;
+    --color-mainnet-text: #51cf66;
+    --color-testnet-bg: #3a2a1a;
+    --color-testnet-text: #ffa500;
+
+    /* Badge colors */
+    --color-badge-locked-bg: #3a1a1a;
+    --color-badge-locked-text: #ff6b6b;
+    --color-badge-unlocked-bg: #1a3a1a;
+    --color-badge-unlocked-text: #51cf66;
+    --color-badge-deployed-bg: #1a3a1a;
+    --color-badge-deployed-text: #51cf66;
+    --color-badge-upgraded-bg: #2a3a1a;
+    --color-badge-upgraded-text: #ffa500;
+}
+
 .root {
-  isolation: isolate;
+    isolation: isolate;
 }
 
 body {
-  background-color: #0f0f0f;
-  color: #e0e0e0;
-  position: relative;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    position: relative;
 }
 
 @layer utilities {
-  .custom-shadow {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+    .custom-shadow {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Background utilities */
+    .bg-app {
+        background-color: var(--color-bg-primary);
+    }
+
+    .bg-card {
+        background-color: var(--color-bg-card);
+    }
+
+    .bg-secondary {
+        background-color: var(--color-bg-secondary);
+    }
+
+    .bg-tertiary {
+        background-color: var(--color-bg-tertiary);
+    }
+
+    /* Border utilities */
+    .border-primary {
+        border-color: var(--color-border-primary);
+    }
+
+    .border-secondary {
+        border-color: var(--color-border-secondary);
+    }
+
+    /* Text utilities */
+    .text-primary {
+        color: var(--color-text-primary);
+    }
+
+    .text-secondary {
+        color: var(--color-text-secondary);
+    }
+
+    .text-tertiary {
+        color: var(--color-text-tertiary);
+    }
+
+    .text-muted {
+        color: var(--color-text-muted);
+    }
+
+    .text-subtle {
+        color: var(--color-text-subtle);
+    }
+
+    /* Status badges */
+    .badge-success {
+        background-color: var(--color-success-dark);
+        color: var(--color-success);
+    }
+
+    .badge-error {
+        background-color: var(--color-error-dark);
+        color: var(--color-error);
+    }
+
+    .badge-warning {
+        background-color: var(--color-warning-dark);
+        color: var(--color-warning);
+    }
+
+    .badge-primary {
+        background-color: var(--color-primary-dark);
+        color: var(--color-primary);
+    }
+
+    /* Network badges */
+    .badge-mainnet {
+        background-color: var(--color-mainnet-bg);
+        color: var(--color-mainnet-text);
+    }
+
+    .badge-testnet {
+        background-color: var(--color-testnet-bg);
+        color: var(--color-testnet-text);
+    }
+
+    /* Lock status badges */
+    .badge-locked {
+        background-color: var(--color-badge-locked-bg);
+        color: var(--color-badge-locked-text);
+    }
+
+    .badge-unlocked {
+        background-color: var(--color-badge-unlocked-bg);
+        color: var(--color-badge-unlocked-text);
+    }
+
+    /* Deployment status badges */
+    .badge-deployed {
+        background-color: var(--color-badge-deployed-bg);
+        color: var(--color-badge-deployed-text);
+    }
+
+    .badge-upgraded {
+        background-color: var(--color-badge-upgraded-bg);
+        color: var(--color-badge-upgraded-text);
+    }
 }
 
 .Scrollbar {
-  display: flex;
-  justify-content: center;
-  background-color: var(--color-gray-500);
-  width: 0.25rem;
-  border-radius: 0.375rem;
-  margin: 0.5rem;
-  opacity: 0;
-  transition: opacity 150ms;
-  pointer-events: none;
+    display: flex;
+    justify-content: center;
+    background-color: var(--color-gray-500);
+    width: 0.25rem;
+    border-radius: 0.375rem;
+    margin: 0.5rem;
+    opacity: 0;
+    transition: opacity 150ms;
+    pointer-events: none;
 
-  &[data-scrolling] {
-    transition-duration: 0ms;
-  }
+    &[data-scrolling] {
+        transition-duration: 0ms;
+    }
 
-  &[data-hovering],
-  &[data-scrolling] {
-    opacity: 1;
-    pointer-events: auto;
-  }
+    &[data-hovering],
+    &[data-scrolling] {
+        opacity: 1;
+        pointer-events: auto;
+    }
 
-  &::before {
-    content: "";
-    position: absolute;
-    width: 1.25rem;
-    height: 100%;
-  }
+    &::before {
+        content: "";
+        position: absolute;
+        width: 1.25rem;
+        height: 100%;
+    }
 }
 
 .Thumb {
-  width: 100%;
-  border-radius: inherit;
-  background-color: var(--color-gray-200);
+    width: 100%;
+    border-radius: inherit;
+    background-color: var(--color-gray-200);
 }
