@@ -1,6 +1,7 @@
 -- Contract version tracker
 CREATE TABLE contract_versions (
-    contract_hash TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    contract_hash TEXT,
     contract_package_hash TEXT NOT NULL REFERENCES contract_packages(package_hash) ON DELETE CASCADE,
     contract_wasm_hash TEXT NOT NULL,
     user_id UUID NOT NULL REFERENCES contract_packages(user_id) ON DELETE CASCADE,
