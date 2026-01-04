@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO contract_versions (\n                contract_hash, \n                contract_package_hash, \n                contract_wasm_hash, \n                user_id, \n                version, \n                major_protocol_version, \n                protocol_version, \n                entry_points,\n                named_keys,\n                disabled, \n                age\n            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\n            ON CONFLICT (contract_package_hash, version) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Int4",
+        "Int4",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Bool",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f7c77475a9d211587b3bddd1a0540d01c93887c09ed046c4b7eb8e9df9ec8b44"
+}
