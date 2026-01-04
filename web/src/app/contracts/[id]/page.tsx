@@ -150,9 +150,7 @@ export default function ContractDetailsPage() {
                 <ContractDiff
                   user_id={userId}
                   package_hash={contractData.package_hash}
-                  versions={contractData.versions.map(
-                    (v) => v.contract_version,
-                  )}
+                  versions={contractData.versions}
                 />
               </Tabs.Panel>
             </div>

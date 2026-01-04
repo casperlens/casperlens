@@ -1,6 +1,6 @@
 import { dummyVersionDiffData } from "@/store/dummy";
-import { ContractVersionDiff, ResponseData } from "@/types";
-import { Button, Combobox } from "@base-ui/react";
+import { ContractVersionData, ContractVersionDiff, ResponseData } from "@/types";
+import { Accordion, AccordionRootChangeEventDetails, AccordionValue, Button, Combobox } from "@base-ui/react";
 import { useState } from "react";
 
 interface VersionOption {
@@ -15,7 +15,7 @@ export default function ContractDiff({
 }: {
   user_id: string;
   package_hash: string;
-  versions: number[];
+  versions: ContractVersionData[];
 }) {
   const [v1, setV1] = useState<VersionOption | null>(null);
   const [v2, setV2] = useState<VersionOption | null>(null);
@@ -23,11 +23,14 @@ export default function ContractDiff({
   const [fetchedDiffData, setFetchedDiffData] =
     useState<ContractVersionDiff | null>(null);
   const [error, setError] = useState<string>("");
+  const [analysis, setAnalysis] = useState<string>("");
 
-  const versionOptions: VersionOption[] = versions.map((v) => ({
-    value: v,
-    label: `Version ${v}`,
-  }));
+  const versionOptions: VersionOption[] = versions.map((v) => {
+    return ({
+      value: v.contract_version,
+      label: `Version ${v.contract_version}`,
+    });
+  });
 
   const getAvailableV1Options = (): VersionOption[] => {
     if (v2) {
@@ -46,7 +49,7 @@ export default function ContractDiff({
   const fetchDiffs = async (v1: number, v2: number) => {
     try {
       const res = await fetch(
-        `/api/v1/u/${user_id}/contract-package/${package_hash}/diff?v1=${v1}&v2=${v2}`,
+        `/api/v1/u/${user_id}/contract-package/diff?v1=${v1}&v2=${v2}`,
         {
           method: "GET",
           headers: {
@@ -74,6 +77,37 @@ export default function ContractDiff({
     }
   };
 
+  const fetchAnalysis = async (diffData: ContractVersionDiff) => {
+    try {
+      const res = await fetch(
+        `/api/v1/u/${user_id}/contract-package/${package_hash}/diff/analyze`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: versions }),
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const json: ResponseData<string> = await res.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      if (!json.data) {
+        throw new Error("No analysis data found");
+      }
+      setAnalysis(json.data);
+    } catch (error) {
+      console.error("Error fetching analysis:", error);
+      setAnalysis("Failed to fetch analysis.");
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!v1 || !v2) {
@@ -96,6 +130,12 @@ export default function ContractDiff({
       setIsLoading(false);
     }
   };
+
+  const handleValueChange = (value: AccordionValue, event: AccordionRootChangeEventDetails) => {
+    if (!analysis && fetchedDiffData) {
+      fetchAnalysis(fetchedDiffData);
+    }
+  }
 
   return (
     <>
@@ -262,10 +302,58 @@ export default function ContractDiff({
       {/* Display diff results */}
       {fetchedDiffData && (
         <>
+          {/* Comparison */}
           <h4 className="text-md font-semibold mb-3">
             Comparing Version {fetchedDiffData.v1.contract_version} → Version{" "}
             {fetchedDiffData.v2.contract_version}
           </h4>
+
+          {/* AI Analysis */}
+          <div className="mb-6">
+            <Accordion.Root onValueChange={handleValueChange}>
+              <Accordion.Item value="info" className="border border-primary rounded-lg bg-tertiary overflow-hidden">
+                <Accordion.Header>
+                  <Accordion.Trigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-card transition-colors group">
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-primary transition-transform duration-200 group-data-panel-open:rotate-90"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                      <span className="font-semibold text-primary">AI Analysis</span>
+                    </div>
+                    <span className="text-xs text-muted bg-card px-2 py-1 rounded">
+                      Click to expand
+                    </span>
+                  </Accordion.Trigger>
+                </Accordion.Header>
+                <Accordion.Panel className="px-4 py-3 text-sm text-secondary border-t border-primary bg-card">
+                  {analysis ? (
+                    <div className="prose prose-sm max-w-none">
+                      <p className="whitespace-pre-wrap">{analysis}</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted">
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Analyzing changes...</span>
+                    </div>
+                  )}
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion.Root>
+          </div>
+
           <div className="space-y-3">
             {fetchedDiffData.entry_points?.map((diff, idx) => {
               const type =
@@ -295,13 +383,12 @@ export default function ContractDiff({
                   }}
                 >
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
-                      type === "added"
-                        ? "badge-success"
-                        : type === "removed"
-                          ? "badge-error"
-                          : "badge-warning"
-                    }`}
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${type === "added"
+                      ? "badge-success"
+                      : type === "removed"
+                        ? "badge-error"
+                        : "badge-warning"
+                      }`}
                   >
                     {type}
                   </span>
@@ -337,13 +424,12 @@ export default function ContractDiff({
                   }}
                 >
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
-                      type === "added"
-                        ? "badge-success"
-                        : type === "removed"
-                          ? "badge-error"
-                          : "badge-warning"
-                    }`}
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${type === "added"
+                      ? "badge-success"
+                      : type === "removed"
+                        ? "badge-error"
+                        : "badge-warning"
+                      }`}
                   >
                     {type}
                   </span>
