@@ -50,7 +50,7 @@ The metadata of the versions are stored in off-chain PostgreSQL database for eff
 
 ## Intelligent Analysis
 
-CasperLens provided AI-assisted analysis for differences between 2 versions by providing insights on the changelog and its implications for development teams and security. This improves secure SDLC and efficiency in teams working on smart contract development and integration.
+CasperLens provided AI-assisted analysis for differences between 2 versions by providing insights on the changelog and its implications for development teams and security. This improves secure SDLC and efficiency in teams working on smart contract development and integration. It uses HuggingFace inference points with LLaMa for this.
 
 # Architecture
 
