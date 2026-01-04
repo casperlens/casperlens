@@ -2,7 +2,6 @@
 
 import { ContractRegisterForm } from "@/components/ContractRegisterForm";
 import { formatHash } from "@/lib/utils";
-import { dummyContracts } from "@/store/dummy";
 import type { ContractOverview, ResponseData } from "@/types";
 import { Button } from "@base-ui/react";
 import { useRouter } from "next/navigation";
@@ -35,7 +34,6 @@ export default function ContractPage() {
       setContracts(json.data);
     } catch (error) {
       console.error("Error fetching contracts:", error);
-      setContracts(dummyContracts);
     }
   };
 
@@ -86,8 +84,9 @@ export default function ContractPage() {
                   </p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${contract.lock_status ? "badge-locked" : "badge-unlocked"
-                    }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${
+                    contract.lock_status ? "badge-locked" : "badge-unlocked"
+                  }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
