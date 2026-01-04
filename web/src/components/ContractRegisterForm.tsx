@@ -156,10 +156,11 @@ export function ContractRegisterForm() {
 
   return (
     <Dialog.Root>
-      <Dialog.Trigger>
-        <Button className="border-primary border px-2 py-1 rounded-xl text-white hover:bg-primary hover:text-primary-darker transition-colors">
-          Register Contract
-        </Button>
+      <Dialog.Trigger
+        type="button"
+        className="border-primary border px-2 py-1 rounded-xl text-white hover:bg-primary hover:text-primary-darker transition-colors"
+      >
+        Register Contract
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-black/80 transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
