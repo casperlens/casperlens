@@ -235,7 +235,6 @@ pub async fn get_contract_diff(
     }
 }
 
-
 #[axum::debug_handler]
 pub async fn get_diff_analysis(
     state: State<Arc<AppState>>,
@@ -368,7 +367,6 @@ pub async fn register_contract(
 
                     let package_meta = package_meta.unwrap();
                     let package_hash = package_hash.clone();
-                    let user_id = user_id.clone();
                     let contract_name = payload.package_name.clone();
                     let owner_id = package_meta.owner_public_key.clone();
                     let lock_status = data.is_locked();

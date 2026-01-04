@@ -1,7 +1,6 @@
 use casper_types::{Key, NamedKeys, contracts::EntryPoint};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,8 +30,8 @@ impl ContractPackageSchema {
             contract_name,
             owner_id,
             network,
-            lock_status: lock_status,
-            age: age,
+            lock_status,
+            age,
         }
     }
 }

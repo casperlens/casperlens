@@ -16,16 +16,16 @@ pub async fn get_contract_version_diff(
     if v1_package_hash != v2_package_hash {
         return Err("Contracts do not belong to same package".to_string());
     }
-    if &v1.contract_version > &v2.contract_version {
+    if v1.contract_version > v2.contract_version {
         return Err(format!(
             "Contract {} is older than contract {}",
             &v1.contract_version, &v2.contract_hash
         ));
     }
-    if &v1.contract_version == &v2.contract_version {
+    if v1.contract_version == v2.contract_version {
         return Err(format!(
             "Contract {} is same as contract {}",
-            &v1.contract_version, &v2.contract_hash
+            v1.contract_version, v2.contract_hash
         ));
     }
 

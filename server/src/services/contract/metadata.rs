@@ -45,13 +45,11 @@ pub async fn get_contract_version_metadata(
     network: &str,
     hash: &str,
 ) -> Result<ContractVersionMeta, String> {
-    let endpoint: &str;
-
-    if network == "mainnet" {
-        endpoint = MAINNET_API_ENDPOINT;
+    let endpoint: &str = if network == "mainnet" {
+        MAINNET_API_ENDPOINT
     } else {
-        endpoint = TESTNET_API_ENDPOINT;
-    }
+        TESTNET_API_ENDPOINT
+    };
 
     // cspr.live expects RAW hash (no `hash-`)
 
@@ -66,7 +64,6 @@ pub async fn get_contract_version_metadata(
     if resp.status().is_success() {
         let json: APIMetaResponse<ContractVersionMeta> =
             resp.json().await.map_err(|e| e.to_string())?;
-
         return Ok(json.data);
     } else {
         if reqwest::StatusCode::NOT_FOUND == resp.status() {
