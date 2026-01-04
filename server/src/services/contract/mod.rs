@@ -10,15 +10,15 @@ pub async fn get_state_root_hash(node_address: &String) -> Result<String, String
 
     let state_root = casper_client::get_state_root_hash(
         rpc_id,
-        &node_address,
+        node_address,
         casper_client::Verbosity::Low,
         None,
     )
     .await
-    .map_err(|e| format!("Failed to get state root digest: {}", e.to_string()))?;
+    .map_err(|e| format!("Failed to get state root digest: {:?}", e.to_string()))?;
 
     let state_root_hash = state_root.result.state_root_hash;
-    if let None = state_root_hash {
+    if state_root_hash.is_none() {
         return Err("Failed to obtain state root digest".to_string());
     }
 

@@ -36,10 +36,9 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
 
 pub async fn create_db_pool() -> Pool<Postgres> {
     let config = config::load_config();
-    let pool = PgPoolOptions::new()
+    PgPoolOptions::new()
         .max_connections(5)
         .connect(&config.database_url)
         .await
-        .expect("Failed to connect to DB");
-    pool
+        .expect("Failed to connect to DB")
 }

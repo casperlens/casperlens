@@ -1,7 +1,24 @@
 [package]
 name = "casperlens-server"
 version = "0.1.0"
+authors = [
+    "Keerthana Rajesh Kumar <grittypuffy@riseup.net>",
+    "Shalini S <s.j.shalini2005@gmail.com>",
+    "Vijay Ganesh S <savijayganesh@gmail.com>"
+]
+description = "Server for CasperLens, a smart contract lifecycle and observability management for Casper Network"
+readme = "README.md"
+documentation = "https://docs.rs/casperlens-server"
+keywords = ["casper", "web3", "odra", "observability", "lifecycle"]
+categories = ["api-bindings"]
+license = "Apache-2.0"
 edition = "2024"
+include       = [
+  "Cargo.toml",
+  "README.md",
+  "src/**/*.rs",
+  ".sqlx"
+]
 
 [dependencies]
 axum = { version = "0.8.8", features = ["json", "macros"] }
