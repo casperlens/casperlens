@@ -46,14 +46,14 @@ export default function ContractDiff({
 
   const getAvailableV1Options = (): VersionOption[] => {
     if (v2) {
-      return versionOptions.filter((opt) => opt.value !== v2.value);
+      return versionOptions.filter((opt) => opt.value < v2.value);
     }
     return versionOptions;
   };
 
   const getAvailableV2Options = (): VersionOption[] => {
     if (v1) {
-      return versionOptions.filter((opt) => opt.value !== v1.value);
+      return versionOptions.filter((opt) => opt.value > v1.value);
     }
     return versionOptions;
   };
@@ -81,6 +81,7 @@ export default function ContractDiff({
       if (!json.data) {
         throw new Error("No diff data found");
       }
+      fetchAnalysis();
       return json.data;
     } catch (error) {
       console.error("Error fetching diff data:", error);
@@ -89,7 +90,7 @@ export default function ContractDiff({
     }
   };
 
-  const fetchAnalysis = async (diffData: ContractVersionDiff) => {
+  const fetchAnalysis = async () => {
     try {
       const res = await fetch(
         `/api/v1/u/${user_id}/contract-package/diff/analyze`,
@@ -98,7 +99,7 @@ export default function ContractDiff({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(diffData),
+          body: JSON.stringify({ data: versions }),
         },
       );
 
@@ -133,6 +134,7 @@ export default function ContractDiff({
 
     try {
       const data = await fetchDiffs(v1.value, v2.value);
+      console.log("Fetched Data:\n", data);
       setFetchedDiffData(data);
     } catch (err) {
       setError(
@@ -148,7 +150,7 @@ export default function ContractDiff({
     event: AccordionRootChangeEventDetails,
   ) => {
     if (!analysis && fetchedDiffData) {
-      fetchAnalysis(fetchedDiffData);
+      fetchAnalysis();
     }
   };
 
@@ -415,7 +417,7 @@ export default function ContractDiff({
                       </span>
                     </h5>
                   </div>
-                  <Accordion.Root className="divide-y divide-primary">
+                  <Accordion.Root className="divide-y divide-primary-dark">
                     {fetchedDiffData.entry_points.map((diff, idx) => {
                       const type =
                         "Added" in diff
@@ -472,33 +474,101 @@ export default function ContractDiff({
                           </Accordion.Header>
                           <Accordion.Panel className="px-4 py-3 bg-tertiary">
                             <div className="space-y-4">
-                              {type === "modified" && entryPointTo && (
-                                <div className="mb-4 p-3 bg-warning-dark border-l-4 border-warning rounded">
-                                  <p className="text-sm text-warning font-medium">
-                                    Modified: Changes detected between versions
-                                  </p>
-                                </div>
-                              )}
-
                               <div className="grid md:grid-cols-2 gap-4">
                                 {/* From/Original Version */}
+                                <div className="bg-card p-3 rounded border border-primary">
+                                  <p className="text-xs text-muted mb-1">
+                                    Name
+                                  </p>
+                                  <p className="font-mono text-primary">
+                                    {entryPoint.name}
+                                  </p>
+                                </div>
+                                <div className="bg-card p-3 rounded border border-primary">
+                                  <p className="text-xs text-muted mb-1">
+                                    Return Type
+                                  </p>
+                                  <p className="font-mono text-secondary">
+                                    {entryPoint.ret}
+                                  </p>
+                                </div>
+                                <div className="bg-card p-3 rounded border border-primary">
+                                  <p className="text-xs text-muted mb-1">
+                                    Access
+                                  </p>
+                                  <p className="text-secondary">
+                                    {(() => {
+                                      const access = entryPoint.access;
+
+                                      if (typeof access === 'string') {
+                                        return access;
+                                      }
+
+                                      if (typeof access === 'object' && access !== null) {
+                                        if ('Public' in access) {
+                                          return 'Public';
+                                        }
+                                        if ('Groups' in access) {
+                                          return `Groups: ${access.Groups.join(", ")}`;
+                                        }
+                                        if ('Template' in access) {
+                                          return 'Template';
+                                        }
+                                      }
+
+                                      return 'Unknown';
+                                    })()}
+                                  </p>
+                                </div>
+                                <div className="bg-card p-3 rounded border border-primary">
+                                  <p className="text-xs text-muted mb-1">
+                                    Type
+                                  </p>
+                                  <p className="text-secondary">
+                                    {entryPoint.entry_point_type}
+                                  </p>
+                                </div>
+                                <div className="bg-card p-3 rounded border border-primary">
+                                  <p className="text-xs text-muted mb-2">
+                                    Parameters
+                                  </p>
+                                  {Object.keys(entryPoint.args).length > 0 ? (
+                                    <div className="space-y-1">
+                                      {Object.entries(entryPoint.args).map(
+                                        ([key, value]) => (
+                                          <div
+                                            key={key}
+                                            className="flex justify-between items-center py-1 px-2 bg-tertiary rounded"
+                                          >
+                                            <pre className="font-mono text-xs text-subtle">
+                                              {JSON.stringify(value, null, 2)}
+                                            </pre>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs text-muted italic">
+                                      No parameters
+                                    </p>
+                                  )}
+                                </div>
+
+                              </div>
+                              {/* To Version (for modified) */}
+                              {type === "modified" && entryPointTo && (
                                 <div className="space-y-3">
                                   <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
-                                    {type === "modified"
-                                      ? "From (v" +
-                                      fetchedDiffData.v1.contract_version +
-                                      ")"
-                                      : type === "removed"
-                                        ? "Removed From"
-                                        : "Added In"}
+                                    To (v
+                                    {fetchedDiffData.v2.contract_version})
                                   </h6>
-                                  <div className="space-y-2 text-sm">
+                                  <div className="space-y-2 text-sm grid md:grid-cols-2 gap-4">
                                     <div className="bg-card p-3 rounded border border-primary">
                                       <p className="text-xs text-muted mb-1">
                                         Name
                                       </p>
                                       <p className="font-mono text-primary">
-                                        {entryPoint.name}
+                                        {entryPointTo.name}
                                       </p>
                                     </div>
                                     <div className="bg-card p-3 rounded border border-primary">
@@ -506,7 +576,7 @@ export default function ContractDiff({
                                         Return Type
                                       </p>
                                       <p className="font-mono text-secondary">
-                                        {entryPoint.ret}
+                                        {entryPointTo.ret}
                                       </p>
                                     </div>
                                     <div className="bg-card p-3 rounded border border-primary">
@@ -514,11 +584,27 @@ export default function ContractDiff({
                                         Access
                                       </p>
                                       <p className="text-secondary">
-                                        {"Public" in entryPoint.access
-                                          ? "Public"
-                                          : "Groups" in entryPoint.access
-                                            ? `Groups: ${entryPoint.access.Groups.join(", ")}`
-                                            : "Template"}
+                                        {(() => {
+                                          const access = entryPointTo.access;
+
+                                          if (typeof access === 'string') {
+                                            return access;
+                                          }
+
+                                          if (typeof access === 'object' && access !== null) {
+                                            if ('Public' in access) {
+                                              return 'Public';
+                                            }
+                                            if ('Groups' in access) {
+                                              return `Groups: ${access.Groups.join(", ")}`;
+                                            }
+                                            if ('Template' in access) {
+                                              return 'Template';
+                                            }
+                                          }
+
+                                          return 'Unknown';
+                                        })()}
                                       </p>
                                     </div>
                                     <div className="bg-card p-3 rounded border border-primary">
@@ -526,31 +612,27 @@ export default function ContractDiff({
                                         Type
                                       </p>
                                       <p className="text-secondary">
-                                        {entryPoint.entry_point_type}
+                                        {entryPointTo.entry_point_type}
                                       </p>
                                     </div>
                                     <div className="bg-card p-3 rounded border border-primary">
                                       <p className="text-xs text-muted mb-2">
                                         Parameters
                                       </p>
-                                      {Object.keys(entryPoint.args).length >
-                                        0 ? (
+                                      {Object.keys(entryPointTo.args).length > 0 ? (
                                         <div className="space-y-1">
-                                          {Object.entries(entryPoint.args).map(
-                                            ([key, value]) => (
-                                              <div
-                                                key={key}
-                                                className="flex justify-between items-center py-1 px-2 bg-tertiary rounded"
-                                              >
-                                                <span className="font-mono text-xs text-primary">
-                                                  {key}
-                                                </span>
-                                                <span className="font-mono text-xs text-subtle">
-                                                  {JSON.stringify(value)}
-                                                </span>
-                                              </div>
-                                            )
-                                          )}
+                                          {Object.entries(
+                                            entryPointTo.args
+                                          ).map(([key, value]) => (
+                                            <div
+                                              key={key}
+                                              className="flex justify-between items-center py-1 px-2 bg-tertiary rounded"
+                                            >
+                                              <pre className="font-mono text-xs text-subtle">
+                                                {JSON.stringify(value, null, 2)}
+                                              </pre>
+                                            </div>
+                                          ))}
                                         </div>
                                       ) : (
                                         <p className="text-xs text-muted italic">
@@ -560,84 +642,7 @@ export default function ContractDiff({
                                     </div>
                                   </div>
                                 </div>
-
-                                {/* To Version (for modified) */}
-                                {type === "modified" && entryPointTo && (
-                                  <div className="space-y-3">
-                                    <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
-                                      To (v
-                                      {fetchedDiffData.v2.contract_version})
-                                    </h6>
-                                    <div className="space-y-2 text-sm">
-                                      <div className="bg-card p-3 rounded border border-primary">
-                                        <p className="text-xs text-muted mb-1">
-                                          Name
-                                        </p>
-                                        <p className="font-mono text-primary">
-                                          {entryPointTo.name}
-                                        </p>
-                                      </div>
-                                      <div className="bg-card p-3 rounded border border-primary">
-                                        <p className="text-xs text-muted mb-1">
-                                          Return Type
-                                        </p>
-                                        <p className="font-mono text-secondary">
-                                          {entryPointTo.ret}
-                                        </p>
-                                      </div>
-                                      <div className="bg-card p-3 rounded border border-primary">
-                                        <p className="text-xs text-muted mb-1">
-                                          Access
-                                        </p>
-                                        <p className="text-secondary">
-                                          {"Public" in entryPointTo.access
-                                            ? "Public"
-                                            : "Groups" in entryPointTo.access
-                                              ? `Groups: ${entryPointTo.access.Groups.join(", ")}`
-                                              : "Template"}
-                                        </p>
-                                      </div>
-                                      <div className="bg-card p-3 rounded border border-primary">
-                                        <p className="text-xs text-muted mb-1">
-                                          Type
-                                        </p>
-                                        <p className="text-secondary">
-                                          {entryPointTo.entry_point_type}
-                                        </p>
-                                      </div>
-                                      <div className="bg-card p-3 rounded border border-primary">
-                                        <p className="text-xs text-muted mb-2">
-                                          Parameters
-                                        </p>
-                                        {Object.keys(entryPointTo.args).length >
-                                          0 ? (
-                                          <div className="space-y-1">
-                                            {Object.entries(
-                                              entryPointTo.args
-                                            ).map(([key, value]) => (
-                                              <div
-                                                key={key}
-                                                className="flex justify-between items-center py-1 px-2 bg-tertiary rounded"
-                                              >
-                                                <span className="font-mono text-xs text-primary">
-                                                  {key}
-                                                </span>
-                                                <span className="font-mono text-xs text-subtle">
-                                                  {JSON.stringify(value)}
-                                                </span>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        ) : (
-                                          <p className="text-xs text-muted italic">
-                                            No parameters
-                                          </p>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+                              )}
                             </div>
                           </Accordion.Panel>
                         </Accordion.Item>
@@ -735,14 +740,6 @@ export default function ContractDiff({
                           </Accordion.Header>
                           <Accordion.Panel className="px-4 py-3 bg-tertiary">
                             <div className="space-y-4">
-                              {type === "modified" && keyValueTo && (
-                                <div className="mb-4 p-3 bg-warning-dark border-l-4 border-warning rounded">
-                                  <p className="text-sm text-warning font-medium">
-                                    Modified: Value changed between versions
-                                  </p>
-                                </div>
-                              )}
-
                               <div className="grid md:grid-cols-2 gap-4">
                                 {/* From/Original Version */}
                                 <div className="space-y-3">

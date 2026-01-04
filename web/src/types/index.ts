@@ -88,7 +88,8 @@ export interface EntryPoint {
 export type EntryPointAccess =
   | { Public: {} }
   | { Groups: string[] }
-  | { Template: {} };
+  | { Template: {} }
+  | string;
 
 export type EntryPointType = "Caller" | "Called" | "Factory"
 

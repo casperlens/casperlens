@@ -4,7 +4,7 @@ import ContractDetailsPane from "@/components/ContractDetailsPane";
 import ContractDiff from "@/components/ContractDiff";
 import { dummyContractData } from "@/store/dummy";
 import type { ContractData, ResponseData } from "@/types";
-import { Tabs } from "@base-ui/react";
+import { ScrollArea, Tabs } from "@base-ui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -106,52 +106,60 @@ export default function ContractDetailsPage() {
             {/* Tab Content */}
             <div className="flex-1 overflow-y-auto rounded-b-lg p-6 border border-t-0 bg-card border-primary">
               {/* Lifecycles Tab */}
-              <Tabs.Panel value="lifetime">
-                <h3 className="text-lg font-bold mb-4">Version Lifecycles</h3>
-                <div className="space-y-4">
-                  {contractData.versions.map((lifecycle, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-lg border bg-tertiary border-primary"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-semibold">
-                            Version {lifecycle.contract_version}
-                          </p>
-                          <p className="text-muted text-sm">
-                            Age: {lifecycle.age}
-                          </p>
-                        </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${lifecycle.disabled ? "badge-error" : "badge-deployed"}`}
-                        >
-                          {lifecycle.disabled ? "disabled" : "active"}
-                        </span>
+              <ScrollArea.Root className="h-full pr-6">
+                <ScrollArea.Viewport className="h-full">
+                  <ScrollArea.Content>
+                    <Tabs.Panel value="lifetime">
+                      <h3 className="text-lg font-bold mb-4">Version Lifecycles</h3>
+                      <div className="space-y-4">
+                        {contractData.versions.map((lifecycle, idx) => (
+                          <div
+                            key={idx}
+                            className="p-4 rounded-lg border bg-tertiary border-primary"
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <p className="font-semibold">
+                                  Version {lifecycle.contract_version}
+                                </p>
+                                <p className="text-muted text-sm">
+                                  Age: {lifecycle.age}
+                                </p>
+                              </div>
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${lifecycle.disabled ? "badge-error" : "badge-deployed"}`}
+                              >
+                                {lifecycle.disabled ? "disabled" : "active"}
+                              </span>
+                            </div>
+                            <p className="text-muted text-sm">
+                              Hash:{" "}
+                              <span className="font-mono">
+                                {lifecycle.contract_hash}
+                              </span>
+                            </p>
+                            <p className="text-muted text-sm mt-1">
+                              Protocol: {lifecycle.protocol_version}
+                            </p>
+                          </div>
+                        ))}
                       </div>
-                      <p className="text-muted text-sm">
-                        Hash:{" "}
-                        <span className="font-mono">
-                          {lifecycle.contract_hash}
-                        </span>
-                      </p>
-                      <p className="text-muted text-sm mt-1">
-                        Protocol: {lifecycle.protocol_version}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </Tabs.Panel>
+                    </Tabs.Panel>
 
-              {/* Diff Tab */}
-
-              <Tabs.Panel value="diff">
-                <ContractDiff
-                  user_id={userId}
-                  package_hash={contractData.package_hash}
-                  versions={contractData.versions}
-                />
-              </Tabs.Panel>
+                    {/* Diff Tab */}
+                    <Tabs.Panel value="diff">
+                      <ContractDiff
+                        user_id={userId}
+                        package_hash={contractData.package_hash}
+                        versions={contractData.versions}
+                      />
+                    </Tabs.Panel>
+                  </ScrollArea.Content>
+                </ScrollArea.Viewport>
+                <ScrollArea.Scrollbar className="Scrollbar">
+                  <ScrollArea.Thumb className="Thumb" />
+                </ScrollArea.Scrollbar>
+              </ScrollArea.Root>
             </div>
           </Tabs.Root>
         </div>
