@@ -26,7 +26,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             get(get_contract_diff),
         )
         .route(
-            "/api/v1/u/{user_id}/contract-package/{package_hash}/diff/analyze",
+            "/api/v1/u/{user_id}/contract-package/diff/analyze",
             post(get_diff_analysis),
         )
         .with_state(app_state)
