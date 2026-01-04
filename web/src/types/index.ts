@@ -18,7 +18,6 @@ export interface ResponseData<T> {
   data?: T;
 }
 
-
 export interface ContractOverview {
   package_hash: string;
   contract_name: string;

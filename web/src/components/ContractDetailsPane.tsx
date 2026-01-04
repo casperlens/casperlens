@@ -1,7 +1,13 @@
 import { ContractOverview, ContractVersionData } from "@/types";
 import { ScrollArea } from "@base-ui/react";
 
-export default function ContractDetailsPane({ contractData, versionData }: { contractData: ContractOverview; versionData: ContractVersionData }) {
+export default function ContractDetailsPane({
+  contractData,
+  versionData,
+}: {
+  contractData: ContractOverview;
+  versionData: ContractVersionData;
+}) {
   return (
     <ScrollArea.Root className="w-80 shrink-0">
       <h2 className="text-xl font-bold mb-6">Package Details</h2>
@@ -65,9 +71,7 @@ export default function ContractDetailsPane({ contractData, versionData }: { con
             <div className="space-y-3 text-sm">
               <div>
                 <p className="text-muted">Version</p>
-                <p className="font-medium">
-                  {versionData.contract_version}
-                </p>
+                <p className="font-medium">{versionData.contract_version}</p>
               </div>
               <div>
                 <p className="text-muted">Protocol Version</p>
@@ -89,5 +93,5 @@ export default function ContractDetailsPane({ contractData, versionData }: { con
         <ScrollArea.Thumb className="Thumb" />
       </ScrollArea.Scrollbar>
     </ScrollArea.Root>
-  )
+  );
 }

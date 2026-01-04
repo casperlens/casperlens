@@ -3,7 +3,7 @@ import { Tabs } from "@base-ui/react";
 
 export default function ContractDetailsTab({
   lifecycleData,
-  diffData
+  diffData,
 }: {
   lifecycleData: ContractVersionDiffMeta[];
   diffData: ContractVersionDiff;
@@ -63,17 +63,21 @@ export default function ContractDetailsTab({
 
         {/* Diff Tab */}
         <Tabs.Panel value="diff">
-          <h3 className="text-lg font-bold mb-4">
-            Changes in Latest Version
-          </h3>
+          <h3 className="text-lg font-bold mb-4">Changes in Latest Version</h3>
           <div className="space-y-3">
             {diffData.entry_points?.map((diff, idx) => {
-              const type = "Added" in diff ? "added" : "Removed" in diff ? "removed" : "modified";
-              const item = "Added" in diff
-                ? JSON.stringify(diff.Added)
-                : "Removed" in diff
-                  ? JSON.stringify(diff.Removed)
-                  : `${JSON.stringify(diff.Modified.from)} → ${JSON.stringify(diff.Modified.to)}`;
+              const type =
+                "Added" in diff
+                  ? "added"
+                  : "Removed" in diff
+                    ? "removed"
+                    : "modified";
+              const item =
+                "Added" in diff
+                  ? JSON.stringify(diff.Added)
+                  : "Removed" in diff
+                    ? JSON.stringify(diff.Removed)
+                    : `${JSON.stringify(diff.Modified.from)} → ${JSON.stringify(diff.Modified.to)}`;
 
               return (
                 <div
@@ -89,12 +93,13 @@ export default function ContractDetailsTab({
                   }}
                 >
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${type === "added"
-                      ? "badge-success"
-                      : type === "removed"
-                        ? "badge-error"
-                        : "badge-warning"
-                      }`}
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
+                      type === "added"
+                        ? "badge-success"
+                        : type === "removed"
+                          ? "badge-error"
+                          : "badge-warning"
+                    }`}
                   >
                     {type}
                   </span>
@@ -103,12 +108,18 @@ export default function ContractDetailsTab({
               );
             })}
             {diffData.named_keys?.map((diff, idx) => {
-              const type = "Added" in diff ? "added" : "Removed" in diff ? "removed" : "modified";
-              const item = "Added" in diff
-                ? `${diff.Added.key}: ${JSON.stringify(diff.Added.value)}`
-                : "Removed" in diff
-                  ? `${diff.Removed.key}: ${JSON.stringify(diff.Removed.value)}`
-                  : `${diff.Modified.key}: ${JSON.stringify(diff.Modified.from)} → ${JSON.stringify(diff.Modified.to)}`;
+              const type =
+                "Added" in diff
+                  ? "added"
+                  : "Removed" in diff
+                    ? "removed"
+                    : "modified";
+              const item =
+                "Added" in diff
+                  ? `${diff.Added.key}: ${JSON.stringify(diff.Added.value)}`
+                  : "Removed" in diff
+                    ? `${diff.Removed.key}: ${JSON.stringify(diff.Removed.value)}`
+                    : `${diff.Modified.key}: ${JSON.stringify(diff.Modified.from)} → ${JSON.stringify(diff.Modified.to)}`;
 
               return (
                 <div
@@ -124,12 +135,13 @@ export default function ContractDetailsTab({
                   }}
                 >
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${type === "added"
-                      ? "badge-success"
-                      : type === "removed"
-                        ? "badge-error"
-                        : "badge-warning"
-                      }`}
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
+                      type === "added"
+                        ? "badge-success"
+                        : type === "removed"
+                          ? "badge-error"
+                          : "badge-warning"
+                    }`}
                   >
                     {type}
                   </span>

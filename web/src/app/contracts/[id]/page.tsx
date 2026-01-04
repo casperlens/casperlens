@@ -2,7 +2,11 @@
 
 import ContractDetailsPane from "@/components/ContractDetailsPane";
 import ContractDetailsTab from "@/components/ContractDetailsTab";
-import { dummyContractData, dummyVersionDiffData, dummyVersionMetaData } from "@/store/dummy";
+import {
+  dummyContractData,
+  dummyVersionDiffData,
+  dummyVersionMetaData,
+} from "@/store/dummy";
 import type { ContractData, ResponseData } from "@/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -27,12 +31,15 @@ export default function ContractDetailsPage() {
 
   const fetchContractData = async () => {
     try {
-      const res = await fetch(`/api/v1/u/${userId}/contract-package/${contractPkgId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `/api/v1/u/${userId}/contract-package/${contractPkgId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -77,10 +84,16 @@ export default function ContractDetailsPage() {
         {/* Two-pane layout */}
         <div className="flex gap-3 h-[calc(100vh-200px)]">
           {/* Left Pane - Contract Details */}
-          <ContractDetailsPane contractData={contractData} versionData={currentVersion} />
+          <ContractDetailsPane
+            contractData={contractData}
+            versionData={currentVersion}
+          />
 
           {/* Right Pane - Tabs Content */}
-          <ContractDetailsTab lifecycleData={dummyVersionMetaData} diffData={dummyVersionDiffData} />
+          <ContractDetailsTab
+            lifecycleData={dummyVersionMetaData}
+            diffData={dummyVersionDiffData}
+          />
         </div>
       </div>
     </div>

@@ -22,7 +22,7 @@ export default function ContractPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to fetch contracts');
+        throw new Error("Failed to fetch contracts");
       }
 
       const json: ResponseData<ContractOverview[]> = await res.json();
@@ -30,14 +30,14 @@ export default function ContractPage() {
         throw new Error(json.error);
       }
       if (!json.data) {
-        throw new Error('No contract data found');
+        throw new Error("No contract data found");
       }
       setContracts(json.data);
     } catch (error) {
-      console.error('Error fetching contracts:', error);
+      console.error("Error fetching contracts:", error);
       setContracts(dummyContracts);
     }
-  }
+  };
 
   const handleClick = (packageHash: string) => {
     console.log(`View details for contract with package hash: ${packageHash}`);
@@ -87,8 +87,9 @@ export default function ContractPage() {
                   <p className="text-xs text-muted">{contract.owner_id}</p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status ? "badge-locked" : "badge-unlocked"
-                    }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${
+                    contract.lock_status ? "badge-locked" : "badge-unlocked"
+                  }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
