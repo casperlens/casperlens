@@ -74,10 +74,16 @@ export default function ContractPage() {
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1 overflow-hidden mr-2">
-                  <h3 className="font-bold text-lg mb-2 text-primary truncate" title={contract.contract_name}>
+                  <h3
+                    className="font-bold text-lg mb-2 text-primary truncate"
+                    title={contract.contract_name}
+                  >
                     {contract.contract_name}
                   </h3>
-                  <p className="text-xs text-subtle mb-1" title={contract.package_hash}>
+                  <p
+                    className="text-xs text-subtle mb-1"
+                    title={contract.package_hash}
+                  >
                     {formatHash(contract.package_hash)}
                   </p>
                   <p className="text-xs text-muted" title={contract.owner_id}>
@@ -85,8 +91,9 @@ export default function ContractPage() {
                   </p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${contract.lock_status ? "badge-locked" : "badge-unlocked"
-                    }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${
+                    contract.lock_status ? "badge-locked" : "badge-unlocked"
+                  }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>

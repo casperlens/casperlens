@@ -1,6 +1,16 @@
 import { dummyVersionDiffData } from "@/store/dummy";
-import { ContractVersionData, ContractVersionDiff, ResponseData } from "@/types";
-import { Accordion, AccordionRootChangeEventDetails, AccordionValue, Button, Combobox } from "@base-ui/react";
+import {
+  ContractVersionData,
+  ContractVersionDiff,
+  ResponseData,
+} from "@/types";
+import {
+  Accordion,
+  AccordionRootChangeEventDetails,
+  AccordionValue,
+  Button,
+  Combobox,
+} from "@base-ui/react";
 import { useState } from "react";
 
 interface VersionOption {
@@ -26,10 +36,10 @@ export default function ContractDiff({
   const [analysis, setAnalysis] = useState<string>("");
 
   const versionOptions: VersionOption[] = versions.map((v) => {
-    return ({
+    return {
       value: v.contract_version,
       label: `Version ${v.contract_version}`,
-    });
+    };
   });
 
   const getAvailableV1Options = (): VersionOption[] => {
@@ -106,7 +116,7 @@ export default function ContractDiff({
       console.error("Error fetching analysis:", error);
       setAnalysis("Failed to fetch analysis.");
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,11 +141,14 @@ export default function ContractDiff({
     }
   };
 
-  const handleValueChange = (value: AccordionValue, event: AccordionRootChangeEventDetails) => {
+  const handleValueChange = (
+    value: AccordionValue,
+    event: AccordionRootChangeEventDetails,
+  ) => {
     if (!analysis && fetchedDiffData) {
       fetchAnalysis(fetchedDiffData);
     }
-  }
+  };
 
   return (
     <>
@@ -311,7 +324,10 @@ export default function ContractDiff({
           {/* AI Analysis */}
           <div className="mb-6">
             <Accordion.Root onValueChange={handleValueChange}>
-              <Accordion.Item value="info" className="border border-primary rounded-lg bg-tertiary overflow-hidden">
+              <Accordion.Item
+                value="info"
+                className="border border-primary rounded-lg bg-tertiary overflow-hidden"
+              >
                 <Accordion.Header>
                   <Accordion.Trigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-card transition-colors group">
                     <div className="flex items-center gap-2">
@@ -328,7 +344,9 @@ export default function ContractDiff({
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                      <span className="font-semibold text-primary">AI Analysis</span>
+                      <span className="font-semibold text-primary">
+                        AI Analysis
+                      </span>
                     </div>
                     <span className="text-xs text-muted bg-card px-2 py-1 rounded">
                       Click to expand
@@ -342,9 +360,24 @@ export default function ContractDiff({
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-muted">
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="w-4 h-4 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       <span>Analyzing changes...</span>
                     </div>
@@ -383,12 +416,13 @@ export default function ContractDiff({
                   }}
                 >
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${type === "added"
-                      ? "badge-success"
-                      : type === "removed"
-                        ? "badge-error"
-                        : "badge-warning"
-                      }`}
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
+                      type === "added"
+                        ? "badge-success"
+                        : type === "removed"
+                          ? "badge-error"
+                          : "badge-warning"
+                    }`}
                   >
                     {type}
                   </span>
@@ -424,12 +458,13 @@ export default function ContractDiff({
                   }}
                 >
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${type === "added"
-                      ? "badge-success"
-                      : type === "removed"
-                        ? "badge-error"
-                        : "badge-warning"
-                      }`}
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
+                      type === "added"
+                        ? "badge-success"
+                        : type === "removed"
+                          ? "badge-error"
+                          : "badge-warning"
+                    }`}
                   >
                     {type}
                   </span>
