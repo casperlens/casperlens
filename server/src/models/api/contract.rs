@@ -24,3 +24,29 @@ pub struct ContractOverview {
     pub lock_status: bool,
     pub age: i64,
 }
+
+#[derive(Debug, Serialize)]
+pub struct ContractVersionData {
+    pub protocol_major_version: u32,
+    pub contract_version: u32,
+    pub contract_package_hash: String,
+    pub contract_hash: String,
+    pub contract_wasm_hash: String,
+    pub user_id: String,
+    pub protocol_version: String,
+    pub named_keys: Vec<String>,
+    pub entry_points: Vec<String>,
+    pub disabled: bool,
+    pub age: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ContractData {
+    pub package_hash: String,
+    pub contract_name: String,
+    pub owner_id: String,
+    pub network: String,
+    pub lock_status: bool,
+    pub age: i64,
+    pub versions: Vec<ContractVersionData>,
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { ContractRegisterForm } from "@/components/ContractRegisterForm";
+import { formatHash } from "@/lib/utils";
 import { dummyContracts } from "@/store/dummy";
 import type { ContractOverview, ResponseData } from "@/types";
 import { Button } from "@base-ui/react";
@@ -41,12 +42,6 @@ export default function ContractPage() {
   const handleClick = (packageHash: string) => {
     console.log(`View details for contract with package hash: ${packageHash}`);
     router.push(`/contracts/${packageHash}`);
-  };
-
-  const formatHash = (hash: string) => {
-    if (!hash) return "";
-    if (hash.length < 12) return hash;
-    return `${hash.slice(0, 6)}...${hash.slice(-6)}`;
   };
 
   useEffect(() => {

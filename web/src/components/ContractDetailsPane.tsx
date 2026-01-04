@@ -1,3 +1,4 @@
+import { formatHash } from "@/lib/utils";
 import { ContractOverview, ContractVersionData } from "@/types";
 import { ScrollArea } from "@base-ui/react";
 
@@ -24,16 +25,16 @@ export default function ContractDetailsPane({
           {/* Package Hash */}
           <div className="mb-6 pb-6 border-b border-primary">
             <p className="text-muted text-sm mb-2">Package Hash</p>
-            <p className="font-mono text-xs break-all">
-              {contractData.package_hash}
+            <p className="font-mono text-xs" title={contractData.package_hash}>
+              {formatHash(contractData.package_hash)}
             </p>
           </div>
 
           {/* Owner ID */}
           <div className="mb-6 pb-6 border-b border-primary">
             <p className="text-muted text-sm mb-2">Owner ID</p>
-            <p className="font-mono text-xs break-all">
-              {contractData.owner_id}
+            <p className="font-mono text-xs" title={contractData.owner_id}>
+              {formatHash(contractData.owner_id)}
             </p>
           </div>
 

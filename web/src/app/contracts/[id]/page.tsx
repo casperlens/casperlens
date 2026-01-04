@@ -20,19 +20,22 @@ export default function ContractDetailsPage() {
     } else {
       setUserId(storedUserId);
       const pkgId = window.location.pathname.split("/")[2];
-      console.log("Fetched package ID from URL:", pkgId);
-      fetchContractData(pkgId);
+      fetchContractData(storedUserId, pkgId);
     }
   }, []);
 
-  const fetchContractData = async (pkgId: string) => {
+  const fetchContractData = async (uid: string, pid: string) => {
     try {
-      const res = await fetch(`/api/v1/u/${userId}/contract-package/${pkgId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `/api/v1/u/${uid}/contract-package/${pid}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
+
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);

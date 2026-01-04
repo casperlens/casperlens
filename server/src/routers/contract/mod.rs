@@ -5,7 +5,10 @@ use crate::{
     models::{
         api::{
             ApiResponse,
-            contract::{ContractDiffQuery, ContractOverview, RegisterContractRequest},
+            contract::{
+                ContractData, ContractDiffQuery, ContractOverview, ContractVersionData,
+                RegisterContractRequest,
+            },
         },
         schema::contract::{ContractPackageSchema, ContractVersionDiff},
     },
@@ -19,8 +22,8 @@ use crate::{
             },
         },
         database::contract::{
-            get_all_contracts, get_contract_version, insert_contract_package,
-            insert_contract_package_versions,
+            get_all_contracts, get_contract_package, get_contract_version, get_contract_versions,
+            insert_contract_package, insert_contract_package_versions,
         },
     },
 };
@@ -47,6 +50,94 @@ fn normalize_hash(input: &str) -> String {
         input.to_string()
     } else {
         format!("hash-{}", input)
+    }
+}
+
+fn strip_hash_prefix(input: &str) -> String {
+    if let Some(stripped) = input.strip_prefix("hash-") {
+        stripped.to_string()
+    } else {
+        input.to_string()
+    }
+}
+
+#[axum::debug_handler]
+pub async fn get_contract_details(
+    state: State<Arc<AppState>>,
+    Path((user_id, package_hash)): Path<(Uuid, String)>,
+) -> impl IntoResponse {
+    let package_hash = strip_hash_prefix(&package_hash);
+
+    match get_contract_package(&state.db, &user_id, &package_hash).await {
+        Ok(Some(pkg)) => match get_contract_versions(&state.db, &package_hash).await {
+            Ok(versions) => {
+                let versions_data: Vec<ContractVersionData> = versions
+                    .into_iter()
+                    .map(|v| {
+                        let named_keys: Vec<String> =
+                            v.named_keys.iter().map(|(k, _)| k.clone()).collect();
+                        let entry_points: Vec<String> = v
+                            .entry_points
+                            .iter()
+                            .map(|ep| ep.name().to_string())
+                            .collect();
+
+                        ContractVersionData {
+                            protocol_major_version: v.protocol_major_version,
+                            contract_version: v.contract_version,
+                            contract_package_hash: v.contract_package_hash,
+                            contract_hash: v.contract_hash,
+                            contract_wasm_hash: v.contract_wasm_hash,
+                            user_id: v.user_id.to_string(),
+                            protocol_version: v.protocol_version,
+                            named_keys,
+                            entry_points,
+                            disabled: v.disabled,
+                            age: format!("{}d", (Utc::now() - v.age).num_days()),
+                        }
+                    })
+                    .collect();
+
+                let contract_data = ContractData {
+                    package_hash: pkg.package_hash,
+                    contract_name: pkg.contract_name,
+                    owner_id: pkg.owner_id,
+                    network: pkg.network,
+                    lock_status: pkg.lock_status,
+                    age: (Utc::now() - pkg.age).num_days(),
+                    versions: versions_data,
+                };
+
+                Json(ApiResponse {
+                    success: true,
+                    message: "Contract details fetched successfully".to_string(),
+                    error: None::<String>,
+                    data: Some(contract_data),
+                })
+                .into_response()
+            }
+            Err(e) => Json(ApiResponse {
+                success: false,
+                message: "Failed to fetch contract versions".to_string(),
+                error: Some(e.to_string()),
+                data: None::<String>,
+            })
+            .into_response(),
+        },
+        Ok(None) => Json(ApiResponse {
+            success: false,
+            message: "Contract package not found".to_string(),
+            error: Some("Contract package not found".to_string()),
+            data: None::<String>,
+        })
+        .into_response(),
+        Err(e) => Json(ApiResponse {
+            success: false,
+            message: "Failed to fetch contract package".to_string(),
+            error: Some(e.to_string()),
+            data: None::<String>,
+        })
+        .into_response(),
     }
 }
 
@@ -93,7 +184,7 @@ pub async fn get_contract_diff(
     Path((_user_id, package_hash)): Path<(Uuid, String)>,
     Query(query): Query<ContractDiffQuery>,
 ) -> impl IntoResponse {
-    let package_hash = normalize_hash(&package_hash);
+    let package_hash = strip_hash_prefix(&package_hash);
 
     let v1_db = match get_contract_version(&state.db, &package_hash, query.v1, query.v1_maj).await {
         Ok(Some(v)) => v,
@@ -440,11 +531,11 @@ pub async fn register_contract(
                             .into_response();
                         }
 
-                        Err(_) => {
+                        Err(e) => {
                             return Json(ApiResponse {
                                 success: false,
                                 message: "Failed to register contract".to_string(),
-                                error: Some("Database error".to_string()),
+                                error: Some(format!("Database error: {}", e)),
                                 data: None::<String>,
                             })
                             .into_response();

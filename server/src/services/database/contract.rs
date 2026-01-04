@@ -168,3 +168,93 @@ pub async fn get_contract_version(
         None => Ok(None),
     }
 }
+
+pub async fn get_contract_package(
+    pool: &PgPool,
+    user_id: &Uuid,
+    package_hash: &str,
+) -> Result<Option<ContractPackageSchema>, Error> {
+    let row = query!(
+        r#"
+        SELECT
+            package_hash,
+            user_id,
+            contract_name,
+            owner_id,
+            network,
+            lock_status,
+            age
+        FROM contract_packages
+        WHERE user_id = $1 AND package_hash = $2
+        "#,
+        user_id,
+        package_hash
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match row {
+        Some(r) => Ok(Some(ContractPackageSchema {
+            package_hash: r.package_hash,
+            user_id: r.user_id,
+            contract_name: r.contract_name,
+            owner_id: r.owner_id,
+            network: r.network,
+            lock_status: r.lock_status,
+            age: r.age,
+        })),
+        None => Ok(None),
+    }
+}
+
+pub async fn get_contract_versions(
+    pool: &PgPool,
+    contract_package_hash: &str,
+) -> Result<Vec<ContractVersionSchema>, Error> {
+    let rows = query!(
+        r#"
+        SELECT
+            contract_hash,
+            contract_package_hash,
+            contract_wasm_hash,
+            user_id,
+            version,
+            major_protocol_version, 
+            protocol_version, 
+            entry_points,
+            named_keys,
+            disabled, 
+            age
+        FROM contract_versions
+        WHERE contract_package_hash = $1
+        ORDER BY version DESC
+        "#,
+        contract_package_hash
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let mut versions = Vec::new();
+    for r in rows {
+        let entry_points: Vec<casper_types::contracts::EntryPoint> =
+            serde_json::from_value(r.entry_points).map_err(|e| Error::Decode(Box::new(e)))?;
+        let named_keys: casper_types::NamedKeys =
+            serde_json::from_value(r.named_keys).map_err(|e| Error::Decode(Box::new(e)))?;
+
+        versions.push(ContractVersionSchema {
+            contract_hash: r.contract_hash.unwrap_or_default(),
+            contract_package_hash: r.contract_package_hash,
+            contract_wasm_hash: r.contract_wasm_hash,
+            user_id: r.user_id,
+            contract_version: r.version as u32,
+            protocol_major_version: r.major_protocol_version as u32,
+            protocol_version: r.protocol_version,
+            entry_points,
+            named_keys,
+            disabled: r.disabled,
+            age: r.age,
+        });
+    }
+
+    Ok(versions)
+}
