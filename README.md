@@ -85,6 +85,7 @@ Check out our [contributing guide](/CONTRIBUTING.md) for getting started.
 1. Support tokens and integrate observability metrics from Casper Cloud.
 2. Integrating support for other networks to enable interoperability.
 3. Support user account and tracking contracts under a user account using Casper Wallet.
+4. Enable code level tracking for functional changes and ABI changes for enhanced intelligent analysis using CI integration.
 
 # License
 
