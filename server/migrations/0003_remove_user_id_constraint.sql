@@ -1,0 +1,1 @@
+ALTER TABLE contract_packages DROP CONSTRAINT contract_packages_user_id_key CASCADE;
