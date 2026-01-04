@@ -10,6 +10,20 @@
 
 CasperLens is an observability and smart contract lifecycle management platform for the Casper Network.
 
+# Table of Contents
+
+- [Why?](#why)
+- [Solution](#solution)
+  - [Smart contract tracking](#smart-contract-tracking)
+  - [Version difference analysis](#version-difference-analysis)
+  - [Intelligent Analysis](#intelligent-analysis)
+- [Architecture](#architecture)
+- [Technologies Used](#technologies-used)
+- [Screenshots](#screenshots)
+- [Development](#development)
+- [Future Enhancements](#future-enhancements)
+- [License](#license)
+
 # Why?
 
 Smart contract lifecycle monitoring and management is essential for ensuring smooth integration in application, auditing for security and integrity and continuous evolution with collective knowledge.
