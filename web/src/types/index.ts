@@ -91,7 +91,7 @@ export type EntryPointAccess =
   | { Template: {} }
   | string;
 
-export type EntryPointType = "Caller" | "Called" | "Factory"
+export type EntryPointType = "Caller" | "Called" | "Factory";
 
 export interface Parameters {
   [key: string]: any;

@@ -1,4 +1,3 @@
-import { dummyVersionDiffData } from "@/store/dummy";
 import {
   ContractVersionData,
   ContractVersionDiff,
@@ -87,7 +86,6 @@ export default function ContractDiff({
       return json.data;
     } catch (error) {
       console.error("Error fetching diff data:", error);
-      setFetchedDiffData(dummyVersionDiffData);
       throw error;
     }
   };

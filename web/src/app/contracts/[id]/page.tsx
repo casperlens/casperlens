@@ -2,7 +2,6 @@
 
 import ContractDetailsPane from "@/components/ContractDetailsPane";
 import ContractDiff from "@/components/ContractDiff";
-import { dummyContractData } from "@/store/dummy";
 import type { ContractData, ResponseData } from "@/types";
 import { ScrollArea, Tabs } from "@base-ui/react";
 import { useRouter } from "next/navigation";
@@ -26,16 +25,12 @@ export default function ContractDetailsPage() {
 
   const fetchContractData = async (uid: string, pid: string) => {
     try {
-      const res = await fetch(
-        `/api/v1/u/${uid}/contract-package/${pid}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const res = await fetch(`/api/v1/u/${uid}/contract-package/${pid}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-
+      });
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -51,7 +46,6 @@ export default function ContractDetailsPage() {
       setContractData(json.data);
     } catch (error) {
       console.error("Error fetching contract data:", error);
-      setContractData(dummyContractData);
       return null;
     }
   };
@@ -110,7 +104,9 @@ export default function ContractDetailsPage() {
                 <ScrollArea.Viewport className="h-full">
                   <ScrollArea.Content>
                     <Tabs.Panel value="lifetime">
-                      <h3 className="text-lg font-bold mb-4">Version Lifecycles</h3>
+                      <h3 className="text-lg font-bold mb-4">
+                        Version Lifecycles
+                      </h3>
                       <div className="space-y-4">
                         {contractData.versions.map((lifecycle, idx) => (
                           <div
