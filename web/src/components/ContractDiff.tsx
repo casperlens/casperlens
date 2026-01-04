@@ -2,6 +2,8 @@ import { dummyVersionDiffData } from "@/store/dummy";
 import {
   ContractVersionData,
   ContractVersionDiff,
+  EntryPoint,
+  Key,
   ResponseData,
 } from "@/types";
 import {
@@ -387,91 +389,432 @@ export default function ContractDiff({
             </Accordion.Root>
           </div>
 
-          <div className="space-y-3">
-            {fetchedDiffData.entry_points?.map((diff, idx) => {
-              const type =
-                "Added" in diff
-                  ? "added"
-                  : "Removed" in diff
-                    ? "removed"
-                    : "modified";
-              const item =
-                "Added" in diff
-                  ? JSON.stringify(diff.Added)
-                  : "Removed" in diff
-                    ? JSON.stringify(diff.Removed)
-                    : `${JSON.stringify(diff.Modified.from)} → ${JSON.stringify(diff.Modified.to)}`;
+          <div className="space-y-6">
+            {/* Entry Points Section */}
+            {fetchedDiffData.entry_points &&
+              fetchedDiffData.entry_points.length > 0 && (
+                <div className="border border-primary rounded-lg bg-card overflow-hidden">
+                  <div className="px-4 py-3 bg-tertiary border-b border-primary">
+                    <h5 className="font-semibold text-primary flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                        />
+                      </svg>
+                      Entry Points Changes
+                      <span className="text-xs text-muted bg-card px-2 py-1 rounded">
+                        {fetchedDiffData.entry_points.length}
+                      </span>
+                    </h5>
+                  </div>
+                  <Accordion.Root className="divide-y divide-primary">
+                    {fetchedDiffData.entry_points.map((diff, idx) => {
+                      const type =
+                        "Added" in diff
+                          ? "added"
+                          : "Removed" in diff
+                            ? "removed"
+                            : "modified";
+                      const entryPoint: EntryPoint =
+                        "Added" in diff
+                          ? diff.Added
+                          : "Removed" in diff
+                            ? diff.Removed
+                            : diff.Modified.from;
+                      const entryPointTo =
+                        "Modified" in diff ? diff.Modified.to : null;
 
-              return (
-                <div
-                  key={idx}
-                  className="p-4 rounded-lg border-l-4 flex items-start gap-3 bg-tertiary"
-                  style={{
-                    borderLeftColor:
-                      type === "added"
-                        ? "var(--color-success)"
-                        : type === "removed"
-                          ? "var(--color-error)"
-                          : "var(--color-warning)",
-                  }}
-                >
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
-                      type === "added"
-                        ? "badge-success"
-                        : type === "removed"
-                          ? "badge-error"
-                          : "badge-warning"
-                    }`}
-                  >
-                    {type}
-                  </span>
-                  <p>{item}</p>
-                </div>
-              );
-            })}
-            {fetchedDiffData.named_keys?.map((diff, idx) => {
-              const type =
-                "Added" in diff
-                  ? "added"
-                  : "Removed" in diff
-                    ? "removed"
-                    : "modified";
-              const item =
-                "Added" in diff
-                  ? `${diff.Added.key}: ${JSON.stringify(diff.Added.value)}`
-                  : "Removed" in diff
-                    ? `${diff.Removed.key}: ${JSON.stringify(diff.Removed.value)}`
-                    : `${diff.Modified.key}: ${JSON.stringify(diff.Modified.from)} → ${JSON.stringify(diff.Modified.to)}`;
+                      return (
+                        <Accordion.Item
+                          key={idx}
+                          value={`ep-${idx}`}
+                          className="bg-card"
+                        >
+                          <Accordion.Header>
+                            <Accordion.Trigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-tertiary transition-colors group">
+                              <div className="flex items-center gap-3 flex-1">
+                                <svg
+                                  className="w-4 h-4 text-primary transition-transform duration-200 group-data-panel-open:rotate-90 shrink-0"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${type === "added"
+                                    ? "badge-success"
+                                    : type === "removed"
+                                      ? "badge-error"
+                                      : "badge-warning"
+                                    }`}
+                                >
+                                  {type}
+                                </span>
+                                <span className="font-mono text-sm text-primary font-semibold truncate">
+                                  {entryPoint.name}
+                                </span>
+                              </div>
+                            </Accordion.Trigger>
+                          </Accordion.Header>
+                          <Accordion.Panel className="px-4 py-3 bg-tertiary">
+                            <div className="space-y-4">
+                              {type === "modified" && entryPointTo && (
+                                <div className="mb-4 p-3 bg-warning-dark border-l-4 border-warning rounded">
+                                  <p className="text-sm text-warning font-medium">
+                                    Modified: Changes detected between versions
+                                  </p>
+                                </div>
+                              )}
 
-              return (
-                <div
-                  key={`nk-${idx}`}
-                  className="p-4 rounded-lg border-l-4 flex items-start gap-3 bg-tertiary"
-                  style={{
-                    borderLeftColor:
-                      type === "added"
-                        ? "var(--color-success)"
-                        : type === "removed"
-                          ? "var(--color-error)"
-                          : "var(--color-warning)",
-                  }}
-                >
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap mt-0.5 ${
-                      type === "added"
-                        ? "badge-success"
-                        : type === "removed"
-                          ? "badge-error"
-                          : "badge-warning"
-                    }`}
-                  >
-                    {type}
-                  </span>
-                  <p>{item}</p>
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {/* From/Original Version */}
+                                <div className="space-y-3">
+                                  <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
+                                    {type === "modified"
+                                      ? "From (v" +
+                                      fetchedDiffData.v1.contract_version +
+                                      ")"
+                                      : type === "removed"
+                                        ? "Removed From"
+                                        : "Added In"}
+                                  </h6>
+                                  <div className="space-y-2 text-sm">
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-1">
+                                        Name
+                                      </p>
+                                      <p className="font-mono text-primary">
+                                        {entryPoint.name}
+                                      </p>
+                                    </div>
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-1">
+                                        Return Type
+                                      </p>
+                                      <p className="font-mono text-secondary">
+                                        {entryPoint.ret}
+                                      </p>
+                                    </div>
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-1">
+                                        Access
+                                      </p>
+                                      <p className="text-secondary">
+                                        {"Public" in entryPoint.access
+                                          ? "Public"
+                                          : "Groups" in entryPoint.access
+                                            ? `Groups: ${entryPoint.access.Groups.join(", ")}`
+                                            : "Template"}
+                                      </p>
+                                    </div>
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-1">
+                                        Type
+                                      </p>
+                                      <p className="text-secondary">
+                                        {entryPoint.entry_point_type}
+                                      </p>
+                                    </div>
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-2">
+                                        Parameters
+                                      </p>
+                                      {Object.keys(entryPoint.args).length >
+                                        0 ? (
+                                        <div className="space-y-1">
+                                          {Object.entries(entryPoint.args).map(
+                                            ([key, value]) => (
+                                              <div
+                                                key={key}
+                                                className="flex justify-between items-center py-1 px-2 bg-tertiary rounded"
+                                              >
+                                                <span className="font-mono text-xs text-primary">
+                                                  {key}
+                                                </span>
+                                                <span className="font-mono text-xs text-subtle">
+                                                  {JSON.stringify(value)}
+                                                </span>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="text-xs text-muted italic">
+                                          No parameters
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* To Version (for modified) */}
+                                {type === "modified" && entryPointTo && (
+                                  <div className="space-y-3">
+                                    <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
+                                      To (v
+                                      {fetchedDiffData.v2.contract_version})
+                                    </h6>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-1">
+                                          Name
+                                        </p>
+                                        <p className="font-mono text-primary">
+                                          {entryPointTo.name}
+                                        </p>
+                                      </div>
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-1">
+                                          Return Type
+                                        </p>
+                                        <p className="font-mono text-secondary">
+                                          {entryPointTo.ret}
+                                        </p>
+                                      </div>
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-1">
+                                          Access
+                                        </p>
+                                        <p className="text-secondary">
+                                          {"Public" in entryPointTo.access
+                                            ? "Public"
+                                            : "Groups" in entryPointTo.access
+                                              ? `Groups: ${entryPointTo.access.Groups.join(", ")}`
+                                              : "Template"}
+                                        </p>
+                                      </div>
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-1">
+                                          Type
+                                        </p>
+                                        <p className="text-secondary">
+                                          {entryPointTo.entry_point_type}
+                                        </p>
+                                      </div>
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-2">
+                                          Parameters
+                                        </p>
+                                        {Object.keys(entryPointTo.args).length >
+                                          0 ? (
+                                          <div className="space-y-1">
+                                            {Object.entries(
+                                              entryPointTo.args
+                                            ).map(([key, value]) => (
+                                              <div
+                                                key={key}
+                                                className="flex justify-between items-center py-1 px-2 bg-tertiary rounded"
+                                              >
+                                                <span className="font-mono text-xs text-primary">
+                                                  {key}
+                                                </span>
+                                                <span className="font-mono text-xs text-subtle">
+                                                  {JSON.stringify(value)}
+                                                </span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <p className="text-xs text-muted italic">
+                                            No parameters
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Accordion.Panel>
+                        </Accordion.Item>
+                      );
+                    })}
+                  </Accordion.Root>
                 </div>
-              );
-            })}
+              )}
+
+            {/* Named Keys Section */}
+            {fetchedDiffData.named_keys &&
+              fetchedDiffData.named_keys.length > 0 && (
+                <div className="border border-primary rounded-lg bg-card overflow-hidden">
+                  <div className="px-4 py-3 bg-tertiary border-b border-primary">
+                    <h5 className="font-semibold text-primary flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                        />
+                      </svg>
+                      Named Keys Changes
+                      <span className="text-xs text-muted bg-card px-2 py-1 rounded">
+                        {fetchedDiffData.named_keys.length}
+                      </span>
+                    </h5>
+                  </div>
+                  <Accordion.Root className="divide-y divide-primary">
+                    {fetchedDiffData.named_keys.map((diff, idx) => {
+                      const type =
+                        "Added" in diff
+                          ? "added"
+                          : "Removed" in diff
+                            ? "removed"
+                            : "modified";
+                      const keyName =
+                        "Added" in diff
+                          ? diff.Added.key
+                          : "Removed" in diff
+                            ? diff.Removed.key
+                            : diff.Modified.key;
+                      const keyValue: Key =
+                        "Added" in diff
+                          ? diff.Added.value
+                          : "Removed" in diff
+                            ? diff.Removed.value
+                            : diff.Modified.from;
+                      const keyValueTo: Key | null =
+                        "Modified" in diff ? diff.Modified.to : null;
+
+                      return (
+                        <Accordion.Item
+                          key={`nk-${idx}`}
+                          value={`nk-${idx}`}
+                          className="bg-card"
+                        >
+                          <Accordion.Header>
+                            <Accordion.Trigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-tertiary transition-colors group">
+                              <div className="flex items-center gap-3 flex-1">
+                                <svg
+                                  className="w-4 h-4 text-primary transition-transform duration-200 group-data-panel-open:rotate-90 shrink-0"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${type === "added"
+                                    ? "badge-success"
+                                    : type === "removed"
+                                      ? "badge-error"
+                                      : "badge-warning"
+                                    }`}
+                                >
+                                  {type}
+                                </span>
+                                <span className="font-mono text-sm text-primary font-semibold truncate">
+                                  {keyName}
+                                </span>
+                              </div>
+                            </Accordion.Trigger>
+                          </Accordion.Header>
+                          <Accordion.Panel className="px-4 py-3 bg-tertiary">
+                            <div className="space-y-4">
+                              {type === "modified" && keyValueTo && (
+                                <div className="mb-4 p-3 bg-warning-dark border-l-4 border-warning rounded">
+                                  <p className="text-sm text-warning font-medium">
+                                    Modified: Value changed between versions
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {/* From/Original Version */}
+                                <div className="space-y-3">
+                                  <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
+                                    {type === "modified"
+                                      ? "From (v" +
+                                      fetchedDiffData.v1.contract_version +
+                                      ")"
+                                      : type === "removed"
+                                        ? "Removed From"
+                                        : "Added In"}
+                                  </h6>
+                                  <div className="space-y-2 text-sm">
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-1">
+                                        Key Name
+                                      </p>
+                                      <p className="font-mono text-primary">
+                                        {keyName}
+                                      </p>
+                                    </div>
+                                    <div className="bg-card p-3 rounded border border-primary">
+                                      <p className="text-xs text-muted mb-2">
+                                        Value
+                                      </p>
+                                      <div className="bg-tertiary p-2 rounded overflow-x-auto">
+                                        <pre className="font-mono text-xs text-secondary whitespace-pre-wrap break-all">
+                                          {JSON.stringify(keyValue, null, 2)}
+                                        </pre>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* To Version (for modified) */}
+                                {type === "modified" && keyValueTo && (
+                                  <div className="space-y-3">
+                                    <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
+                                      To (v
+                                      {fetchedDiffData.v2.contract_version})
+                                    </h6>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-1">
+                                          Key Name
+                                        </p>
+                                        <p className="font-mono text-primary">
+                                          {keyName}
+                                        </p>
+                                      </div>
+                                      <div className="bg-card p-3 rounded border border-primary">
+                                        <p className="text-xs text-muted mb-2">
+                                          Value
+                                        </p>
+                                        <div className="bg-tertiary p-2 rounded overflow-x-auto">
+                                          <pre className="font-mono text-xs text-secondary whitespace-pre-wrap break-all">
+                                            {JSON.stringify(keyValueTo, null, 2)}
+                                          </pre>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Accordion.Panel>
+                        </Accordion.Item>
+                      );
+                    })}
+                  </Accordion.Root>
+                </div>
+              )}
           </div>
         </>
       )}

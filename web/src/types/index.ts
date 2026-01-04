@@ -78,6 +78,21 @@ export type ContractNamedKeysDiff =
   | { Modified: { key: string; from: Key; to: Key } };
 
 export interface EntryPoint {
+  name: string;
+  args: Parameters;
+  ret: string;
+  access: EntryPointAccess;
+  entry_point_type: EntryPointType;
+}
+
+export type EntryPointAccess =
+  | { Public: {} }
+  | { Groups: string[] }
+  | { Template: {} };
+
+export type EntryPointType = "Caller" | "Called" | "Factory"
+
+export interface Parameters {
   [key: string]: any;
 }
 
