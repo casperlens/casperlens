@@ -43,6 +43,12 @@ export default function ContractPage() {
     router.push(`/contracts/${packageHash}`);
   };
 
+  const formatHash = (hash: string) => {
+    if (!hash) return "";
+    if (hash.length < 12) return hash;
+    return `${hash.slice(0, 6)}...${hash.slice(-6)}`;
+  };
+
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
     if (userId) {
@@ -67,17 +73,19 @@ export default function ContractPage() {
               className="rounded-xl p-6 hover:shadow-md hover:shadow-text-primary transition-all duration-300 flex flex-col h-56 border bg-card border-primary hover:-translate-y-1"
             >
               <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 text-primary">
+                <div className="flex-1 overflow-hidden mr-2">
+                  <h3 className="font-bold text-lg mb-2 text-primary truncate" title={contract.contract_name}>
                     {contract.contract_name}
                   </h3>
-                  <p className="text-xs break-all mb-1 text-subtle">
-                    {contract.package_hash}
+                  <p className="text-xs text-subtle mb-1" title={contract.package_hash}>
+                    {formatHash(contract.package_hash)}
                   </p>
-                  <p className="text-xs text-muted">{contract.owner_id}</p>
+                  <p className="text-xs text-muted" title={contract.owner_id}>
+                    {formatHash(contract.owner_id)}
+                  </p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status ? "badge-locked" : "badge-unlocked"
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${contract.lock_status ? "badge-locked" : "badge-unlocked"
                     }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}

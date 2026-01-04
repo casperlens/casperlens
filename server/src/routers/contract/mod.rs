@@ -5,7 +5,7 @@ use crate::{
     models::{
         api::{
             ApiResponse,
-            contract::{ContractDiffQuery, RegisterContractRequest},
+            contract::{ContractDiffQuery, ContractOverview, RegisterContractRequest},
         },
         schema::contract::{ContractPackageSchema, ContractVersionDiff},
     },
@@ -19,7 +19,8 @@ use crate::{
             },
         },
         database::contract::{
-            get_contract_version, insert_contract_package, insert_contract_package_versions,
+            get_all_contracts, get_contract_version, insert_contract_package,
+            insert_contract_package_versions,
         },
     },
 };
@@ -46,6 +47,43 @@ fn normalize_hash(input: &str) -> String {
         input.to_string()
     } else {
         format!("hash-{}", input)
+    }
+}
+
+#[axum::debug_handler]
+pub async fn get_contracts_overview(
+    state: State<Arc<AppState>>,
+    Path(user_id): Path<Uuid>,
+) -> impl IntoResponse {
+    match get_all_contracts(&state.db, &user_id).await {
+        Ok(contracts) => {
+            let overview: Vec<ContractOverview> = contracts
+                .into_iter()
+                .map(|c| ContractOverview {
+                    package_hash: c.package_hash,
+                    contract_name: c.contract_name,
+                    owner_id: c.owner_id,
+                    network: c.network,
+                    lock_status: c.lock_status,
+                    age: (Utc::now() - c.age).num_days(),
+                })
+                .collect();
+
+            Json(ApiResponse {
+                success: true,
+                message: "Contracts fetched successfully".to_string(),
+                error: None::<String>,
+                data: Some(overview),
+            })
+            .into_response()
+        }
+        Err(e) => Json(ApiResponse {
+            success: false,
+            message: "Failed to fetch contracts".to_string(),
+            error: Some(e.to_string()),
+            data: None::<String>,
+        })
+        .into_response(),
     }
 }
 

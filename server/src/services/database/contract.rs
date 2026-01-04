@@ -1,5 +1,44 @@
 use crate::models::schema::contract::{ContractPackageSchema, ContractVersionSchema};
 use sqlx::{Error, PgPool, query};
+use uuid::Uuid;
+
+pub async fn get_all_contracts(
+    pool: &PgPool,
+    user_id: &Uuid,
+) -> Result<Vec<ContractPackageSchema>, Error> {
+    let rows = query!(
+        r#"
+        SELECT
+            package_hash,
+            user_id,
+            contract_name,
+            owner_id,
+            network,
+            lock_status,
+            age
+        FROM contract_packages
+        WHERE user_id = $1
+        "#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let contracts = rows
+        .into_iter()
+        .map(|r| ContractPackageSchema {
+            package_hash: r.package_hash,
+            user_id: r.user_id,
+            contract_name: r.contract_name,
+            owner_id: r.owner_id,
+            network: r.network,
+            lock_status: r.lock_status,
+            age: r.age,
+        })
+        .collect();
+
+    Ok(contracts)
+}
 
 pub async fn insert_contract_package(
     pool: &PgPool,
