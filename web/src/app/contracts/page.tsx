@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 
 export default function ContractPage() {
   const router = useRouter();
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [contracts, setContracts] = useState<ContractOverview[]>([]);
 
   const fetchContracts = async (user_id: string) => {
@@ -58,20 +57,11 @@ export default function ContractPage() {
           <h1 className="text-2xl font-bold text-gray-300">
             Contract Packages
           </h1>
-          <Button
-            onClick={() => setShowRegisterModal(true)}
-            className="border-primary border px-2 py-1 rounded-xl text-white hover:bg-primary hover:text-primary-darker transition-colors"
-          >
-            Register Contract
-          </Button>
+          <ContractRegisterForm />
         </div>
 
-        {showRegisterModal && (
-          <ContractRegisterForm onClose={() => setShowRegisterModal(false)} />
-        )}
-
         <div className="px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dummyContracts.map((contract) => (
+          {contracts.map((contract) => (
             <div
               key={contract.package_hash}
               className="rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col h-56 border bg-card border-primary"

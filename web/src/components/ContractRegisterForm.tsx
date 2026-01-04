@@ -1,14 +1,29 @@
 "use client";
 
-import { Button } from "@base-ui/react";
-import { useState } from "react";
 import type { ContractRegister, ContractRegisterRes } from "@/types";
+import { Button } from "@base-ui/react";
+import { Combobox } from "@base-ui/react/combobox";
+import { Dialog } from "@base-ui/react/dialog";
+import { Field } from "@base-ui/react/field";
+import { Form } from "@base-ui/react/form";
+import { useState } from "react";
 
-interface ContractRegisterFormProps {
-  onClose: () => void;
+interface NetworkOption {
+  value: "mainnet" | "testnet";
+  label: string;
 }
 
-export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
+const NETWORK_OPTIONS: NetworkOption[] = [
+  { value: "mainnet", label: "Mainnet" },
+  { value: "testnet", label: "Testnet" },
+];
+
+interface ContractRegisterFormProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ContractRegisterForm() {
   const [formData, setFormData] = useState<ContractRegister>({
     package_hash: "",
     package_name: "",
@@ -17,15 +32,31 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    // Clear field error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleNetworkChange = (value: NetworkOption | null) => {
+    if (value) {
+      setFormData((prev) => ({
+        ...prev,
+        network: value.value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,6 +64,7 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
     setIsLoading(true);
     setMessage("");
     setError("");
+    setErrors({});
 
     try {
       const userId = localStorage.getItem("user_id");
@@ -48,16 +80,22 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
 
       // Validate hash format (should be hex only)
       if (!/^[a-fA-F0-9]+$/.test(packageHash)) {
-        throw new Error(
-          "Invalid package hash format. Should only contain hexadecimal characters (0-9, a-f, A-F).",
-        );
+        setErrors({
+          package_hash:
+            "Invalid package hash format. Should only contain hexadecimal characters (0-9, a-f, A-F).",
+        });
+        setIsLoading(false);
+        return;
       }
 
       // Additional check for any dots or special characters
       if (packageHash.includes(".") || packageHash.includes("-")) {
-        throw new Error(
-          "Package hash should not contain dots or dashes. Remove any special characters.",
-        );
+        setErrors({
+          package_hash:
+            "Package hash should not contain dots or dashes. Remove any special characters.",
+        });
+        setIsLoading(false);
+        return;
       }
 
       const payload = {
@@ -84,6 +122,10 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
           package_name: "",
           network: "mainnet",
         });
+        // Close dialog after 2 seconds
+        setTimeout(() => {
+          setMessage("");
+        }, 2000);
       } else {
         // Provide more user-friendly error messages
         let errorMessage = result.error || "Registration failed";
@@ -113,118 +155,185 @@ export function ContractRegisterForm({ onClose }: ContractRegisterFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="max-w-md w-full mx-4 p-6 rounded-xl border bg-[#0e0e0e] border-gray-800">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-300">
-            Register Contract Package
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-300 transition-colors"
-            aria-label="Close modal"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+    <Dialog.Root>
+      <Dialog.Trigger>
+        <Button className="border-primary border px-2 py-1 rounded-xl text-white hover:bg-primary hover:text-primary-darker transition-colors">
+          Register Contract
+        </Button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 bg-black/80 transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg mx-4 p-6 rounded-xl border bg-card border-primary transition-all duration-200 data-starting-style:scale-95 data-starting-style:opacity-0 data-ending-style:scale-95 data-ending-style:opacity-0">
+          <div className="flex justify-between items-center mb-6">
+            <Dialog.Title className="text-xl font-bold text-primary">
+              Register Contract Package
+            </Dialog.Title>
+            <Dialog.Close className="text-muted hover:text-primary transition-colors p-1 rounded hover:bg-tertiary">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </Dialog.Close>
+          </div>
+
+          <Form onSubmit={handleSubmit} errors={errors} className="space-y-4">
+            <Field.Root name="package_hash">
+              <Field.Label className="block text-sm font-medium text-secondary mb-2">
+                Contract Package Hash
+              </Field.Label>
+              <Field.Control
+                render={(props) => (
+                  <input
+                    {...props}
+                    type="text"
+                    value={formData.package_hash}
+                    onChange={handleInputChange}
+                    placeholder="Enter package hash"
+                    required
+                    className="w-full px-3 py-2 bg-tertiary border border-primary rounded-lg text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all"
+                  />
+                )}
               />
-            </svg>
-          </button>
-        </div>
+              <Field.Description className="text-xs text-muted mt-1 px-3">
+                E.g.: hash-abcdef123... or just abcdef123... (hexadecimal only)
+              </Field.Description>
+              <Field.Error
+                match="valueMissing"
+                className="text-xs text-error mt-1"
+              >
+                Package hash is required
+              </Field.Error>
+              <Field.Error match={true} className="text-xs text-error mt-1" />
+            </Field.Root>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="package_hash"
-              className="block text-sm font-medium text-gray-400 mb-2"
+            <Field.Root name="package_name">
+              <Field.Label className="block text-sm font-medium text-secondary mb-2">
+                Contract Package Name
+              </Field.Label>
+              <Field.Control
+                render={(props) => (
+                  <input
+                    {...props}
+                    type="text"
+                    value={formData.package_name}
+                    onChange={handleInputChange}
+                    placeholder="Enter package name"
+                    required
+                    className="w-full px-3 py-2 bg-tertiary border border-primary rounded-lg text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all"
+                  />
+                )}
+              />
+              <Field.Error
+                match="valueMissing"
+                className="text-xs text-error mt-1"
+              >
+                Package name is required
+              </Field.Error>
+            </Field.Root>
+
+            <Field.Root name="network">
+              <Field.Label className="block text-sm font-medium text-secondary mb-2">
+                Network
+              </Field.Label>
+              <Combobox.Root
+                value={
+                  NETWORK_OPTIONS.find(
+                    (opt) => opt.value === formData.network,
+                  ) || NETWORK_OPTIONS[0]
+                }
+                onValueChange={handleNetworkChange}
+                items={NETWORK_OPTIONS}
+                itemToStringLabel={(item) => (item ? item.label : "")}
+              >
+                <Combobox.Trigger className="w-full px-3 py-2 bg-tertiary border border-primary rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all cursor-pointer flex items-center justify-between">
+                  <Combobox.Value>
+                    {(value) =>
+                      value ? (value as NetworkOption).label : "Select network"
+                    }
+                  </Combobox.Value>
+                  <Combobox.Icon className="ml-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </Combobox.Icon>
+                </Combobox.Trigger>
+                <Combobox.Portal>
+                  <Combobox.Positioner className="z-50">
+                    <Combobox.Popup className="min-w-md bg-tertiary border border-primary rounded-lg shadow-lg overflow-hidden transition-all duration-150 data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95">
+                      <Combobox.List className="py-1 max-h-60 overflow-auto">
+                        {(item: NetworkOption) => (
+                          <Combobox.Item
+                            key={item.value}
+                            value={item}
+                            className="px-3 py-2 cursor-pointer hover:bg-primary-dark transition-colors flex items-center justify-between data-highlighted:bg-primary-dark"
+                          >
+                            <span className="text-primary">{item.label}</span>
+                            <Combobox.ItemIndicator>
+                              <svg
+                                className="w-4 h-4 text-success"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </Combobox.ItemIndicator>
+                          </Combobox.Item>
+                        )}
+                      </Combobox.List>
+                    </Combobox.Popup>
+                  </Combobox.Positioner>
+                </Combobox.Portal>
+              </Combobox.Root>
+            </Field.Root>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2 px-4 bg-primary text-gray-900 rounded-lg hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
             >
-              Contract Package Hash
-            </label>
-            <input
-              type="text"
-              id="package_hash"
-              name="package_hash"
-              value={formData.package_hash}
-              onChange={handleInputChange}
-              placeholder="Enter package hash (hex format or hash-<hash>)"
-              required
-              className="w-full px-3 py-2 bg-black border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Enter either: hash-abcdef123... or just abcdef123... (hexadecimal
-              only)
-            </p>
-          </div>
+              {isLoading ? "Registering..." : "Register Contract"}
+            </Button>
+          </Form>
 
-          <div>
-            <label
-              htmlFor="package_name"
-              className="block text-sm font-medium text-gray-400 mb-2"
-            >
-              Contract Package Name
-            </label>
-            <input
-              type="text"
-              id="package_name"
-              name="package_name"
-              value={formData.package_name}
-              onChange={handleInputChange}
-              placeholder="Enter package name"
-              required
-              className="w-full px-3 py-2 bg-black border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+          {message && (
+            <div className="mt-4 p-3 badge-success border border-success rounded-lg">
+              <p className="text-sm">{message}</p>
+            </div>
+          )}
 
-          <div>
-            <label
-              htmlFor="network"
-              className="block text-sm font-medium text-gray-400 mb-2"
-            >
-              Network
-            </label>
-            <select
-              id="network"
-              name="network"
-              value={formData.network}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-black border border-gray-700 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="mainnet">Mainnet</option>
-              <option value="testnet">Testnet</option>
-            </select>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? "Registering..." : "Register Contract"}
-          </Button>
-        </form>
-
-        {message && (
-          <div className="mt-4 p-3 bg-green-900 border border-green-700 rounded-lg">
-            <p className="text-green-400 text-sm">{message}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 p-3 bg-red-900 border border-red-700 rounded-lg">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-      </div>
-    </div>
+          {error && (
+            <div className="mt-4 p-3 badge-error border border-error rounded-lg">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
