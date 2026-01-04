@@ -10,9 +10,7 @@ pub struct RegisterContractRequest {
 #[derive(Debug, Deserialize)]
 pub struct ContractDiffQuery {
     pub v1: u32,
-    pub v1_maj: u32,
     pub v2: u32,
-    pub v2_maj: u32,
 }
 
 #[derive(Debug, Serialize)]

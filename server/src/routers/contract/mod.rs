@@ -16,10 +16,7 @@ use crate::{
         contract::{
             diff::get_contract_version_diff,
             metadata::get_contract_package_metadata,
-            package::{
-                get_contract_package_details, get_contract_version_details,
-                get_contract_versions_details,
-            },
+            package::{get_contract_package_details, get_contract_versions_details},
         },
         database::contract::{
             get_all_contracts, get_contract_package, get_contract_version, get_contract_versions,
@@ -186,16 +183,13 @@ pub async fn get_contract_diff(
 ) -> impl IntoResponse {
     let package_hash = strip_hash_prefix(&package_hash);
 
-    let v1_db = match get_contract_version(&state.db, &package_hash, query.v1, query.v1_maj).await {
+    let v1_db = match get_contract_version(&state.db, &package_hash, query.v1).await {
         Ok(Some(v)) => v,
         Ok(None) => {
             return Json(ApiResponse {
                 success: false,
                 message: "Version 1 not found".to_string(),
-                error: Some(format!(
-                    "Contract version {} (maj {}) not found",
-                    query.v1, query.v1_maj
-                )),
+                error: Some(format!("Contract version {} not found", query.v1)),
                 data: None::<String>,
             })
             .into_response();
@@ -211,16 +205,13 @@ pub async fn get_contract_diff(
         }
     };
 
-    let v2_db = match get_contract_version(&state.db, &package_hash, query.v2, query.v2_maj).await {
+    let v2_db = match get_contract_version(&state.db, &package_hash, query.v2).await {
         Ok(Some(v)) => v,
         Ok(None) => {
             return Json(ApiResponse {
                 success: false,
                 message: "Version 2 not found".to_string(),
-                error: Some(format!(
-                    "Contract version {} (maj {}) not found",
-                    query.v2, query.v2_maj
-                )),
+                error: Some(format!("Contract version {} not found", query.v2)),
                 data: None::<String>,
             })
             .into_response();
@@ -236,79 +227,7 @@ pub async fn get_contract_diff(
         }
     };
 
-    let network_row = sqlx::query!(
-        "SELECT network FROM contract_packages WHERE package_hash = $1",
-        package_hash
-    )
-    .fetch_optional(&state.db)
-    .await;
-
-    let network = match network_row {
-        Ok(Some(row)) => row.network,
-        Ok(None) => {
-            return Json(ApiResponse {
-                success: false,
-                message: "Contract package not found".to_string(),
-                error: Some("Package not found in database".to_string()),
-                data: None::<String>,
-            })
-            .into_response();
-        }
-        Err(e) => {
-            return Json(ApiResponse {
-                success: false,
-                message: "Database error".to_string(),
-                error: Some(e.to_string()),
-                data: None::<String>,
-            })
-            .into_response();
-        }
-    };
-
-    let node_address = if network == "testnet" {
-        state.config.testnet_node_address.clone()
-    } else {
-        state.config.mainnet_node_address.clone()
-    };
-
-    let v1_contract =
-        match get_contract_version_details(node_address.clone(), v1_db.contract_hash.clone()).await
-        {
-            Ok(c) => c,
-            Err(e) => {
-                return Json(ApiResponse {
-                    success: false,
-                    message: "Failed to fetch version 1 details from chain".to_string(),
-                    error: Some(e),
-                    data: None::<String>,
-                })
-                .into_response();
-            }
-        };
-
-    let v2_contract =
-        match get_contract_version_details(node_address, v2_db.contract_hash.clone()).await {
-            Ok(c) => c,
-            Err(e) => {
-                return Json(ApiResponse {
-                    success: false,
-                    message: "Failed to fetch version 2 details from chain".to_string(),
-                    error: Some(e),
-                    data: None::<String>,
-                })
-                .into_response();
-            }
-        };
-
-    let mut v1 = v1_db;
-    v1.entry_points = v1_contract.entry_points().clone().take_entry_points();
-    v1.named_keys = v1_contract.named_keys().clone();
-
-    let mut v2 = v2_db;
-    v2.entry_points = v2_contract.entry_points().clone().take_entry_points();
-    v2.named_keys = v2_contract.named_keys().clone();
-
-    match get_contract_version_diff(v1, v2).await {
+    match get_contract_version_diff(v1_db, v2_db).await {
         Ok(diff) => Json(ApiResponse {
             success: true,
             message: "Diff calculated successfully".to_string(),
@@ -329,7 +248,7 @@ pub async fn get_contract_diff(
 #[axum::debug_handler]
 pub async fn get_diff_analysis(
     state: State<Arc<AppState>>,
-    Path((_user_id, _package_hash)): Path<(Uuid, String)>,
+    Path(_user_id): Path<Uuid>,
     Json(payload): Json<ContractVersionDiff>,
 ) -> impl IntoResponse {
     let hf_token = state.config.huggingface_token.clone();
@@ -379,7 +298,7 @@ pub async fn get_diff_analysis(
         }
         let response_body = response_body.unwrap();
         if let Some(choice) = response_body.get("choices") {
-            if let Some(idx) = choice.get("0") {
+            if let Some(idx) = choice.get(0) {
                 if let Some(message) = idx.get("message") {
                     if let Some(content) = message.get("content") {
                         return Json(ApiResponse {

@@ -96,7 +96,7 @@ export default function ContractDiff({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ data: versions }),
+          body: JSON.stringify(diffData),
         },
       );
 

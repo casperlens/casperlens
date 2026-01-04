@@ -99,14 +99,10 @@ pub struct ContractVersionMeta {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ContractVersionDiff {
-    #[serde(flatten)]
     pub v1: ContractVersionDiffMeta,
-    #[serde(flatten)]
     pub v2: ContractVersionDiffMeta,
     pub contract_package_hash: String,
-    #[serde(flatten)]
     pub entry_points: Vec<ContractEntryPointDiff>,
-    #[serde(flatten)]
     pub named_keys: Vec<ContractNamedKeysDiff>,
 }
 

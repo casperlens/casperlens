@@ -113,7 +113,6 @@ pub async fn get_contract_version(
     pool: &PgPool,
     contract_package_hash: &str,
     version: u32,
-    major_protocol_version: u32,
 ) -> Result<Option<ContractVersionSchema>, Error> {
     let row = query!(
         r#"
@@ -130,11 +129,10 @@ pub async fn get_contract_version(
             disabled, 
             age
         FROM contract_versions
-        WHERE contract_package_hash = $1 AND version = $2 AND major_protocol_version = $3
+        WHERE contract_package_hash = $1 AND version = $2
         "#,
         contract_package_hash,
-        version as i32,
-        major_protocol_version as i32
+        version as i32
     )
     .fetch_optional(pool)
     .await?;
