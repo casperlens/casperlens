@@ -81,7 +81,7 @@ export default function ContractDiff({
       if (!json.data) {
         throw new Error("No diff data found");
       }
-      fetchAnalysis();
+      fetchAnalysis(json.data);
       return json.data;
     } catch (error) {
       console.error("Error fetching diff data:", error);
@@ -90,7 +90,7 @@ export default function ContractDiff({
     }
   };
 
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = async (diffData: ContractVersionDiff) => {
     try {
       const res = await fetch(
         `/api/v1/u/${user_id}/contract-package/diff/analyze`,
@@ -99,7 +99,7 @@ export default function ContractDiff({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ data: versions }),
+          body: JSON.stringify(diffData),
         },
       );
 
@@ -150,7 +150,7 @@ export default function ContractDiff({
     event: AccordionRootChangeEventDetails,
   ) => {
     if (!analysis && fetchedDiffData) {
-      fetchAnalysis();
+      fetchAnalysis(fetchedDiffData);
     }
   };
 

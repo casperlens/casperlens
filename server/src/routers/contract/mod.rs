@@ -297,18 +297,20 @@ pub async fn get_diff_analysis(
             .into_response();
         }
         let response_body = response_body.unwrap();
-        if let Some(choice) = response_body.get("choices")
-            && let Some(idx) = choice.get("0")
-            && let Some(message) = idx.get("message")
-            && let Some(content) = message.get("content")
-        {
-            return Json(ApiResponse {
-                success: true,
-                message: "Successfully retrieved response".to_string(),
-                error: None::<String>,
-                data: Some(content.as_str().to_owned()),
-            })
-            .into_response();
+        if let Some(choice) = response_body.get("choices") {
+            if let Some(idx) = choice.get(0) {
+                if let Some(message) = idx.get("message") {
+                    if let Some(content) = message.get("content") {
+                        return Json(ApiResponse {
+                            success: true,
+                            message: "Successfully retrieved response".to_string(),
+                            error: None::<String>,
+                            data: Some(content.as_str().to_owned()),
+                        })
+                        .into_response();
+                    }
+                }
+            }
         }
         return Json(ApiResponse {
             success: false,
