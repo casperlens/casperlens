@@ -86,9 +86,8 @@ export default function ContractPage() {
                   </p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${
-                    contract.lock_status ? "badge-locked" : "badge-unlocked"
-                  }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ${contract.lock_status ? "badge-locked" : "badge-unlocked"
+                    }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>

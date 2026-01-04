@@ -6,6 +6,7 @@ import { Combobox } from "@base-ui/react/combobox";
 import { Dialog } from "@base-ui/react/dialog";
 import { Field } from "@base-ui/react/field";
 import { Form } from "@base-ui/react/form";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface NetworkOption {
@@ -18,12 +19,8 @@ const NETWORK_OPTIONS: NetworkOption[] = [
   { value: "testnet", label: "Testnet" },
 ];
 
-interface ContractRegisterFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
 export function ContractRegisterForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState<ContractRegister>({
     package_hash: "",
     package_name: "",
@@ -33,6 +30,7 @@ export function ContractRegisterForm() {
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [open, setOpen] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -126,6 +124,8 @@ export function ContractRegisterForm() {
         setTimeout(() => {
           setMessage("");
         }, 2000);
+        setOpen(false);
+        router.push(`/contracts/${formData.package_hash}`);
       } else {
         // Provide more user-friendly error messages
         let errorMessage = result.error || "Registration failed";
@@ -155,7 +155,7 @@ export function ContractRegisterForm() {
   };
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger
         type="button"
         className="border-primary border px-2 py-1 rounded-xl text-white hover:bg-primary hover:text-primary-darker transition-colors"
