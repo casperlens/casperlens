@@ -31,7 +31,7 @@ pub async fn get_contract_package_metadata(
     if resp.status().is_success() {
         let json: APIMetaResponse<ContractPackageMeta> =
             resp.json().await.map_err(|e| e.to_string())?;
-        return Ok(json.data);
+        Ok(json.data)
     } else {
         let status = resp.status();
         Err(format!(
@@ -64,12 +64,11 @@ pub async fn get_contract_version_metadata(
     if resp.status().is_success() {
         let json: APIMetaResponse<ContractVersionMeta> =
             resp.json().await.map_err(|e| e.to_string())?;
-        return Ok(json.data);
+        Ok(json.data)
     } else {
         if reqwest::StatusCode::NOT_FOUND == resp.status() {
             return Err(format!("Contract {raw_hash} not found"));
         }
-
-        return Err(format!("Error while fetching contract {raw_hash}"));
+        Err(format!("Error while fetching contract {raw_hash}"))
     }
 }

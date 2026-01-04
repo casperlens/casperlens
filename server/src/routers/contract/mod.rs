@@ -22,6 +22,7 @@ use crate::{
             get_all_contracts, get_contract_package, get_contract_version, get_contract_versions,
             insert_contract_package, insert_contract_package_versions,
         },
+        tasks::contract::write_contract_diff_versions_to_chain,
     },
 };
 use axum::{
@@ -31,11 +32,10 @@ use axum::{
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-fn resolve_network(network: &String) -> Option<String> {
+fn resolve_network(network: &str) -> Option<String> {
     const MAINNET: &str = "mainnet";
     const TESTNET: &str = "testnet";
-    let net: &str = network.as_str();
-    match net {
+    match network {
         MAINNET => Some("mainnet".to_string()),
         TESTNET => Some("testnet".to_string()),
         _ => None,
@@ -297,6 +297,20 @@ pub async fn get_diff_analysis(
             .into_response();
         }
         let response_body = response_body.unwrap();
+        if let Some(choice) = response_body.get("choices")
+            && let Some(idx) = choice.get("0")
+            && let Some(message) = idx.get("message")
+            && let Some(content) = message.get("content")
+        {
+            return Json(ApiResponse {
+                success: true,
+                message: "Successfully retrieved response".to_string(),
+                error: None::<String>,
+                data: Some(content.as_str().to_owned()),
+            })
+            .into_response();
+        }
+        Json(ApiResponse {
         if let Some(choice) = response_body.get("choices") {
             if let Some(idx) = choice.get(0) {
                 if let Some(message) = idx.get("message") {
@@ -318,9 +332,9 @@ pub async fn get_diff_analysis(
             error: Some("Failed to get data from response by parsing".to_string()),
             data: None::<String>,
         })
-        .into_response();
+        .into_response()
     } else {
-        return Json(ApiResponse {
+        Json(ApiResponse {
             success: false,
             message: "Request failed".to_string(),
             error: Some(format!(
@@ -329,7 +343,7 @@ pub async fn get_diff_analysis(
             )),
             data: None::<String>,
         })
-        .into_response();
+        .into_response()
     }
 }
 
@@ -343,12 +357,11 @@ pub async fn register_contract(
     match resolve_network(&payload.network.to_string()) {
         Some(network) => {
             let package_hash_norm = normalize_hash(&payload.package_hash);
-            let node_address: String;
-            if network == "testnet" {
-                node_address = state.config.testnet_node_address.clone();
+            let node_address: String = if network == "testnet" {
+                state.config.testnet_node_address.clone()
             } else {
-                node_address = state.config.mainnet_node_address.clone();
-            }
+                state.config.mainnet_node_address.clone()
+            };
             let contract_package_details =
                 get_contract_package_details(node_address.clone(), package_hash_norm.clone()).await;
 
@@ -365,11 +378,8 @@ pub async fn register_contract(
                     if let Err(e) = package_meta {
                         return Json(ApiResponse {
                             success: false,
-
                             message: "Failed to register contract".to_string(),
-
                             error: Some(format!("Failed to get contract package metadata: {}", e)),
-
                             data: None::<String>,
                         })
                         .into_response();
@@ -427,8 +437,11 @@ pub async fn register_contract(
 
                     match insert_contract_package(&state.db, &contract_package).await {
                         Ok(()) => {
-                            if let Err(e) =
-                                insert_contract_package_versions(&state.db, versions_details).await
+                            if let Err(e) = insert_contract_package_versions(
+                                &state.db,
+                                versions_details.clone(),
+                            )
+                            .await
                             {
                                 return Json(ApiResponse {
                                     success: false,
@@ -440,14 +453,24 @@ pub async fn register_contract(
                                 .into_response();
                             }
 
-                            return Json(ApiResponse {
+                            tokio::spawn(async move {
+                                let _ = write_contract_diff_versions_to_chain(
+                                    &package_hash,
+                                    versions_details,
+                                    &network,
+                                    &node_address,
+                                )
+                                .await;
+                            });
+
+                            Json(ApiResponse {
                                 success: true,
                                 message: "Contract and its versions registered successfully"
                                     .to_string(),
                                 error: None::<String>,
                                 data: None::<String>,
                             })
-                            .into_response();
+                            .into_response()
                         }
 
                         Err(e) => {

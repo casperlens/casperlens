@@ -52,8 +52,8 @@ pub async fn get_contract_package_details(
 }
 
 pub async fn get_contract_versions_details(
-    node_address: &String,
-    network: &String,
+    node_address: &str,
+    network: &str,
     user_id: Uuid,
     versions: &ContractVersions,
 ) -> Result<Vec<ContractVersionSchema>, String> {

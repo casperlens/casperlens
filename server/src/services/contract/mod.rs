@@ -5,7 +5,7 @@ pub(crate) mod diff;
 pub(crate) mod metadata;
 pub(crate) mod package;
 
-pub async fn get_state_root_hash(node_address: &String) -> Result<String, String> {
+pub async fn get_state_root_hash(node_address: &str) -> Result<String, String> {
     let rpc_id = JsonRpcId::from(rand::rng().random::<i64>());
 
     let state_root = casper_client::get_state_root_hash(
