@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 export default function ContractDetailsPage() {
   const router = useRouter();
   const [userId, setUserId] = useState("");
-  const [contractPkgId, setContractPkgId] = useState("");
   const [contractData, setContractData] = useState<ContractData | null>(null);
 
   useEffect(() => {
@@ -21,22 +20,19 @@ export default function ContractDetailsPage() {
     } else {
       setUserId(storedUserId);
       const pkgId = window.location.pathname.split("/")[2];
-      setContractPkgId(pkgId);
-      fetchContractData();
+      console.log("Fetched package ID from URL:", pkgId);
+      fetchContractData(pkgId);
     }
   }, []);
 
-  const fetchContractData = async () => {
+  const fetchContractData = async (pkgId: string) => {
     try {
-      const res = await fetch(
-        `/api/v1/u/${userId}/contract-package/${contractPkgId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const res = await fetch(`/api/v1/u/${userId}/contract-package/${pkgId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
