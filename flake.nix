@@ -14,6 +14,7 @@
         devShells.default = pkgs.mkShell {
           NIX_SHELL_NAME="CASPER";
           RUST_SRC_PATH="${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+          OPENSSL_NO_VENDOR="1";
          	packages = with unstb; [
          	  # Rust
        	    rustc
@@ -21,6 +22,9 @@
        	    clippy
        	    rustfmt
        	    rust-analyzer
+       	    rustup
+       	    pkg-config
+            openssl.dev
 
        	    # Javascript
        	    bun
