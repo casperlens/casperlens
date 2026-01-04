@@ -15,7 +15,7 @@ bun install
 2. Copy the example environment file and modify it as needed:
 
 ```bash
-cp .env.sample .env
+echo NEXT_PUBLIC_API_URL=http://localhost:8000 >> .env
 ```
 
 3. Then run the development server:

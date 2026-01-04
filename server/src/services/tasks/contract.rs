@@ -32,11 +32,7 @@ pub async fn write_contract_diff_versions_to_chain(
                 let rpc_id_str = &rpc_id.to_string();
                 let entry_point = "store_diff";
                 let secret_key_path = "./secret-key.pem";
-                let chain_name = match network {
-                    "testnet" => "casper-test",
-                    "mainnet" => "casper",
-                    _ => "",
-                };
+                let chain_name = "casper-test";
                 let ttl = "30min";
                 let current_time = Utc::now().to_rfc3339();
                 let builder_params = TransactionBuilderParams::Package {
@@ -82,7 +78,7 @@ pub async fn write_contract_diff_versions_to_chain(
                 };
                 let result = casper_client::cli::put_transaction(
                     rpc_id_str,
-                    rpc_address,
+                    "https://node.testnet.casper.network/rpc",
                     0,
                     builder_params,
                     transaction_params,
