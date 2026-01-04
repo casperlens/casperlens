@@ -49,7 +49,7 @@ export default function ContractDiff({
   const fetchDiffs = async (v1: number, v2: number) => {
     try {
       const res = await fetch(
-        `/api/v1/u/${user_id}/contract-package/diff?v1=${v1}&v2=${v2}`,
+        `/api/v1/u/${user_id}/contract-package/${package_hash}/diff?v1=${v1}&v2=${v2}`,
         {
           method: "GET",
           headers: {
@@ -80,7 +80,7 @@ export default function ContractDiff({
   const fetchAnalysis = async (diffData: ContractVersionDiff) => {
     try {
       const res = await fetch(
-        `/api/v1/u/${user_id}/contract-package/${package_hash}/diff/analyze`,
+        `/api/v1/u/${user_id}/contract-package/diff/analyze`,
         {
           method: "POST",
           headers: {
