@@ -7,7 +7,7 @@ use crate::{
             ApiResponse,
             contract::{ContractDiffQuery, RegisterContractRequest},
         },
-        schema::contract::ContractPackageSchema,
+        schema::contract::{ContractPackageSchema, ContractVersionDiff},
     },
     services::{
         contract::{
@@ -142,7 +142,6 @@ pub async fn get_contract_diff(
         state.config.mainnet_node_address.clone()
     };
 
-    // Now fetch details from chain for v1
     let v1_contract =
         match get_contract_version_details(node_address.clone(), v1_db.contract_hash.clone()).await
         {
@@ -158,7 +157,6 @@ pub async fn get_contract_diff(
             }
         };
 
-    // Fetch details from chain for v2
     let v2_contract =
         match get_contract_version_details(node_address, v2_db.contract_hash.clone()).await {
             Ok(c) => c,
@@ -199,27 +197,111 @@ pub async fn get_contract_diff(
     }
 }
 
+
+#[axum::debug_handler]
+pub async fn get_diff_analysis(
+    state: State<Arc<AppState>>,
+    Path((_user_id, _package_hash)): Path<(Uuid, String)>,
+    Json(payload): Json<ContractVersionDiff>,
+) -> impl IntoResponse {
+    let hf_token = state.config.huggingface_token.clone();
+    let content = format!(
+        "There are 2 smart contract deployment for same package on Casper Network. This is the diff between them:\n{:#?}\nwhere v1 contains metadata on previous version and v2 on new version, entry points and named keys show the changes from v1 to v2. Explain what it means for smart contract and how it affects development and security",
+        payload
+    );
+    let body = serde_json::json!({
+        "messages": [
+            {
+                "role": "user",
+                "content": content
+            }
+        ],
+        "model": "meta-llama/Llama-3.1-8B-Instruct:cerebras",
+        "stream": false
+    });
+    let client = reqwest::Client::new();
+
+    let response = client
+        .post("https://router.huggingface.co/v1/chat/completions")
+        .header("Authorization", format!("Bearer {}", hf_token))
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .send()
+        .await;
+    if let Err(err) = &response {
+        return Json(ApiResponse {
+            success: false,
+            message: "Failed to get completions for diff".to_string(),
+            error: Some(format!("Failed to get completions for diff: {}", err)),
+            data: None::<String>,
+        })
+        .into_response();
+    }
+    let response = response.unwrap();
+    if response.status().is_success() {
+        let response_body = response.json::<serde_json::Value>().await;
+        if let Err(e) = response_body {
+            return Json(ApiResponse {
+                success: false,
+                message: "Failed to parse response to JSON".to_string(),
+                error: Some(format!("Failed to parse response to JSON: {}", e)),
+                data: None::<String>,
+            })
+            .into_response();
+        }
+        let response_body = response_body.unwrap();
+        if let Some(choice) = response_body.get("choices") {
+            if let Some(idx) = choice.get("0") {
+                if let Some(message) = idx.get("message") {
+                    if let Some(content) = message.get("content") {
+                        return Json(ApiResponse {
+                            success: true,
+                            message: "Successfully retrieved response".to_string(),
+                            error: None::<String>,
+                            data: Some(content.as_str().to_owned()),
+                        })
+                        .into_response();
+                    }
+                }
+            }
+        }
+        return Json(ApiResponse {
+            success: false,
+            message: "Failed to get data from response by parsing".to_string(),
+            error: Some("Failed to get data from response by parsing".to_string()),
+            data: None::<String>,
+        })
+        .into_response();
+    } else {
+        return Json(ApiResponse {
+            success: false,
+            message: "Request failed".to_string(),
+            error: Some(format!(
+                "Request failed with status code: {}",
+                response.status()
+            )),
+            data: None::<String>,
+        })
+        .into_response();
+    }
+}
+
 #[axum::debug_handler]
 
 pub async fn register_contract(
     state: State<Arc<AppState>>,
-
     Path(user_id): Path<Uuid>,
-
     Json(payload): Json<RegisterContractRequest>,
 ) -> impl IntoResponse {
     match resolve_network(&payload.network.to_string()) {
         Some(network) => {
             let package_hash_norm = normalize_hash(&payload.package_hash);
-
             let node_address: String;
-
             if network == "testnet" {
                 node_address = state.config.testnet_node_address.clone();
             } else {
                 node_address = state.config.mainnet_node_address.clone();
             }
-
             let contract_package_details =
                 get_contract_package_details(node_address.clone(), package_hash_norm.clone()).await;
 
@@ -247,27 +329,18 @@ pub async fn register_contract(
                     }
 
                     let package_meta = package_meta.unwrap();
-
                     let package_hash = package_hash.clone();
-
                     let user_id = user_id.clone();
-
                     let contract_name = payload.package_name.clone();
-
                     let owner_id = package_meta.owner_public_key.clone();
-
                     let lock_status = data.is_locked();
-
                     let age = package_meta.timestamp.clone().parse::<DateTime<Utc>>();
 
                     if let Err(e) = age {
                         return Json(ApiResponse {
                             success: false,
-
                             message: "Failed to register contract".to_string(),
-
                             error: Some(format!("Failed to parse date: {}", e)),
-
                             data: None::<String>,
                         })
                         .into_response();
@@ -298,11 +371,8 @@ pub async fn register_contract(
                         Err(e) => {
                             return Json(ApiResponse {
                                 success: false,
-
                                 message: "Failed to fetch contract versions".to_string(),
-
                                 error: Some(e),
-
                                 data: None::<String>,
                             })
                             .into_response();

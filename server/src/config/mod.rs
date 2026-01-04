@@ -12,6 +12,7 @@ pub struct Config {
     pub(crate) web_url: String,
     pub(crate) mainnet_node_address: String,
     pub(crate) testnet_node_address: String,
+    pub(crate) huggingface_token: String
 }
 
 pub fn load_config() -> Config {
@@ -25,6 +26,7 @@ pub fn load_config() -> Config {
             .unwrap_or("https://node.mainnet.casper.network".to_string()),
         testnet_node_address: env::var("TESTNET_NODE_ADDRESS")
             .unwrap_or("https://node.testnet.casper.network".to_string()),
+        huggingface_token: env::var("HUGGINGFACE_TOKEN").expect("HUGGINGFACE_TOKEN is not set")
     };
     config
 }
