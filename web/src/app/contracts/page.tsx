@@ -1,6 +1,7 @@
 "use client";
 
 import { ContractRegisterForm } from "@/components/ContractRegisterForm";
+import { dummyContracts } from "@/store/dummy";
 import type { ContractOverview, ResponseData } from "@/types";
 import { Button } from "@base-ui/react";
 import { useRouter } from "next/navigation";
@@ -10,57 +11,6 @@ export default function ContractPage() {
   const router = useRouter();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [contracts, setContracts] = useState<ContractOverview[]>([]);
-
-  const dummyContracts: ContractOverview[] = [
-    {
-      package_hash: "hash1",
-      contract_name: "Contract One",
-      owner_id: "owner1",
-      network: "mainnet",
-      lock_status: false,
-      age: 120,
-    },
-    {
-      package_hash: "hash2",
-      contract_name: "Contract Two",
-      owner_id: "owner2",
-      network: "testnet",
-      lock_status: true,
-      age: 60,
-    },
-    {
-      package_hash: "hash3",
-      contract_name: "Contract Three",
-      owner_id: "owner3",
-      network: "mainnet",
-      lock_status: false,
-      age: 30,
-    },
-    {
-      package_hash: "hash4",
-      contract_name: "Contract Four",
-      owner_id: "owner4",
-      network: "mainnet",
-      lock_status: true,
-      age: 45,
-    },
-    {
-      package_hash: "hash5",
-      contract_name: "Contract Five",
-      owner_id: "owner5",
-      network: "testnet",
-      lock_status: false,
-      age: 90,
-    },
-    {
-      package_hash: "hash6",
-      contract_name: "Contract Six",
-      owner_id: "owner6",
-      network: "mainnet",
-      lock_status: false,
-      age: 15,
-    },
-  ];
 
   const fetchContracts = async (user_id: string) => {
     try {
