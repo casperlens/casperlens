@@ -1,7 +1,6 @@
 use casper_types::{Key, NamedKeys, contracts::EntryPoint};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,8 +30,8 @@ impl ContractPackageSchema {
             contract_name,
             owner_id,
             network,
-            lock_status: lock_status,
-            age: age,
+            lock_status,
+            age,
         }
     }
 }
@@ -65,7 +64,7 @@ pub struct APIMetaResponse<T> {
     pub data: T,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ContractVersionSchema {
     pub protocol_major_version: u32,
     pub contract_version: u32,
@@ -100,15 +99,11 @@ pub struct ContractVersionMeta {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ContractVersionDiff {
-    #[serde(flatten)]
     pub v1: ContractVersionDiffMeta,
-    #[serde(flatten)]
     pub v2: ContractVersionDiffMeta,
     pub contract_package_hash: String,
-    #[serde(flatten)]
     pub entry_points: Vec<ContractEntryPointDiff>,
-    #[serde(flatten)]
-    pub named_keys: Vec<ContractNamedKeysDiff>
+    pub named_keys: Vec<ContractNamedKeysDiff>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -117,9 +112,8 @@ pub struct ContractVersionDiffMeta {
     pub timestamp: DateTime<Utc>,
     pub contract_version: u32,
     pub is_disabled: bool,
-    pub wasm_hash: String
+    pub wasm_hash: String,
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ContractEntryPointDiff {
@@ -127,7 +121,6 @@ pub enum ContractEntryPointDiff {
     Removed(EntryPoint),
     Modified { from: EntryPoint, to: EntryPoint },
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ContractNamedKeysDiff {

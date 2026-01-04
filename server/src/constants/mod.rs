@@ -1,2 +1,2 @@
-pub(crate) mod network;
 pub(crate) mod headers;
+pub(crate) mod network;

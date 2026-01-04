@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            contract_hash,\n            contract_package_hash,\n            contract_wasm_hash,\n            user_id,\n            version,\n            major_protocol_version, \n            protocol_version, \n            entry_points,\n            named_keys,\n            disabled, \n            age\n        FROM contract_versions\n        WHERE contract_package_hash = $1\n        ORDER BY version DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "contract_hash",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "contract_package_hash",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "contract_wasm_hash",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "version",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "major_protocol_version",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "protocol_version",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "entry_points",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "named_keys",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 9,
+        "name": "disabled",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 10,
+        "name": "age",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fec15d4b5fa5771e7ab11d3874dbe21a2e1596935c8e2b3a0063e64654c94bb0"
+}

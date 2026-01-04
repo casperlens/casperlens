@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE contract_packages (
     package_hash TEXT PRIMARY KEY,
     user_id UUID UNIQUE NOT NULL,
