@@ -12,9 +12,39 @@ However, lack of lifecycle tracking and robust observability of the smart contra
 
 # Solution
 
-CasperLens simplifies the process of smart contract lifecycle and changelog management.
+## Smart contract tracking
+
+CasperLens simplifies the process of smart contract lifecycle and changelog management by tracking smart contracts deployed on Mainnet and Testnet, allowing an inventory of contracts to be tracked, that is either developed or used.
+
+This helps in checking the evolution of smart contracts over a period of time, improving accountability and transparency, as intended in Web3 ecosystem.
+
+This provides a centralized mechanism for retrieval of smart contract information such as entry points, parameters, named keys, timestamps, owner, lock status, etc. by integrating data from Casper's RPC nodes and Network Explorer's API endpoints.
+
+## Version difference analysis
+
+CasperLens allows checking for changes between 2 different versions of a smart contract package, aiding in understanding and analysis of differences between versions. This simplifies integration in development teams and improves the process of security auditing for compliance.
+
+The metadata of the versions are stored in off-chain PostgreSQL database for efficient querying and the diff is stored in the Casper Network for transparency.
+
+## Intelligent Analysis
+
+CasperLens provided AI-assisted analysis for differences between 2 versions by providing insights on the changelog and its implications for development teams and security. This improves secure SDLC and efficiency in teams working on smart contract development and integration.
+
+# Architecture
+
+# Technologies Used
+
+1. **Frontend:** The web interface for CasperLens is written with Next.js and Base UI for an interactive experience.
+2. **Backend:** The server is written using Axum, allowing interaction with the Casper Network using Casper Client. The data is written to off-chain PostgreSQL database for smart contract package and version and the version diff data is written to the Casper Network.
+3. **Smart Contract Framework:** Observability contract for writing diff is written to Casper network's chain using Odra Framework, allowing easier iterations.
 
 # Development
+
+Check out our [contributing guide](/CONTRIBUTING.md) for getting started.
+
+# Future Enhancements
+
+1. Support tokens and integrate observability metrics from Casper Cloud.
 
 # License
 
