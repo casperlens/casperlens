@@ -50,7 +50,7 @@ CasperLens provided AI-assisted analysis for differences between 2 versions by p
 
 # Screenshots
 
-| Dashboard | Contract List |
+| Dashboard | Contract Registration |
 | :---: | :---: |
 | ![Dashboard](./assets/Screenshot%20From%202026-01-05%2000-02-34.png) | ![Contract List](./assets/Screenshot%20From%202026-01-05%2000-03-00.png) |
 
