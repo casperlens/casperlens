@@ -64,7 +64,7 @@ export default function ContractPage() {
           {contracts.map((contract) => (
             <div
               key={contract.package_hash}
-              className="rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col h-56 border bg-card border-primary"
+              className="rounded-xl p-6 hover:shadow-md hover:shadow-text-primary transition-all duration-300 flex flex-col h-56 border bg-card border-primary hover:-translate-y-1"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
@@ -77,9 +77,8 @@ export default function ContractPage() {
                   <p className="text-xs text-muted">{contract.owner_id}</p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${
-                    contract.lock_status ? "badge-locked" : "badge-unlocked"
-                  }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status ? "badge-locked" : "badge-unlocked"
+                    }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
