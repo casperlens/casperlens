@@ -1,5 +1,9 @@
 # CasperLens
 
+- [Demo](https://casperlens.vercel.app)
+- [Demo video]()
+- [Testnet Deployment](https://testnet.cspr.live/contract-package/c3933fe16448d6072ef107c288271a95bc93ab4273f88e5598edca922fdd3cd6)
+
 CasperLens is an observability and smart contract lifecycle management platform for the Casper Network.
 
 # Why?
@@ -32,11 +36,15 @@ CasperLens provided AI-assisted analysis for differences between 2 versions by p
 
 # Architecture
 
+![CasperLens architecture](./assets/architecture.png)
+
 # Technologies Used
 
 1. **Frontend:** The web interface for CasperLens is written with Next.js and Base UI for an interactive experience.
 2. **Backend:** The server is written using Axum, allowing interaction with the Casper Network using Casper Client. The data is written to off-chain PostgreSQL database for smart contract package and version and the version diff data is written to the Casper Network.
 3. **Smart Contract Framework:** Observability contract for writing diff is written to Casper network's chain using Odra Framework, allowing easier iterations.
+
+# Screenshots
 
 # Development
 
@@ -45,6 +53,8 @@ Check out our [contributing guide](/CONTRIBUTING.md) for getting started.
 # Future Enhancements
 
 1. Support tokens and integrate observability metrics from Casper Cloud.
+2. Integrating support for other networks to enable interoperability.
+3. Support user account and tracking contracts under a user account using Casper Wallet.
 
 # License
 
