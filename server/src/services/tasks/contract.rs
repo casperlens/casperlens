@@ -15,7 +15,8 @@ pub async fn write_contract_diff_versions_to_chain(
     package_hash: &str,
     contract_versions: Vec<ContractVersionSchema>,
     network: &str,
-    rpc_address: &String,
+    observability_package_hash: &str,
+    rpc_address: &str,
 ) -> Result<(), String> {
     if contract_versions.len() == 1 {
         return Ok(());
@@ -26,7 +27,7 @@ pub async fn write_contract_diff_versions_to_chain(
             Some(val) => {
                 let diff = get_contract_version_diff(val.clone(), contract_version.clone()).await?;
                 let diff_str =
-                    serde_json::to_string(&diff).map_err(|e| "Failed to serialize diff")?;
+                    serde_json::to_string(&diff).map_err(|_e| "Failed to serialize diff")?;
                 let rpc_id = JsonRpcId::from(rand::rng().random::<i64>());
                 let rpc_id_str = &rpc_id.to_string();
                 let entry_point = "store_diff";
@@ -39,7 +40,8 @@ pub async fn write_contract_diff_versions_to_chain(
                 let ttl = "30min";
                 let current_time = Utc::now().to_rfc3339();
                 let builder_params = TransactionBuilderParams::Package {
-                    package_hash: PackageHash::from_formatted_str(package_hash).unwrap(),
+                    package_hash: PackageHash::from_formatted_str(observability_package_hash)
+                        .unwrap(),
                     maybe_entity_version: None,
                     entry_point,
                     runtime: casper_types::TransactionRuntimeParams::VmCasperV2 {

@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            package_hash,\n            user_id,\n            contract_name,\n            owner_id,\n            network,\n            lock_status,\n            age\n        FROM contract_packages\n        WHERE user_id = $1 AND package_hash = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "package_hash",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "contract_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "owner_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "network",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "lock_status",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "age",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "084fe817015443e588da28b1aa7cceeb5f71806fca0127c5fb22fd930ab1968a"
+}

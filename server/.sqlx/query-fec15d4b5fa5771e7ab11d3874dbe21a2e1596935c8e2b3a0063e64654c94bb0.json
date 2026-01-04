@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT \n            contract_hash, \n            contract_package_hash, \n            contract_wasm_hash, \n            user_id, \n            version, \n            major_protocol_version, \n            protocol_version, \n            entry_points,\n            named_keys,\n            disabled, \n            age\n        FROM contract_versions\n        WHERE contract_package_hash = $1 AND version = $2 AND major_protocol_version = $3\n        ",
+  "query": "\n        SELECT\n            contract_hash,\n            contract_package_hash,\n            contract_wasm_hash,\n            user_id,\n            version,\n            major_protocol_version, \n            protocol_version, \n            entry_points,\n            named_keys,\n            disabled, \n            age\n        FROM contract_versions\n        WHERE contract_package_hash = $1\n        ORDER BY version DESC\n        ",
   "describe": {
     "columns": [
       {
@@ -61,9 +61,7 @@
     ],
     "parameters": {
       "Left": [
-        "Text",
-        "Int4",
-        "Int4"
+        "Text"
       ]
     },
     "nullable": [
@@ -80,5 +78,5 @@
       false
     ]
   },
-  "hash": "fe00a91b4899f247ef7c6272c30322c8460599eaf02c28d3797c3470655bb5c9"
+  "hash": "fec15d4b5fa5771e7ab11d3874dbe21a2e1596935c8e2b3a0063e64654c94bb0"
 }

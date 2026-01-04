@@ -310,29 +310,13 @@ pub async fn get_diff_analysis(
             })
             .into_response();
         }
-        Json(ApiResponse {
-        if let Some(choice) = response_body.get("choices") {
-            if let Some(idx) = choice.get(0) {
-                if let Some(message) = idx.get("message") {
-                    if let Some(content) = message.get("content") {
-                        return Json(ApiResponse {
-                            success: true,
-                            message: "Successfully retrieved response".to_string(),
-                            error: None::<String>,
-                            data: Some(content.as_str().to_owned()),
-                        })
-                        .into_response();
-                    }
-                }
-            }
-        }
         return Json(ApiResponse {
             success: false,
             message: "Failed to get data from response by parsing".to_string(),
             error: Some("Failed to get data from response by parsing".to_string()),
             data: None::<String>,
         })
-        .into_response()
+        .into_response();
     } else {
         Json(ApiResponse {
             success: false,
@@ -458,6 +442,7 @@ pub async fn register_contract(
                                     &package_hash,
                                     versions_details,
                                     &network,
+                                    &state.config.observability_package_hash,
                                     &node_address,
                                 )
                                 .await;
