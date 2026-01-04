@@ -14,6 +14,8 @@ import {
   Combobox,
 } from "@base-ui/react";
 import { useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface VersionOption {
   value: number;
@@ -360,7 +362,11 @@ export default function ContractDiff({
                 <Accordion.Panel className="px-4 py-3 text-sm text-secondary border-t border-primary bg-card">
                   {analysis ? (
                     <div className="prose prose-sm max-w-none">
-                      <p className="whitespace-pre-wrap">{analysis}</p>
+                      <p className="whitespace-pre-wrap">
+                        <Markdown remarkPlugins={[remarkGfm]}>
+                          {analysis}
+                        </Markdown>
+                      </p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-muted">
@@ -457,12 +463,13 @@ export default function ContractDiff({
                                   />
                                 </svg>
                                 <span
-                                  className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${type === "added"
-                                    ? "badge-success"
-                                    : type === "removed"
-                                      ? "badge-error"
-                                      : "badge-warning"
-                                    }`}
+                                  className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${
+                                    type === "added"
+                                      ? "badge-success"
+                                      : type === "removed"
+                                        ? "badge-error"
+                                        : "badge-warning"
+                                  }`}
                                 >
                                   {type}
                                 </span>
@@ -500,23 +507,26 @@ export default function ContractDiff({
                                     {(() => {
                                       const access = entryPoint.access;
 
-                                      if (typeof access === 'string') {
+                                      if (typeof access === "string") {
                                         return access;
                                       }
 
-                                      if (typeof access === 'object' && access !== null) {
-                                        if ('Public' in access) {
-                                          return 'Public';
+                                      if (
+                                        typeof access === "object" &&
+                                        access !== null
+                                      ) {
+                                        if ("Public" in access) {
+                                          return "Public";
                                         }
-                                        if ('Groups' in access) {
+                                        if ("Groups" in access) {
                                           return `Groups: ${access.Groups.join(", ")}`;
                                         }
-                                        if ('Template' in access) {
-                                          return 'Template';
+                                        if ("Template" in access) {
+                                          return "Template";
                                         }
                                       }
 
-                                      return 'Unknown';
+                                      return "Unknown";
                                     })()}
                                   </p>
                                 </div>
@@ -544,7 +554,7 @@ export default function ContractDiff({
                                               {JSON.stringify(value, null, 2)}
                                             </pre>
                                           </div>
-                                        )
+                                        ),
                                       )}
                                     </div>
                                   ) : (
@@ -553,7 +563,6 @@ export default function ContractDiff({
                                     </p>
                                   )}
                                 </div>
-
                               </div>
                               {/* To Version (for modified) */}
                               {type === "modified" && entryPointTo && (
@@ -587,23 +596,26 @@ export default function ContractDiff({
                                         {(() => {
                                           const access = entryPointTo.access;
 
-                                          if (typeof access === 'string') {
+                                          if (typeof access === "string") {
                                             return access;
                                           }
 
-                                          if (typeof access === 'object' && access !== null) {
-                                            if ('Public' in access) {
-                                              return 'Public';
+                                          if (
+                                            typeof access === "object" &&
+                                            access !== null
+                                          ) {
+                                            if ("Public" in access) {
+                                              return "Public";
                                             }
-                                            if ('Groups' in access) {
+                                            if ("Groups" in access) {
                                               return `Groups: ${access.Groups.join(", ")}`;
                                             }
-                                            if ('Template' in access) {
-                                              return 'Template';
+                                            if ("Template" in access) {
+                                              return "Template";
                                             }
                                           }
 
-                                          return 'Unknown';
+                                          return "Unknown";
                                         })()}
                                       </p>
                                     </div>
@@ -619,10 +631,11 @@ export default function ContractDiff({
                                       <p className="text-xs text-muted mb-2">
                                         Parameters
                                       </p>
-                                      {Object.keys(entryPointTo.args).length > 0 ? (
+                                      {Object.keys(entryPointTo.args).length >
+                                      0 ? (
                                         <div className="space-y-1">
                                           {Object.entries(
-                                            entryPointTo.args
+                                            entryPointTo.args,
                                           ).map(([key, value]) => (
                                             <div
                                               key={key}
@@ -723,12 +736,13 @@ export default function ContractDiff({
                                   />
                                 </svg>
                                 <span
-                                  className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${type === "added"
-                                    ? "badge-success"
-                                    : type === "removed"
-                                      ? "badge-error"
-                                      : "badge-warning"
-                                    }`}
+                                  className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${
+                                    type === "added"
+                                      ? "badge-success"
+                                      : type === "removed"
+                                        ? "badge-error"
+                                        : "badge-warning"
+                                  }`}
                                 >
                                   {type}
                                 </span>
@@ -746,8 +760,8 @@ export default function ContractDiff({
                                   <h6 className="text-xs font-semibold text-muted uppercase tracking-wider">
                                     {type === "modified"
                                       ? "From (v" +
-                                      fetchedDiffData.v1.contract_version +
-                                      ")"
+                                        fetchedDiffData.v1.contract_version +
+                                        ")"
                                       : type === "removed"
                                         ? "Removed From"
                                         : "Added In"}
@@ -796,7 +810,11 @@ export default function ContractDiff({
                                         </p>
                                         <div className="bg-tertiary p-2 rounded overflow-x-auto">
                                           <pre className="font-mono text-xs text-secondary whitespace-pre-wrap break-all">
-                                            {JSON.stringify(keyValueTo, null, 2)}
+                                            {JSON.stringify(
+                                              keyValueTo,
+                                              null,
+                                              2,
+                                            )}
                                           </pre>
                                         </div>
                                       </div>
