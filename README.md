@@ -1,7 +1,11 @@
+<div align="center">
+  <img src="./assets/casperlens.png" alt="CasperLens Logo" width="200">
+</div>
+
 # CasperLens
 
 - [Demo](https://casperlens.vercel.app)
-- [Demo video]()
+- [Demo video](https://youtu.be/qEgnvWekA40)
 - [Testnet Deployment](https://testnet.cspr.live/contract-package/c3933fe16448d6072ef107c288271a95bc93ab4273f88e5598edca922fdd3cd6)
 
 CasperLens is an observability and smart contract lifecycle management platform for the Casper Network.
@@ -45,6 +49,18 @@ CasperLens provided AI-assisted analysis for differences between 2 versions by p
 3. **Smart Contract Framework:** Observability contract for writing diff is written to Casper network's chain using Odra Framework, allowing easier iterations.
 
 # Screenshots
+
+| Dashboard | Contract List |
+| :---: | :---: |
+| ![Dashboard](./assets/Screenshot%20From%202026-01-05%2000-02-34.png) | ![Contract List](./assets/Screenshot%20From%202026-01-05%2000-03-00.png) |
+
+| Contract Details | Version Diff |
+| :---: | :---: |
+| ![Contract Details](./assets/Screenshot%20From%202026-01-05%2000-04-23.png) | ![Version Diff](./assets/Screenshot%20From%202026-01-05%2000-04-38.png) |
+
+| Analysis | |
+| :---: | :---: |
+| ![Analysis](./assets/Screenshot%20From%202026-01-05%2000-04-49.png) | |
 
 # Development
 
