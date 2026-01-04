@@ -17,10 +17,10 @@
 
 # Getting Started
 
-1. Clone repository
+1. Fork the repository and clone:
 
 ```sh
-git clone https://github.com/casperlens/casperlens
+git clone https://github.com/<username>/casperlens
 ```
 
 2. Set up environment variables for frontend and backend from `.env.sample`
@@ -28,3 +28,4 @@ git clone https://github.com/casperlens/casperlens
 4. Run the backend using `cargo run`
 5. Install dependencies for frontend using `bun install`
 6. Run frontend using `bun run dev` in `frontend/`
+7. Make your changes and create a PR to `dev` branch
