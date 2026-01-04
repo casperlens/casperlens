@@ -1,15 +1,17 @@
 "use client";
 
+import { ContractRegisterForm } from "@/components/ContractRegisterForm";
+import type { ContractOverview, ResponseData } from "@/types";
 import { Button } from "@base-ui/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ContractRegisterForm } from "@/components/ContractRegisterForm";
-import type { ContractOverview } from "@/types";
+import { useEffect, useState } from "react";
 
 export default function ContractPage() {
   const router = useRouter();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const contractList: ContractOverview[] = [
+  const [contracts, setContracts] = useState<ContractOverview[]>([]);
+
+  const dummyContracts: ContractOverview[] = [
     {
       package_hash: "hash1",
       contract_name: "Contract One",
@@ -60,21 +62,55 @@ export default function ContractPage() {
     },
   ];
 
+  const fetchContracts = async (user_id: string) => {
+    try {
+      const res = await fetch(`/api/v1/u/${user_id}/contract/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch contracts');
+      }
+
+      const json: ResponseData<ContractOverview[]> = await res.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      if (!json.data) {
+        throw new Error('No contract data found');
+      }
+      setContracts(json.data);
+    } catch (error) {
+      console.error('Error fetching contracts:', error);
+      setContracts(dummyContracts);
+    }
+  }
+
   const handleClick = (packageHash: string) => {
     console.log(`View details for contract with package hash: ${packageHash}`);
     router.push(`/contracts/${packageHash}`);
   };
 
+  useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      fetchContracts(userId);
+    }
+  }, []);
+
   return (
-    <div className="px-6 py-12 bg-app">
-      <div className="mx-auto">
-        <div className="mb-8 flex justify-between items-center">
+    <div className="py-12 bg-app max-w-7xl mx-auto min-h-screen border-x border-gray-800">
+      <div className="">
+        <div className="px-6 py-4 mb-8 flex justify-between items-center border-b border-primary">
           <h1 className="text-2xl font-bold text-gray-300">
             Contract Packages
           </h1>
           <Button
             onClick={() => setShowRegisterModal(true)}
-            className="bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            className="border-primary border px-2 py-1 rounded-xl text-white hover:bg-primary hover:text-primary-darker transition-colors"
           >
             Register Contract
           </Button>
@@ -84,11 +120,11 @@ export default function ContractPage() {
           <ContractRegisterForm onClose={() => setShowRegisterModal(false)} />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {contractList.map((contract) => (
+        <div className="px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {dummyContracts.map((contract) => (
             <div
               key={contract.package_hash}
-              className="min-w-md rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col h-56 border bg-card border-primary"
+              className="rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col h-56 border bg-card border-primary"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
@@ -101,9 +137,8 @@ export default function ContractPage() {
                   <p className="text-xs text-muted">{contract.owner_id}</p>
                 </div>
                 <span
-                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${
-                    contract.lock_status ? "badge-locked" : "badge-unlocked"
-                  }`}
+                  className={`inline-block px-2 py-1 rounded-full font-medium text-xs whitespace-nowrap ml-2 ${contract.lock_status ? "badge-locked" : "badge-unlocked"
+                    }`}
                 >
                   {contract.lock_status ? "Locked" : "Unlocked"}
                 </span>
@@ -116,7 +151,7 @@ export default function ContractPage() {
                   >
                     {contract.network}
                   </span>
-                  <span className="text-muted">{contract.age}d</span>
+                  <span className="text-muted px-2 py-1">{contract.age}d</span>
                 </div>
                 <Button
                   className="text-xs border rounded-lg px-2 py-1 text-white hover:bg-gray-700 transition-colors cursor-pointer"
