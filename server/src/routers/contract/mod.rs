@@ -439,16 +439,14 @@ pub async fn register_contract(
                                 .into_response();
                             }
 
-                            tokio::spawn(async move {
-                                let _ = write_contract_diff_versions_to_chain(
-                                    &package_hash,
-                                    versions_details,
-                                    &network,
-                                    &state.config.observability_package_hash,
-                                    &node_address,
-                                )
-                                .await;
-                            });
+                            let _ = write_contract_diff_versions_to_chain(
+                                &package_hash,
+                                versions_details,
+                                &network,
+                                &state.config.observability_package_hash,
+                                &node_address,
+                            )
+                            .await;
 
                             Json(ApiResponse {
                                 success: true,
