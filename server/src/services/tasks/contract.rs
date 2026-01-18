@@ -98,7 +98,7 @@ pub async fn write_contract_diff_versions_to_chain(
             session_entry_point: Some(entry_point),
             pricing_mode: "classic",
             standard_payment: "true",
-            payment_amount: "2500000000",
+            payment_amount: "50000000000",
             transferred_value: "0",
 
             gas_price_tolerance: "1",

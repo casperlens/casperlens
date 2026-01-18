@@ -7,17 +7,17 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-odra = { version = "2.4.0", features = [], default-features = false }
+odra = { version = "2.4.0", default-features = true }
 
 [dev-dependencies]
-odra-test = { version = "2.4.0", features = [], default-features = false }
+odra-test = { version = "2.4.0", default-features = true }
 
 [build-dependencies]
-odra-build = { version = "2.4.0", features = [], default-features = false }
+odra-build = { version = "2.4.0", default-features = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-odra-build = { version = "2.4.0", features = [], default-features = false }
-odra-cli = { version = "2.4.0", features = [], default-features = false }
+odra-build = { version = "2.4.0", default-features = true }
+odra-cli = { version = "2.4.0", default-features = true }
 
 [[bin]]
 name = "casperlens_contract_cli"

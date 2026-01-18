@@ -3,7 +3,7 @@ use odra::casper_types::Key;
 
 #[odra::module]
 pub struct Observability {
-    diffs: Mapping<String, ContractVersionDiff>,
+    diffs: Mapping<String, String>, // Changed from ContractVersionDiff to String
     latest_version: Var<String>,
     owner: Var<Address>,
 }
@@ -56,7 +56,7 @@ impl Observability {
         self.owner.set(self.env().caller());
     }
 
-    pub fn store_diff(&mut self, version_id: String, diff: ContractVersionDiff) {
+    pub fn store_diff(&mut self, version_id: String, diff: String) { // Changed input type to String
         // Access Control
         if self.env().caller() != self.owner.get().unwrap() {
             self.env().revert(Error::NotAuthorized);
@@ -71,7 +71,7 @@ impl Observability {
         self.latest_version.set(version_id);
     }
 
-    pub fn get_diff(&self, version_id: String) -> Option<ContractVersionDiff> {
+    pub fn get_diff(&self, version_id: String) -> Option<String> { // Changed return type to Option<String>
         self.diffs.get(&version_id)
     }
 
