@@ -48,7 +48,7 @@ pub async fn insert_contract_package(
         r#"
         INSERT INTO contract_packages (package_hash, user_id, contract_name, owner_id, network, lock_status, age)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
-        ON CONFLICT (package_hash) DO NOTHING
+        ON CONFLICT (package_hash, user_id) DO NOTHING
         "#,
         contract_package.package_hash,
         contract_package.user_id,
@@ -88,7 +88,7 @@ pub async fn insert_contract_package_versions(
                 disabled, 
                 age
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-            ON CONFLICT (contract_package_hash, version) DO NOTHING
+            ON CONFLICT (contract_package_hash, version, user_id) DO NOTHING
             "#,
             contract_version.contract_hash,
             contract_version.contract_package_hash,
@@ -113,6 +113,7 @@ pub async fn get_contract_version(
     pool: &PgPool,
     contract_package_hash: &str,
     version: u32,
+    user_id: &Uuid,
 ) -> Result<Option<ContractVersionSchema>, Error> {
     let row = query!(
         r#"
@@ -129,10 +130,11 @@ pub async fn get_contract_version(
             disabled, 
             age
         FROM contract_versions
-        WHERE contract_package_hash = $1 AND version = $2
+        WHERE contract_package_hash = $1 AND version = $2 AND user_id = $3
         "#,
         contract_package_hash,
-        version as i32
+        version as i32,
+        user_id
     )
     .fetch_optional(pool)
     .await?;
@@ -208,6 +210,7 @@ pub async fn get_contract_package(
 pub async fn get_contract_versions(
     pool: &PgPool,
     contract_package_hash: &str,
+    user_id: &Uuid,
 ) -> Result<Vec<ContractVersionSchema>, Error> {
     let rows = query!(
         r#"
@@ -224,10 +227,11 @@ pub async fn get_contract_versions(
             disabled, 
             age
         FROM contract_versions
-        WHERE contract_package_hash = $1
+        WHERE contract_package_hash = $1 AND user_id = $2
         ORDER BY version DESC
         "#,
-        contract_package_hash
+        contract_package_hash,
+        user_id
     )
     .fetch_all(pool)
     .await?;

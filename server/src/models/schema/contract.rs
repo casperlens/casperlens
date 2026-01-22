@@ -97,7 +97,7 @@ pub struct ContractVersionMeta {
     pub contract_package: Option<serde_json::Value>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ContractVersionDiff {
     pub v1: ContractVersionDiffMeta,
     pub v2: ContractVersionDiffMeta,
@@ -106,7 +106,7 @@ pub struct ContractVersionDiff {
     pub named_keys: Vec<ContractNamedKeysDiff>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ContractVersionDiffMeta {
     pub contract_hash: String,
     pub timestamp: DateTime<Utc>,

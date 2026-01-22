@@ -2,29 +2,18 @@
 
 import type { ContractRegister, ContractRegisterRes } from "@/types";
 import { Button } from "@base-ui/react";
-import { Combobox } from "@base-ui/react/combobox";
 import { Dialog } from "@base-ui/react/dialog";
 import { Field } from "@base-ui/react/field";
 import { Form } from "@base-ui/react/form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-interface NetworkOption {
-  value: "mainnet" | "testnet";
-  label: string;
-}
-
-const NETWORK_OPTIONS: NetworkOption[] = [
-  { value: "mainnet", label: "Mainnet" },
-  { value: "testnet", label: "Testnet" },
-];
-
 export function ContractRegisterForm() {
   const router = useRouter();
   const [formData, setFormData] = useState<ContractRegister>({
     package_hash: "",
     package_name: "",
-    network: "mainnet",
+    network: "testnet",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>("");
@@ -45,15 +34,6 @@ export function ContractRegisterForm() {
         delete newErrors[name];
         return newErrors;
       });
-    }
-  };
-
-  const handleNetworkChange = (value: NetworkOption | null) => {
-    if (value) {
-      setFormData((prev) => ({
-        ...prev,
-        network: value.value,
-      }));
     }
   };
 
@@ -99,7 +79,7 @@ export function ContractRegisterForm() {
       const payload = {
         package_hash: packageHash,
         package_name: formData.package_name,
-        network: formData.network,
+        network: "testnet",
       };
 
       const response = await fetch(`/api/v1/u/${userId}/contract/register`, {
@@ -118,7 +98,7 @@ export function ContractRegisterForm() {
         setFormData({
           package_hash: "",
           package_name: "",
-          network: "mainnet",
+          network: "testnet",
         });
         // Close dialog after 2 seconds
         setTimeout(() => {
@@ -205,7 +185,7 @@ export function ContractRegisterForm() {
                   />
                 )}
               />
-              <Field.Description className="text-xs text-muted mt-1 px-3">
+              <Field.Description className="text-xs text-muted mt-1 px-1">
                 E.g.: hash-abcdef123... or just abcdef123... (hexadecimal only)
               </Field.Description>
               <Field.Error
@@ -242,77 +222,11 @@ export function ContractRegisterForm() {
               </Field.Error>
             </Field.Root>
 
-            <Field.Root name="network">
-              <Field.Label className="block text-sm font-medium text-secondary mb-2">
-                Network
-              </Field.Label>
-              <Combobox.Root
-                value={
-                  NETWORK_OPTIONS.find(
-                    (opt) => opt.value === formData.network,
-                  ) || NETWORK_OPTIONS[0]
-                }
-                onValueChange={handleNetworkChange}
-                items={NETWORK_OPTIONS}
-                itemToStringLabel={(item) => (item ? item.label : "")}
-              >
-                <Combobox.Trigger className="w-full px-3 py-2 bg-tertiary border border-primary rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-transparent transition-all cursor-pointer flex items-center justify-between">
-                  <Combobox.Value>
-                    {(value) =>
-                      value ? (value as NetworkOption).label : "Select network"
-                    }
-                  </Combobox.Value>
-                  <Combobox.Icon className="ml-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </Combobox.Icon>
-                </Combobox.Trigger>
-                <Combobox.Portal>
-                  <Combobox.Positioner className="z-50">
-                    <Combobox.Popup className="min-w-md bg-tertiary border border-primary rounded-lg shadow-lg overflow-hidden transition-all duration-150 data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95">
-                      <Combobox.List className="py-1 max-h-60 overflow-auto">
-                        {(item: NetworkOption) => (
-                          <Combobox.Item
-                            key={item.value}
-                            value={item}
-                            className="px-3 py-2 cursor-pointer hover:bg-primary-dark transition-colors flex items-center justify-between data-highlighted:bg-primary-dark"
-                          >
-                            <span className="text-primary">{item.label}</span>
-                            <Combobox.ItemIndicator>
-                              <svg
-                                className="w-4 h-4 text-success"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            </Combobox.ItemIndicator>
-                          </Combobox.Item>
-                        )}
-                      </Combobox.List>
-                    </Combobox.Popup>
-                  </Combobox.Positioner>
-                </Combobox.Portal>
-              </Combobox.Root>
-            </Field.Root>
-
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <p className="text-sm text-blue-400">
+                <strong>Note:</strong> By default, testnet is used. Please ensure you enter the correct contract package hash for the testnet network.
+              </p>
+            </div>
             <Button
               type="submit"
               disabled={isLoading}

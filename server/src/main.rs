@@ -26,7 +26,10 @@ async fn main() -> io::Result<()> {
         .init();
     dotenv().ok();
     let pool = create_db_pool().await;
-    _MIGRATOR.run(&pool).await.expect("Failed to run migrations");
+    _MIGRATOR
+        .run(&pool)
+        .await
+        .expect("Failed to run migrations");
     let app = create_router(Arc::new(AppState {
         db: pool.clone(),
         config: config::load_config(),
