@@ -62,11 +62,8 @@ impl Observability {
             self.env().revert(Error::NotAuthorized);
         }
 
-        // Append-only check
-        if self.diffs.get(&version_id).is_some() {
-            self.env().revert(Error::VersionAlreadyExists);
-        }
-
+        // Removed Append-only check to allow overwriting (Upsert behavior)
+        
         self.diffs.set(&version_id, diff);
         self.latest_version.set(version_id);
     }
