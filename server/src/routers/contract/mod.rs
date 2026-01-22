@@ -14,7 +14,7 @@ use crate::{
     },
     services::{
         contract::{
-            diff::get_contract_version_diff,
+            diff::{fetch_contract_diff_from_chain, get_contract_version_diff},
             metadata::get_contract_package_metadata,
             package::{get_contract_package_details, get_contract_versions_details},
         },
@@ -22,7 +22,7 @@ use crate::{
             get_all_contracts, get_contract_package, get_contract_version, get_contract_versions,
             insert_contract_package, insert_contract_package_versions,
         },
-        tasks::contract::write_contract_diff_versions_to_chain,
+        tasks::contract::{write_contract_diff_to_chain, write_contract_diff_versions_to_chain},
     },
 };
 use axum::{
@@ -66,7 +66,7 @@ pub async fn get_contract_details(
     let package_hash = strip_hash_prefix(&package_hash);
 
     match get_contract_package(&state.db, &user_id, &package_hash).await {
-        Ok(Some(pkg)) => match get_contract_versions(&state.db, &package_hash).await {
+        Ok(Some(pkg)) => match get_contract_versions(&state.db, &package_hash, &user_id).await {
             Ok(versions) => {
                 let versions_data: Vec<ContractVersionData> = versions
                     .into_iter()
@@ -178,12 +178,12 @@ pub async fn get_contracts_overview(
 #[axum::debug_handler]
 pub async fn get_contract_diff(
     state: State<Arc<AppState>>,
-    Path((_user_id, package_hash)): Path<(Uuid, String)>,
+    Path((user_id, package_hash)): Path<(Uuid, String)>,
     Query(query): Query<ContractDiffQuery>,
 ) -> impl IntoResponse {
     let package_hash = strip_hash_prefix(&package_hash);
 
-    let v1_db = match get_contract_version(&state.db, &package_hash, query.v1).await {
+    let v1_db = match get_contract_version(&state.db, &package_hash, query.v1, &user_id).await {
         Ok(Some(v)) => v,
         Ok(None) => {
             return Json(ApiResponse {
@@ -205,7 +205,7 @@ pub async fn get_contract_diff(
         }
     };
 
-    let v2_db = match get_contract_version(&state.db, &package_hash, query.v2).await {
+    let v2_db = match get_contract_version(&state.db, &package_hash, query.v2, &user_id).await {
         Ok(Some(v)) => v,
         Ok(None) => {
             return Json(ApiResponse {
@@ -227,14 +227,83 @@ pub async fn get_contract_diff(
         }
     };
 
-    match get_contract_version_diff(v1_db, v2_db).await {
-        Ok(diff) => Json(ApiResponse {
-            success: true,
-            message: "Diff calculated successfully".to_string(),
-            error: None::<String>,
-            data: Some(diff),
-        })
-        .into_response(),
+    // Try to fetch from chain first
+    let contract_package = get_contract_package(&state.db, &user_id, &package_hash).await;
+    let mut resolved_node_address = state.config.mainnet_node_address.clone();
+    let mut resolved_network = "mainnet".to_string();
+
+    if let Ok(Some(pkg)) = contract_package {
+        resolved_network = pkg.network.clone();
+        resolved_node_address = if pkg.network == "testnet" {
+            state.config.testnet_node_address.clone()
+        } else {
+            state.config.mainnet_node_address.clone()
+        };
+
+        if let Ok(Some(diff)) = fetch_contract_diff_from_chain(
+            &v1_db,
+            &v2_db,
+            &package_hash,
+            &state.config.observability_package_hash,
+            &resolved_node_address,
+        )
+        .await
+        {
+            return Json(ApiResponse {
+                success: true,
+                message: "Diff fetched from chain successfully".to_string(),
+                error: None::<String>,
+                data: Some(diff),
+            })
+            .into_response();
+        }
+    }
+
+    match get_contract_version_diff(v1_db.clone(), v2_db.clone()).await {
+        Ok(diff) => {
+            // Spawn background task to store the calculated diff
+            let observability_package_hash = state.config.observability_package_hash.clone();
+            let package_hash_clone = package_hash.clone();
+            let v1_clone = v1_db.clone();
+            let v2_clone = v2_db.clone();
+            let diff_clone = diff.clone();
+
+            tokio::spawn(async move {
+                match write_contract_diff_to_chain(
+                    &package_hash_clone,
+                    &v1_clone,
+                    &v2_clone,
+                    &diff_clone,
+                    &resolved_network,
+                    &observability_package_hash,
+                    &resolved_node_address,
+                )
+                .await
+                {
+                    Ok(_) => log::info!(
+                        "Successfully stored diff for {} v{} -> v{}",
+                        package_hash_clone,
+                        v1_clone.contract_version,
+                        v2_clone.contract_version
+                    ),
+                    Err(e) => log::error!(
+                        "Failed to store diff for {} v{} -> v{}: {}",
+                        package_hash_clone,
+                        v1_clone.contract_version,
+                        v2_clone.contract_version,
+                        e
+                    ),
+                }
+            });
+
+            Json(ApiResponse {
+                success: true,
+                message: "Diff calculated successfully".to_string(),
+                error: None::<String>,
+                data: Some(diff),
+            })
+            .into_response()
+        }
         Err(e) => Json(ApiResponse {
             success: false,
             message: "Failed to calculate diff".to_string(),

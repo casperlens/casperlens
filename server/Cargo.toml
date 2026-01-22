@@ -2,6 +2,7 @@
 documentation = "https://docs.rs/crate/casperlens-server/latest"
 name = "casperlens-server"
 version = "0.1.1"
+default-run = "casperlens-server"
 authors = [
   "Keerthana Rajesh Kumar <grittypuffy@riseup.net>",
   "Shalini S <s.j.shalini2005@gmail.com>",
