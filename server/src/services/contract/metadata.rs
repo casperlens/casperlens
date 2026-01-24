@@ -29,8 +29,12 @@ pub async fn get_contract_package_metadata(
     let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
 
     if resp.status().is_success() {
+        let json_data = resp
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| e.to_string())?;
         let json: APIMetaResponse<ContractPackageMeta> =
-            resp.json().await.map_err(|e| e.to_string())?;
+            serde_json::from_value(json_data).map_err(|e| e.to_string())?;
         Ok(json.data)
     } else {
         let status = resp.status();
@@ -60,10 +64,15 @@ pub async fn get_contract_version_metadata(
     let client = reqwest::Client::new();
 
     let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
-
     if resp.status().is_success() {
+        let json_data = resp
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| e.to_string())?;
+        log::info!("{:#?}", json_data);
         let json: APIMetaResponse<ContractVersionMeta> =
-            resp.json().await.map_err(|e| e.to_string())?;
+            serde_json::from_value(json_data).map_err(|e| e.to_string())?;
+        log::info!("{:#?}", json);
         Ok(json.data)
     } else {
         if reqwest::StatusCode::NOT_FOUND == resp.status() {

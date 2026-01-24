@@ -427,7 +427,7 @@ pub async fn register_contract(
                     if let Some(stripped) = package_hash.strip_prefix("hash-") {
                         package_hash = stripped.to_string();
                     }
-
+                    tracing::info!("Getting metadata for contract package: {}", package_hash);
                     let package_meta = get_contract_package_metadata(&network, &package_hash).await;
 
                     if let Err(e) = package_meta {
