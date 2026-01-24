@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
 import { AppSidebar } from "@/components/elements/sidebar";
 import { ThemeProvider } from "@/components/provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
+import type { Metadata } from "next";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 
 const font = Roboto({
@@ -30,6 +31,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SidebarProvider>
             <AppSidebar />
+            <Toaster />
             <main className="min-h-screen bg-background w-full">
               {children}
             </main>
