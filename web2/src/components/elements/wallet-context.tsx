@@ -60,7 +60,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <WalletContext.Provider value={{ activeAccount, connect, disconnect, isLoading }}>
+    <WalletContext.Provider
+      value={{ activeAccount, connect, disconnect, isLoading }}
+    >
       {children}
     </WalletContext.Provider>
   );

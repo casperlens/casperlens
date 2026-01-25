@@ -15,8 +15,8 @@ export default function LandingContent() {
             CasperLens
           </h1>
           <p className="text-xl text-muted-foreground">
-            Advanced contract monitoring and observability for the Casper Network.
-            Track, analyze, and manage your smart contracts with ease.
+            Advanced contract monitoring and observability for the Casper
+            Network. Track, analyze, and manage your smart contracts with ease.
           </p>
         </div>
 
@@ -26,14 +26,10 @@ export default function LandingContent() {
             <p className="text-sm text-muted-foreground">
               Create a temporary session to access the dashboard.
             </p>
-            <Button 
-              size="lg" 
-              className="w-full"
-              onClick={() => connect()}
-            >
+            <Button size="lg" className="w-full" onClick={() => connect()}>
               Start Session
             </Button>
-            
+
             {activeAccount && (
               <div className="text-[10px] text-muted-foreground/50 font-mono">
                 User ID: {activeAccount}

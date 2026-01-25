@@ -1,23 +1,34 @@
 "use client";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type {
-  ContractData,
-  ResponseData
-} from "@/lib/types";
-import { ChartLine, Copy, Diff, GitBranch, Link, Lock, Unlock } from "lucide-react";
+import type { ContractData, ResponseData } from "@/lib/types";
+import {
+  ChartLine,
+  Copy,
+  Diff,
+  GitBranch,
+  Link,
+  Lock,
+  Unlock,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useWallet } from "./wallet-context";
@@ -26,11 +37,11 @@ const formatHash = (hash: string | undefined, start = 5, end = 5) => {
   if (!hash) return "";
   if (hash.length <= start + end + 3) return hash;
   return `${hash.slice(0, start)}...${hash.slice(hash.length - end)}`;
-}
+};
 
 const hasVersions = (data: ContractData) => {
   return data.versions && data.versions.length > 0;
-}
+};
 
 export default function ContractContent() {
   const [contractData, setContractData] = useState<ContractData | null>(null);
@@ -39,7 +50,7 @@ export default function ContractContent() {
   const [activeTab, setActiveTab] = useState<"overview" | "versions" | "diffs">(
     "overview",
   );
-  
+
   const { activeAccount } = useWallet();
 
   useEffect(() => {
@@ -128,18 +139,15 @@ export default function ContractContent() {
               {contractData.contract_name || "Contract Package"}
             </h2>
             <div className="font-mono text-muted-foreground space-x-3 flex items-center">
-              <span className="font-semibold">
-                Package Hash:
-              </span>
-              <span>
-                {formatHash(contractData.package_hash)}
-              </span>
-              <Button variant="ghost"
+              <span className="font-semibold">Package Hash:</span>
+              <span>{formatHash(contractData.package_hash)}</span>
+              <Button
+                variant="ghost"
                 onClick={() => {
-                  navigator.clipboard?.writeText(contractData.package_hash)
+                  navigator.clipboard?.writeText(contractData.package_hash);
                   toast.success("Package hash copied to clipboard", {
                     position: "top-right",
-                  })
+                  });
                 }}
               >
                 <Copy className="text-muted-foreground" />
@@ -185,15 +193,16 @@ export default function ContractContent() {
                           Owner
                         </p>
                         <div className="flex items-center gap-3 xl:text-lg text-muted-foreground">
-                          <p>
-                            {formatHash(contractData.owner_id)}
-                          </p>
-                          <Button variant="ghost"
+                          <p>{formatHash(contractData.owner_id)}</p>
+                          <Button
+                            variant="ghost"
                             onClick={() => {
-                              navigator.clipboard?.writeText(contractData.owner_id)
+                              navigator.clipboard?.writeText(
+                                contractData.owner_id,
+                              );
                               toast.success("Owner ID copied to clipboard", {
                                 position: "top-right",
-                              })
+                              });
                             }}
                           >
                             <Copy className="text-muted-foreground" />
@@ -237,16 +246,12 @@ export default function ContractContent() {
                           {contractData.lock_status ? (
                             <>
                               <Lock />
-                              <p>
-                                Locked
-                              </p>
+                              <p>Locked</p>
                             </>
                           ) : (
                             <>
                               <Unlock />
-                              <p>
-                                Unlocked
-                              </p>
+                              <p>Unlocked</p>
                             </>
                           )}
                         </Badge>
@@ -256,9 +261,7 @@ export default function ContractContent() {
                         <p className="text-lg text-muted-foreground font-semibold">
                           Age
                         </p>
-                        <p className="xl:text-lg">
-                          {contractData.age} days
-                        </p>
+                        <p className="xl:text-lg">{contractData.age} days</p>
                       </div>
                       <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
                         <p className="text-lg text-muted-foreground font-semibold">
@@ -280,60 +283,67 @@ export default function ContractContent() {
                   </CardHeader>
                   <CardContent className="h-full">
                     <ScrollArea className="max-h-full">
-                      <Accordion type="single" defaultValue="0" collapsible className="w-full space-y-2">
-                        {hasVersions(contractData) ? contractData.versions.map((v, i) => (
-                          <AccordionItem key={i} value={i.toString()} className="space-y-2 text-sm">
-                            <AccordionTrigger className="text-lg font-medium">
-                              <div className="flex gap-3">
-                                <span>
-                                  Version
-                                </span>
-                                <span>
-                                  {v.contract_version}
-                                </span>
-                              </div>
-                            </AccordionTrigger>
+                      <Accordion
+                        type="single"
+                        defaultValue="0"
+                        collapsible
+                        className="w-full space-y-2"
+                      >
+                        {hasVersions(contractData) ? (
+                          contractData.versions.map((v, i) => (
+                            <AccordionItem
+                              key={i}
+                              value={i.toString()}
+                              className="space-y-2 text-sm"
+                            >
+                              <AccordionTrigger className="text-lg font-medium">
+                                <div className="flex gap-3">
+                                  <span>Version</span>
+                                  <span>{v.contract_version}</span>
+                                </div>
+                              </AccordionTrigger>
 
-                            <AccordionContent>
-                              <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
-                                <p className="text-muted-foreground font-semibold">
-                                  Hash
-                                </p>
-                                <div className="flex items-center gap-3 text-muted-foreground">
-                                  <p>
-                                    {formatHash(contractData.owner_id)}
+                              <AccordionContent>
+                                <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
+                                  <p className="text-muted-foreground font-semibold">
+                                    Hash
                                   </p>
-                                  <Button variant="ghost"
-                                    onClick={() => {
-                                      navigator.clipboard?.writeText(v.contract_wasm_hash)
-                                      toast.success("Contract WASH Hash copied to clipboard", {
-                                        position: "top-right",
-                                      })
-                                    }}
-                                  >
-                                    <Copy className="text-muted-foreground" />
-                                  </Button>
+                                  <div className="flex items-center gap-3 text-muted-foreground">
+                                    <p>{formatHash(contractData.owner_id)}</p>
+                                    <Button
+                                      variant="ghost"
+                                      onClick={() => {
+                                        navigator.clipboard?.writeText(
+                                          v.contract_wasm_hash,
+                                        );
+                                        toast.success(
+                                          "Contract WASH Hash copied to clipboard",
+                                          {
+                                            position: "top-right",
+                                          },
+                                        );
+                                      }}
+                                    >
+                                      <Copy className="text-muted-foreground" />
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <div className="text-muted-foreground font-semibold">
-                                  Protocol Version
+                                <div className="flex flex-col gap-2">
+                                  <div className="text-muted-foreground font-semibold">
+                                    Protocol Version
+                                  </div>
+                                  <div>{v.protocol_version}</div>
                                 </div>
-                                <div>
-                                  {v.protocol_version}
-                                </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        )) : (
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))
+                        ) : (
                           <Empty>
                             <EmptyHeader>
                               <EmptyMedia>
                                 <GitBranch />
                               </EmptyMedia>
-                              <EmptyTitle>
-                                No versions found.
-                              </EmptyTitle>
+                              <EmptyTitle>No versions found.</EmptyTitle>
                             </EmptyHeader>
                           </Empty>
                         )}
@@ -351,9 +361,7 @@ export default function ContractContent() {
                         <EmptyMedia>
                           <ChartLine />
                         </EmptyMedia>
-                        <EmptyTitle>
-                          Overview content coming soon.
-                        </EmptyTitle>
+                        <EmptyTitle>Overview content coming soon.</EmptyTitle>
                         <EmptyDescription>
                           Detailed analytics and charts will be available here.
                         </EmptyDescription>
@@ -371,9 +379,7 @@ export default function ContractContent() {
                     <EmptyMedia>
                       <GitBranch />
                     </EmptyMedia>
-                    <EmptyTitle>
-                      Versions content coming soon.
-                    </EmptyTitle>
+                    <EmptyTitle>Versions content coming soon.</EmptyTitle>
                     <EmptyDescription>
                       Detailed version history will be available here.
                     </EmptyDescription>
@@ -388,9 +394,7 @@ export default function ContractContent() {
                   <EmptyMedia>
                     <Diff />
                   </EmptyMedia>
-                  <EmptyTitle>
-                    Diffs content coming soon.
-                  </EmptyTitle>
+                  <EmptyTitle>Diffs content coming soon.</EmptyTitle>
                   <EmptyDescription>
                     Code diffs between versions will be available here.
                   </EmptyDescription>
@@ -400,6 +404,6 @@ export default function ContractContent() {
           </div>
         </Tabs>
       </div>
-    </div >
+    </div>
   );
 }

@@ -8,9 +8,7 @@ export function Topbar() {
         <div>
           <SidebarTrigger size={"lg"} />
         </div>
-        <div>
-          {/* Custom account menu can go here */}
-        </div>
+        <div>{/* Custom account menu can go here */}</div>
       </div>
     </>
   );

@@ -17,7 +17,10 @@ export function AuthHandler() {
         router.push("/dashboard");
       }
     } else {
-      if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/contract")) {
+      if (
+        pathname?.startsWith("/dashboard") ||
+        pathname?.startsWith("/contract")
+      ) {
         router.push("/");
       }
     }

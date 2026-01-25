@@ -8,13 +8,13 @@ import React from "react";
 import { WalletProvider } from "./wallet-context";
 
 const AuthHandler = dynamic(
-  () => import("./auth-handler").then(mod => mod.AuthHandler),
-  { ssr: false }
+  () => import("./auth-handler").then((mod) => mod.AuthHandler),
+  { ssr: false },
 );
 
 const AppSidebar = dynamic(
-  () => import("./sidebar").then(mod => mod.AppSidebar),
-  { ssr: false }
+  () => import("./sidebar").then((mod) => mod.AppSidebar),
+  { ssr: false },
 );
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
@@ -25,9 +25,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         <SidebarProvider>
           <AppSidebar />
           <Toaster />
-          <main className="min-h-screen bg-background w-full">
-            {children}
-          </main>
+          <main className="min-h-screen bg-background w-full">{children}</main>
         </SidebarProvider>
       </ThemeProvider>
     </WalletProvider>

@@ -25,9 +25,7 @@ export default function RootLayout({
         <div id="app">
           <div id="csprclick-ui"></div>
         </div>
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
