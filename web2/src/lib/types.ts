@@ -122,3 +122,8 @@ export interface Transaction {
   timestamp: string;
   error_message?: string;
 }
+
+export interface ChartDataPoint {
+  timestamp: string;
+  count: number;
+}

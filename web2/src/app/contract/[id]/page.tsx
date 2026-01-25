@@ -1,5 +1,6 @@
 "use client";
 
+import { TransactionsTab } from "@/components/elements/transaction-tab";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type {
+  ChartDataPoint,
   ContractData,
   ContractEntryPointDiff,
   ContractNamedKeysDiff,
@@ -24,15 +26,19 @@ import type {
   ContractVersionDiff,
   EntryPoint,
   Key,
-  ResponseData
+  ResponseData,
+  Transaction
 } from "@/lib/types";
 import { getUserId } from "@/lib/utils";
-import { TransactionsTab } from "@/components/elements/transaction-tab";
-import { ChartLine, CircleAlert, Copy, Diff, GitBranch, Link, Lock, Minus, Plus, Sparkle, Sparkles, Unlock } from "lucide-react";
+import { CircleAlert, Copy, Diff, GitBranch, Link, Lock, Minus, Plus, Sparkle, Sparkles, Unlock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Markdown from 'react-markdown';
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import remarkGfm from 'remark-gfm';
 
 const formatHash = (hash: string | undefined, start = 5, end = 5) => {
@@ -769,6 +775,16 @@ export default function ContractPage() {
   const [contractData, setContractData] = useState<ContractData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [packageHash, setPackageHash] = useState<string>("");
+  const [loadingChart, setLoadingChart] = useState<boolean>(true);
+  const [granularity, setGranularity] = useState<"hour" | "day" | "week" | "month" | "year">("hour");
+  const [lastCount, setLastCount] = useState<number>(90); // default: last 90 buckets
+  const chartConfig: ChartConfig = {
+    transactions: {
+      label: "Transactions"
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -809,6 +825,7 @@ export default function ContractPage() {
         if (!json.data) throw new Error("No contract data returned");
 
         setContractData(json.data);
+        setPackageHash(json.data.package_hash);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -818,6 +835,95 @@ export default function ContractPage() {
 
     fetchData();
   }, []);
+
+  const formatTransactionTimestamps = (transactions: Transaction[]) => {
+    // Helper to floor a date to the specified granularity
+    const floorDate = (d: Date, g: typeof granularity): string => {
+      const date = new Date(d);
+      switch (g) {
+        case "hour": {
+          date.setMinutes(0, 0, 0);
+          return date.toISOString().slice(0, 13) + ":00:00Z";
+        }
+        case "day": {
+          date.setHours(0, 0, 0, 0);
+          return date.toISOString().split("T")[0];
+        }
+        case "week": {
+          // Set to start of week (Monday)
+          const day = date.getUTCDay(); // 0 = Sunday
+          const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+          date.setUTCDate(date.getUTCDate() + diff);
+          date.setUTCHours(0, 0, 0, 0);
+          return date.toISOString().split("T")[0];
+        }
+        case "month": {
+          date.setUTCDate(1);
+          date.setUTCHours(0, 0, 0, 0);
+          return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+        }
+        case "year": {
+          return String(date.getUTCFullYear());
+        }
+      }
+    };
+
+    // Aggregate counts per bucket
+    const aggregated: Record<string, number> = {};
+    for (const tx of transactions) {
+      const bucket = floorDate(new Date(tx.timestamp), granularity);
+      aggregated[bucket] = (aggregated[bucket] ?? 0) + 1;
+    }
+
+    // Convert to data points and sort by time ascending
+    const points: ChartDataPoint[] = Object.entries(aggregated)
+      .map(([t, c]) => ({ timestamp: t, count: c }))
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+    // Apply last X count filter (take the last N buckets)
+    const sliced = lastCount > 0 ? points.slice(Math.max(points.length - lastCount, 0)) : points;
+
+    setChartData(sliced);
+  };
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoadingChart(true);
+      setError(null);
+      try {
+        const userId = getUserId();
+        if (!userId) throw new Error("User not authenticated");
+
+        const res = await fetch(
+          `/api/v1/u/${userId}/contract-package/${packageHash}/transactions`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch transactions (${res.status})`);
+        }
+
+        const json = await res.json();
+        if (json.success && json.data) {
+          formatTransactionTimestamps(json.data);
+        } else {
+          throw new Error(json.error || "Failed to load transactions");
+        }
+      } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoadingChart(false);
+      }
+    };
+
+    if (packageHash) {
+      fetchTransactions();
+    }
+  }, [packageHash, granularity, lastCount]);
 
   // Loading state (full viewport card)
   if (loading) {
@@ -1053,20 +1159,119 @@ export default function ContractPage() {
 
             <div className="lg:col-span-2 xl:col-span-3 lg:row-span-2">
               <Card className="h-full">
-                <CardContent className="h-full flex flex-col p-6">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <ChartLine />
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        Overview content coming soon.
-                      </EmptyTitle>
-                      <EmptyDescription>
-                        Detailed analytics and charts will be available here.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                <CardContent className="h-full flex flex-col p-6 transition-all">
+                  {loadingChart ? (
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Spinner />
+                        </EmptyMedia>
+                        <EmptyTitle>
+                          Loading analytics...
+                        </EmptyTitle>
+                        <EmptyDescription>
+                          Detailed analytics and charts will be available here.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Granularity</span>
+                          <Select value={granularity} onValueChange={(v) => setGranularity(v as any)}>
+                            <SelectTrigger className="w-[150px]" aria-label="Select granularity">
+                              <SelectValue placeholder="Hour" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              <SelectItem value="hour" className="rounded-lg">Hour</SelectItem>
+                              <SelectItem value="day" className="rounded-lg">Day</SelectItem>
+                              <SelectItem value="week" className="rounded-lg">Week</SelectItem>
+                              <SelectItem value="month" className="rounded-lg">Month</SelectItem>
+                              <SelectItem value="year" className="rounded-lg">Year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Last</span>
+                          <Input
+                            type="number"
+                            className="w-[120px] h-9 px-3 py-2 rounded-md border bg-background text-sm"
+                            min={1}
+                            value={lastCount}
+                            onChange={(e) => {
+                              const v = Number(e.target.value);
+                              if (Number.isFinite(v) && v >= 1) {
+                                setLastCount(v);
+                              }
+                            }}
+                            aria-label="Enter last count"
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {granularity === "hour" ? "hours" :
+                              granularity === "day" ? "days" :
+                                granularity === "week" ? "weeks" :
+                                  granularity === "month" ? "months" : "years"}
+                          </span>
+                        </div>
+                      </div>
+                      <ChartContainer
+                        config={chartConfig}
+                        className="aspect-auto h-full w-full"
+                      >
+                        <AreaChart data={chartData}>
+                          <defs>
+                            <linearGradient id="fillCount" x1="0" y1="0" x2="0" y2="1">
+                              <stop
+                                offset="5%"
+                                stopColor="var(--color-accent)"
+                                stopOpacity={0.8}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="var(--color-accent-foreground)"
+                                stopOpacity={0.1}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid vertical={false} />
+                          <XAxis
+                            dataKey="timestamp"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                            minTickGap={32}
+                            tickFormatter={(value) => {
+                              const date = new Date(value)
+                              return date.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })
+                            }}
+                          />
+                          <ChartTooltip
+                            cursor={false}
+                            content={
+                              <ChartTooltipContent
+                                labelFormatter={(value) => {
+                                  return new Date(value).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                }}
+                                indicator="dot"
+                              />
+                            }
+                          />
+                          <Area
+                            dataKey="count"
+                            type="natural"
+                            stroke="var(--color-accent)"
+                          />
+                        </AreaChart>
+                      </ChartContainer>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </div>
