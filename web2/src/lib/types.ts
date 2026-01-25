@@ -100,3 +100,8 @@ export interface Parameters {
 export interface Key {
   [key: string]: any;
 }
+
+export interface VersionOption {
+  value: number;
+  label: string;
+}
