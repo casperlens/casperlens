@@ -6,8 +6,7 @@ use odra::schema::casper_contract_schema::NamedCLType;
 use odra_cli::{
     deploy::DeployScript,
     scenario::{Args, Error, Scenario, ScenarioMetadata},
-    CommandArg, ContractProvider, DeployedContractsContainer, DeployerExt,
-    OdraCli, 
+    CommandArg, ContractProvider, DeployedContractsContainer, DeployerExt, OdraCli,
 };
 
 /// Deploys the `Observability` contract and adds it to the container.
@@ -17,13 +16,13 @@ impl DeployScript for ObservabilityDeployScript {
     fn deploy(
         &self,
         env: &HostEnv,
-        container: &mut DeployedContractsContainer
+        container: &mut DeployedContractsContainer,
     ) -> Result<(), odra_cli::deploy::Error> {
         let _observability = Observability::load_or_deploy(
             &env,
             NoArgs,
             container,
-            350_000_000_000 // Adjust gas limit as needed
+            350_000_000_000, // Adjust gas limit as needed
         )?;
 
         Ok(())

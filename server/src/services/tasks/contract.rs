@@ -104,17 +104,12 @@ pub async fn write_contract_diff_to_chain(
         output_path: "",
         chunked_args: None,
         min_bid_override: false,
-        };
+    };
 
     // 7️⃣ Submit transaction
-    let result = casper_client::cli::put_transaction(
-        &rpc_id_str,
-        rpc_address,
-        0,
-        builder_params,
-        tx_params,
-    )
-    .await;
+    let result =
+        casper_client::cli::put_transaction(&rpc_id_str, rpc_address, 0, builder_params, tx_params)
+            .await;
 
     match result {
         Ok(resp) => {

@@ -25,7 +25,10 @@ pub async fn get_contract_transactions(
         _ => return Err(format!("Unsupported network: {}", network)),
     };
 
-    let url = format!("{}/accounts/{}/deploys?limit=100", endpoint, owner_public_key);
+    let url = format!(
+        "{}/accounts/{}/deploys?limit=100",
+        endpoint, owner_public_key
+    );
     let client = reqwest::Client::new();
     let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
 
@@ -43,14 +46,14 @@ pub async fn get_contract_transactions(
         .map_err(|e| e.to_string())?;
 
     // Deserialize into our TransactionsResponse model
-    let transactions_response: TransactionsResponse =
-        serde_json::from_value(json_data).map_err(|e| format!("Failed to parse transactions: {}", e))?;
+    let transactions_response: TransactionsResponse = serde_json::from_value(json_data)
+        .map_err(|e| format!("Failed to parse transactions: {}", e))?;
 
     // 3. Filter Deploys
     // We want deploys where `contract_package_hash` matches our target.
     // Note: The API response often contains a `contract_package` object nested in the transaction.
     // We should check if that object's hash matches.
-    
+
     // Normalize our package hash for comparison (remove 'hash-' prefix if present, though API uses raw hex)
     let target_hash_raw = package_hash.strip_prefix("hash-").unwrap_or(package_hash);
 
@@ -60,17 +63,17 @@ pub async fn get_contract_transactions(
         .filter(|tx| {
             // Check direct contract_package_hash field
             if let Some(ref ph) = tx.contract_package_hash {
-                 if ph == target_hash_raw {
-                     return true;
-                 }
+                if ph == target_hash_raw {
+                    return true;
+                }
             }
-            
+
             // Also check if the transaction object structure from the API has a nested contract_package object
             // (The Transaction struct I defined captures the flattened fields, but let's double check logic)
             // Based on my manual curl, the API returns `contract_package_hash` at the top level of the deploy object
             // or inside a `contract_package` object. My struct only mapped the top level.
             // Let's stick to the top level for now as per my struct definition.
-            
+
             false
         })
         .collect();
