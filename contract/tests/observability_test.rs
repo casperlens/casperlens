@@ -44,9 +44,18 @@ fn test_multiple_versions() {
     assert_eq!(contract.get_latest_version(), "v3");
 
     // Verify all can be retrieved
-    assert_eq!(contract.get_diff("v1".to_string()), Some("diff1".to_string()));
-    assert_eq!(contract.get_diff("v2".to_string()), Some("diff2".to_string()));
-    assert_eq!(contract.get_diff("v3".to_string()), Some("diff3".to_string()));
+    assert_eq!(
+        contract.get_diff("v1".to_string()),
+        Some("diff1".to_string())
+    );
+    assert_eq!(
+        contract.get_diff("v2".to_string()),
+        Some("diff2".to_string())
+    );
+    assert_eq!(
+        contract.get_diff("v3".to_string()),
+        Some("diff3".to_string())
+    );
 }
 
 #[test]
@@ -79,10 +88,10 @@ fn test_access_control() {
     let mut contract = Observability::deploy(&env, NoArgs);
 
     // Deployer is owner (account 0)
-    
+
     // Switch to another account (account 1)
     env.set_caller(env.get_account(1));
-    
+
     // Should panic
     contract.store_diff("v2".to_string(), "hacker".to_string());
 }

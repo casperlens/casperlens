@@ -1,6 +1,7 @@
-use serde::{Deserialize, Serialize};
+pub mod contract;
+pub mod transaction;
 
-pub(crate) mod contract;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct ApiResponse<T, E> {

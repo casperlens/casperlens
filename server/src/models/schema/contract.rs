@@ -36,7 +36,7 @@ impl ContractPackageSchema {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct ContractPackageMeta {
     pub account_info: Option<serde_json::Value>,
     centralized_account_info: Option<serde_json::Value>,
@@ -50,7 +50,7 @@ pub struct ContractPackageMeta {
     icon_url: Option<String>,
     is_contract_info_approved: bool,
     latest_version_contract_hash: Option<String>,
-    latest_version_contract_type_id: Option<String>,
+    latest_version_contract_type_id: Option<u16>,
     metadata: serde_json::Value,
     name: Option<String>,
     owner_hash: String,
@@ -79,7 +79,7 @@ pub struct ContractVersionSchema {
     pub age: DateTime<Utc>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ContractVersionMeta {
     pub contract_hash: String,
     pub contract_package_hash: String,

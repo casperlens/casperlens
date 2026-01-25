@@ -4,6 +4,7 @@ use rand::Rng;
 pub(crate) mod diff;
 pub(crate) mod metadata;
 pub(crate) mod package;
+pub(crate) mod transaction;
 
 pub async fn get_state_root_hash(node_address: &str) -> Result<String, String> {
     let rpc_id = JsonRpcId::from(rand::rng().random::<i64>());

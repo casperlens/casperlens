@@ -104,19 +104,19 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="/contracts">
-              <button className="px-8 py-4 bg-primary hover:bg-primary-light text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-primary/50">
-                Launch Dashboard
-              </button>
+            <a
+              href="/contracts"
+              className="px-8 py-4 bg-primary-lighter hover:bg-primary-light text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-primary/50"
+            >
+              Launch Dashboard
             </a>
             <a
               href="https://github.com/casperlens/casperlens"
               target="_blank"
               rel="noopener noreferrer"
+              className="px-8 py-4 bg-card border border-primary hover:border-primary-light text-primary hover:text-primary-light font-semibold rounded-lg transition-all duration-300"
             >
-              <button className="px-8 py-4 bg-card border border-primary hover:border-primary-light text-primary hover:text-primary-light font-semibold rounded-lg transition-all duration-300">
-                View Documentation
-              </button>
+              View Documentation
             </a>
           </div>
         </div>

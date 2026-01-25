@@ -1,12 +1,12 @@
 use casper_client::JsonRpcId;
 use casper_client::rpcs::DictionaryItemIdentifier;
-use casper_types::{contracts::EntryPoints, Digest};
+use casper_types::{Digest, contracts::EntryPoints};
 use rand::Rng;
 
 use crate::{
     models::schema::contract::{
-        ContractEntryPointDiff, ContractNamedKeysDiff, ContractVersionDiff, ContractVersionDiffMeta,
-        ContractVersionSchema,
+        ContractEntryPointDiff, ContractNamedKeysDiff, ContractVersionDiff,
+        ContractVersionDiffMeta, ContractVersionSchema,
     },
     services::contract::{
         get_state_root_hash,
@@ -100,7 +100,7 @@ pub async fn fetch_contract_diff_from_chain(
                 return Ok(Some(diff));
             }
             Ok(None)
-        },
+        }
         Err(_) => Ok(None), // Not found
     }
 }

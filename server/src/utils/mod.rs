@@ -3,8 +3,8 @@ use crate::{
     middleware::cors::get_cors_config,
     routers::{
         contract::{
-            get_contract_details, get_contract_diff, get_contracts_overview, get_diff_analysis,
-            register_contract,
+            get_contract_details, get_contract_diff, get_contract_transactions,
+            get_contracts_overview, get_diff_analysis, register_contract,
         },
         health::health_check,
     },
@@ -31,6 +31,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route(
             "/api/v1/u/{user_id}/contract-package/{package_hash}",
             get(get_contract_details),
+        )
+        .route(
+            "/api/v1/u/{user_id}/contract-package/{package_hash}/transactions",
+            get(get_contract_transactions),
         )
         .route(
             "/api/v1/u/{user_id}/contract-package/{package_hash}/diff",
