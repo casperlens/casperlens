@@ -6,6 +6,7 @@
 
 - [Demo](https://casperlens-taupe.vercel.app)
 - [Demo video](https://www.youtube.com/watch?v=W8lgBpUf6is)
+- [Docs](https://casperlens-docs.vercel.app)
 - [Testnet Deployment](https://testnet.cspr.live/contract-package/6e35a78092c116c3178d8c6408e59e1eb486d060b9694c1ba1b560a60ec1a82d)
 
 CasperLens is an observability and smart contract lifecycle management platform for the Casper Network.
@@ -17,6 +18,8 @@ CasperLens is an observability and smart contract lifecycle management platform 
   - [Smart contract tracking](#smart-contract-tracking)
   - [Version difference analysis](#version-difference-analysis)
   - [Intelligent Analysis](#intelligent-analysis)
+  - [Package Insights and Visualizations](#package-insights-and-visualizations)
+  - [Transaction Tracking](#transaction-tracking)
 - [Architecture](#architecture)
 - [Technologies Used](#technologies-used)
 - [Screenshots](#screenshots)
