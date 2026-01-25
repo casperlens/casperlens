@@ -4,9 +4,9 @@
 
 # CasperLens
 
-- [Demo](https://casperlens.vercel.app)
-- [Demo video](https://youtu.be/qEgnvWekA40)
-- [Testnet Deployment](https://testnet.cspr.live/contract-package/c3933fe16448d6072ef107c288271a95bc93ab4273f88e5598edca922fdd3cd6)
+- [Demo](https://casperlens-taupe.vercel.app)
+- [Demo video](https://www.youtube.com/watch?v=W8lgBpUf6is)
+- [Testnet Deployment](https://testnet.cspr.live/contract-package/6e35a78092c116c3178d8c6408e59e1eb486d060b9694c1ba1b560a60ec1a82d)
 
 CasperLens is an observability and smart contract lifecycle management platform for the Casper Network.
 
@@ -52,6 +52,14 @@ The metadata of the versions are stored in off-chain PostgreSQL database for eff
 
 CasperLens provided AI-assisted analysis for differences between 2 versions by providing insights on the changelog and its implications for development teams and security. This improves secure SDLC and efficiency in teams working on smart contract development and integration. It uses HuggingFace inference points with LLaMa for this.
 
+## Package Insights and Visualizations
+
+Contract package usage can be visualized in graphical manner in frontend for observability analysis. This helps in understanding trends without having to build custom systems for inspecting transaction patterns.
+
+## Transaction Tracking
+
+The recent transactions made for the specific contract version can be tracked for understanding usage patterns and status of the invocations.
+
 # Architecture
 
 ![CasperLens architecture](./assets/architecture.png)
@@ -64,17 +72,21 @@ CasperLens provided AI-assisted analysis for differences between 2 versions by p
 
 # Screenshots
 
-| Dashboard | Contract Registration |
-| :---: | :---: |
-| ![Dashboard](./assets/Screenshot%20From%202026-01-05%2000-02-34.png) | ![Contract List](./assets/Screenshot%20From%202026-01-05%2000-03-00.png) |
+|                Dashboard                |                 Contract Registration                  |
+| :-------------------------------------: | :----------------------------------------------------: |
+| ![Dashboard](./assets/app/packages.png) | ![Register Package](./assets/app/register-package.png) |
 
-| Contract Details | Version Diff |
-| :---: | :---: |
-| ![Contract Details](./assets/Screenshot%20From%202026-01-05%2000-04-23.png) | ![Version Diff](./assets/Screenshot%20From%202026-01-05%2000-04-38.png) |
+|                Contract Details                |                Contract Versions                |
+| :--------------------------------------------: | :---------------------------------------------: |
+| ![Contract Details](./assets/app/overview.png) | ![Contract Versions](./assets/app/versions.png) |
 
-| Analysis | |
-| :---: | :---: |
-| ![Analysis](./assets/Screenshot%20From%202026-01-05%2000-04-49.png) | |
+|                  Transactions                  |              Contract Version Diffs               |
+| :--------------------------------------------: | :-----------------------------------------------: |
+| ![Transactions](./assets/app/transactions.png) | ![Contract Version Diffs](./assets/app/diffs.png) |
+
+|             AI Analysis             |     |
+| :---------------------------------: | :-: |
+| ![AI Analysis](./assets/app/ai.png) |     |
 
 # Development
 
@@ -82,7 +94,7 @@ Check out our [contributing guide](/CONTRIBUTING.md) for getting started.
 
 # Future Enhancements
 
-1. Support tokens and integrate observability metrics from Casper Cloud.
+1. Integrate observability metrics from Casper Cloud.
 2. Integrating support for other networks to enable interoperability.
 3. Support user account and tracking contracts under a user account using Casper Wallet.
 4. Enable code level tracking for functional changes and ABI changes for enhanced intelligent analysis using CI integration.
