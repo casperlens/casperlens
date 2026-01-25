@@ -1,5 +1,6 @@
 "use client";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +18,22 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type {
   ContractData,
+  ContractEntryPointDiff,
+  ContractNamedKeysDiff,
   ContractVersionData,
   ContractVersionDiff,
+  EntryPoint,
+  Key,
   ResponseData
 } from "@/lib/types";
 import { getUserId } from "@/lib/utils";
 import { TransactionsTab } from "@/components/elements/transaction-tab";
-import { ChartLine, CircleAlert, Copy, Diff, GitBranch, Link, Lock, Sparkle, Unlock } from "lucide-react";
+import { ChartLine, CircleAlert, Copy, Diff, GitBranch, Link, Lock, Minus, Plus, Sparkle, Sparkles, Unlock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const formatHash = (hash: string | undefined, start = 5, end = 5) => {
   if (!hash) return "";
@@ -177,6 +185,314 @@ const versionTab = (v: ContractVersionData, i: number) => {
   );
 }
 
+const formatAccess = (access: any) => {
+  if (typeof access === "string") return access;
+  if (typeof access === "object" && access !== null) {
+    if ("Public" in access) return "Public";
+    if ("Groups" in access) return `Groups: ${access.Groups.join(", ")}`;
+    if ("Template" in access) return "Template";
+  }
+  return "Unknown";
+};
+
+const KeyValueCard = ({ title, value, highlight = false }: {
+  title: string;
+  value: Key;
+  highlight?: boolean
+}) => (
+  <div className={`p-3 rounded-lg border transition-all group hover:shadow-sm col-span-full md:col-span-1 ${highlight
+    ? "border-primary/60 bg-accent/20"
+    : "border-border/30 hover:border-border/50"
+    }`}>
+    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2.5 group-hover:text-muted-foreground/90 transition-colors">
+      {title}
+    </p>
+    <div className="max-h-32 overflow-y-auto">
+      <pre className="font-mono text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed text-[0.75rem] bg-muted/30 p-3 rounded-md border border-border/20">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  </div>
+);
+
+const DetailCard = ({ title, value, highlight = false }: {
+  title: string;
+  value: string;
+  highlight?: boolean
+}) => (
+  <div className={`p-3 rounded-lg border transition-all group hover:shadow-sm hover:border-border/80 ${highlight
+    ? "border-primary/60 bg-accent/20"
+    : "border-border/30 hover:border-border/50"
+    }`}>
+    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 group-hover:text-muted-foreground/90 transition-colors">
+      {title}
+    </p>
+    <p className={`font-mono font-medium text-sm leading-tight ${highlight ? "text-primary font-semibold" : "text-foreground"
+      }`}>
+      {value}
+    </p>
+  </div>
+);
+
+const ParameterCard = ({ title, args, highlight = false }: {
+  title: string;
+  args: Record<string, any>;
+  highlight?: boolean
+}) => (
+  <div className={`p-3 rounded-lg border transition-all group hover:shadow-sm col-span-full md:col-span-2 ${highlight
+    ? "border-primary/60 bg-accent/20"
+    : "border-border/30 hover:border-border/50"
+    }`}>
+    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2.5 group-hover:text-muted-foreground/90 transition-colors">
+      {title}
+    </p>
+    {Object.keys(args).length > 0 ? (
+      <div className="space-y-1.5 max-h-24 overflow-y-auto">
+        {Object.entries(args).map(([key, value]) => (
+          <div key={key} className="p-2.5 bg-muted/30 rounded-md border border-border/20 hover:bg-muted/50 transition-colors">
+            <span className="font-mono text-xs font-medium text-foreground/90 block mb-1 truncate">{key}:</span>
+            <pre className="font-mono text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed text-[0.75rem]">
+              {JSON.stringify(value, null, 2)}
+            </pre>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p className="text-sm text-muted-foreground italic font-medium py-1">No parameters</p>
+    )}
+  </div>
+);
+
+const EntryPointTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDiff }) => {
+  return (
+    <ScrollArea className="h-full pr-3">
+      {fetchedDiffData.entry_points && fetchedDiffData.entry_points.length > 0 ? (
+
+        <Accordion type="single" className="divide-y divide-border" defaultValue="ep-0" collapsible>
+          {fetchedDiffData.entry_points.map((diff: ContractEntryPointDiff, idx) => {
+            const type =
+              "Added" in diff ? "added"
+                : "Removed" in diff ? "removed"
+                  : "modified";
+
+            const entryPoint: EntryPoint =
+              "Added" in diff ? diff.Added
+                : "Removed" in diff ? diff.Removed
+                  : diff.Modified.from;
+
+            const entryPointTo = "Modified" in diff ? diff.Modified.to : null;
+
+            return (
+              <AccordionItem key={idx} value={`ep-${idx}`}>
+                <AccordionTrigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-accent/50 transition-all group text-base font-medium leading-tight">
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <Badge className={`inline-flex gap-1 items-center px-2.5 py-1 rounded-full text-xs font-medium ${type === "added" ? "badge-success"
+                      : type === "removed" ? "badge-error"
+                        : "badge-warning"
+                      }`}>
+                      {type === "added" ? <Plus /> : type === "removed" ? <Minus /> : <Diff />}
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Badge>
+                    <span className="font-mono text-lg font-semibold truncate">
+                      {entryPoint.name}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 py-4 bg-background/30">
+                  <ScrollArea className="h-56 pr-4">
+                    <div className="space-y-5">
+                      {/* Original Version */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
+                          Original Version
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <DetailCard title="Name" value={entryPoint.name} />
+                          <DetailCard title="Return Type" value={entryPoint.ret} />
+                          <DetailCard title="Access" value={formatAccess(entryPoint.access)} />
+                          <DetailCard title="Type" value={entryPoint.entry_point_type} />
+                          <ParameterCard title="Parameters" args={entryPoint.args} />
+                        </div>
+                      </div>
+
+                      {/* Modified To Version */}
+                      {type === "modified" && entryPointTo && (
+                        <div>
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1 border-t border-border/50 pt-3">
+                            To (v{fetchedDiffData.v2.contract_version})
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <DetailCard title="Name" value={entryPointTo.name} highlight />
+                            <DetailCard title="Return Type" value={entryPointTo.ret} highlight />
+                            <DetailCard title="Access" value={formatAccess(entryPointTo.access)} highlight />
+                            <DetailCard title="Type" value={entryPointTo.entry_point_type} highlight />
+                            <ParameterCard title="Parameters" args={entryPointTo.args} highlight />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+
+      ) : (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Diff />
+            </EmptyMedia>
+            <EmptyTitle>No diff data to display.</EmptyTitle>
+            <EmptyDescription>
+              Please select two versions and click Compare to see the differences.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </ScrollArea>
+  )
+}
+
+const NamedKeysTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDiff }) => {
+  return (
+    <ScrollArea className="h-full pr-3">
+      {fetchedDiffData.named_keys && fetchedDiffData.named_keys.length > 0 ? (
+        <Accordion type="single" className="divide-y divide-border" defaultValue="nk-0" collapsible>
+          {fetchedDiffData.named_keys.map((diff: ContractNamedKeysDiff, idx) => {
+            const type =
+              "Added" in diff ? "added"
+                : "Removed" in diff ? "removed"
+                  : "modified";
+
+            const keyName: string =
+              "Added" in diff ? diff.Added.key
+                : "Removed" in diff ? diff.Removed.key
+                  : diff.Modified.key;
+
+            const keyValue: Key =
+              "Added" in diff ? diff.Added.value
+                : "Removed" in diff ? diff.Removed.value
+                  : diff.Modified.from;
+
+            const keyValueTo = "Modified" in diff ? diff.Modified.to : null;
+
+            return (
+              <AccordionItem key={idx} value={`nk-${idx}`}>
+                <AccordionTrigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-accent/50 transition-all group text-base font-medium leading-tight">
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <Badge className={`inline-flex gap-1 items-center px-2.5 py-1 rounded-full text-xs font-medium ${type === "added" ? "badge-success"
+                      : type === "removed" ? "badge-error"
+                        : "badge-warning"
+                      }`}>
+                      {type === "added" ? <Plus /> : type === "removed" ? <Minus /> : <Diff />}
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Badge>
+                    <span className="font-mono text-lg font-semibold truncate">
+                      {keyName}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 py-4 bg-background/30">
+                  <ScrollArea className="h-56 pr-4">
+                    <div className="space-y-5">
+                      {/* Original Version */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
+                          Original Version
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <DetailCard title="Key Name" value={keyName} />
+                          <KeyValueCard title="Value" value={keyValue} />
+                        </div>
+                      </div>
+
+                      {/* Modified To Version */}
+                      {type === "modified" && keyValueTo && (
+                        <div>
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1 border-t border-border/50 pt-3">
+                            To (v{fetchedDiffData.v2.contract_version})
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <DetailCard title="Key Name" value={keyName} highlight />
+                            <KeyValueCard title="Value" value={keyValueTo} highlight />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      ) : (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Diff />
+            </EmptyMedia>
+            <EmptyTitle>No diff data to display.</EmptyTitle>
+            <EmptyDescription>
+              Please select two versions and click Compare to see the differences.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </ScrollArea>
+  );
+};
+
+const SummaryTab = ({
+  fetchedDiffData,
+  analysis
+}: {
+  fetchedDiffData: ContractVersionDiff;
+  analysis?: string
+}) => {
+  const hasAnalysis = analysis && analysis.trim().length > 0;
+  const hasDiffData = fetchedDiffData.entry_points?.length > 0 || fetchedDiffData.named_keys?.length > 0;
+
+  return (
+    <ScrollArea className="h-full pr-3">
+      {hasAnalysis ? (
+        <div className="prose prose-sm max-w-none p-5 space-y-4">
+          <div className="prose-content">
+            <Markdown remarkPlugins={[remarkGfm]}>
+              {analysis}
+            </Markdown>
+          </div>
+        </div>
+      ) : hasDiffData ? (
+        <div className="p-8 text-center">
+          <div className="mx-auto max-w-md space-y-4">
+            <div className="flex items-center justify-center w-16 h-16 bg-accent/20 rounded-xl border-2 border-dashed border-accent p-3 mx-auto mb-4">
+              <Sparkle className="h-8 w-8 text-accent-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">Analysis Ready</h3>
+            <p className="text-sm text-muted-foreground">
+              Diff data detected! Analysis summary will appear here once generated.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Sparkle />
+            </EmptyMedia>
+            <EmptyTitle>No analysis data to display.</EmptyTitle>
+            <EmptyDescription>
+              Please select two versions and click Compare to see the differences.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </ScrollArea>
+  );
+};
+
 const DiffTab = ({ contractData }: { contractData: ContractData }) => {
   const [v1, setV1] = useState<ContractVersionData | null>(null);
   const [v2, setV2] = useState<ContractVersionData | null>(null);
@@ -292,7 +608,7 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-3 xl:gap-6 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-3 xl:gap-6 max-h-full">
       <Card className="col-span-1">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
@@ -394,65 +710,32 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
       <Card className="flex flex-1 col-span-3 min-h-full">
         {fetchedDiffData ? (
           <>
-            <Tabs defaultValue="entry_point" className="h-full w-full">
-              <CardHeader className="h-full flex flex-col items-start px-6">
+            <Tabs defaultValue="entry_point" className="h-full w-full flex flex-col justify-start">
+              <CardHeader className="flex flex-col items-start px-6">
                 <TabsList className="flex mb-4" variant="default">
-                  <TabsTrigger value="entry_point" className="text-lg">
+                  <TabsTrigger value="entry_point" className="text-lg p-5">
+                    <Diff />
                     Entry Point Diffs
                   </TabsTrigger>
-                  <TabsTrigger value="named_keys" className="text-lg">
+                  <TabsTrigger value="named_keys" className="text-lg p-5">
+                    <Diff />
                     Named Key Diffs
                   </TabsTrigger>
-                  <TabsTrigger value="summary" className="text-lg">
+                  <TabsTrigger value="summary" className="text-lg p-5">
+                    <Sparkles />
                     AI Analysis
                   </TabsTrigger>
                 </TabsList>
               </CardHeader>
               <CardContent className="h-full">
                 <TabsContent value="entry_point" className="h-full w-full">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Diff />
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        No diff data to display.
-                      </EmptyTitle>
-                      <EmptyDescription>
-                        Please select two versions and click Compare to see the differences.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                  <EntryPointTab fetchedDiffData={fetchedDiffData} />
                 </TabsContent>
                 <TabsContent value="named_keys" className="h-full w-full">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Diff />
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        No diff data to display.
-                      </EmptyTitle>
-                      <EmptyDescription>
-                        Please select two versions and click Compare to see the differences.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                  <NamedKeysTab fetchedDiffData={fetchedDiffData} />
                 </TabsContent>
-                <TabsContent value="summary" className="h-full w-full">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Sparkle />
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        No analysis data to display.
-                      </EmptyTitle>
-                      <EmptyDescription>
-                        Please select two versions and click Compare to see the differences.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                <TabsContent value="summary" className="max-h-full w-full overflow-clip">
+                  <SummaryTab fetchedDiffData={fetchedDiffData} analysis={analysis} />
                 </TabsContent>
               </CardContent>
             </Tabs>
@@ -472,8 +755,8 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
             </EmptyHeader>
           </Empty>
         )}
-      </Card>
-    </div>
+      </Card >
+    </div >
   )
 }
 
