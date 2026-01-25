@@ -22,6 +22,7 @@ import type {
   ResponseData
 } from "@/lib/types";
 import { getUserId } from "@/lib/utils";
+import { TransactionsTab } from "@/components/elements/transaction-tab";
 import { ChartLine, CircleAlert, Copy, Diff, GitBranch, Link, Lock, Sparkle, Unlock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -610,6 +611,9 @@ export default function ContractPage() {
             <TabsTrigger value="versions" className="text-lg">
               Versions
             </TabsTrigger>
+            <TabsTrigger value="transactions" className="text-lg">
+              Transactions
+            </TabsTrigger>
             <TabsTrigger value="diffs" className="text-lg">
               Diffs
             </TabsTrigger>
@@ -841,6 +845,10 @@ export default function ContractPage() {
                 </Empty>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="transactions" className="h-full w-full grid grid-cols-1">
+            <TransactionsTab packageHash={contractData.package_hash} />
           </TabsContent>
 
           <TabsContent value="diffs" className="h-full w-full grid grid-cols-1">

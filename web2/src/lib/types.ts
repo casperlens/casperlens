@@ -105,3 +105,20 @@ export interface VersionOption {
   value: number;
   label: string;
 }
+
+export interface Transaction {
+  deploy_hash: string;
+  block_hash?: string;
+  block_height?: number;
+  caller_public_key: string;
+  execution_type_id?: number;
+  contract_package_hash?: string;
+  contract_hash?: string;
+  entry_point_id?: number;
+  args?: any;
+  payment_amount: string;
+  cost: string;
+  status: string;
+  timestamp: string;
+  error_message?: string;
+}

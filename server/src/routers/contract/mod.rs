@@ -17,6 +17,7 @@ use crate::{
             diff::{fetch_contract_diff_from_chain, get_contract_version_diff},
             metadata::get_contract_package_metadata,
             package::{get_contract_package_details, get_contract_versions_details},
+            transaction::get_contract_transactions as fetch_transactions,
         },
         database::contract::{
             get_all_contracts, get_contract_package, get_contract_version, get_contract_versions,
@@ -55,6 +56,39 @@ fn strip_hash_prefix(input: &str) -> String {
         stripped.to_string()
     } else {
         input.to_string()
+    }
+}
+
+#[axum::debug_handler]
+pub async fn get_contract_transactions(
+    state: State<Arc<AppState>>,
+    Path((user_id, package_hash)): Path<(Uuid, String)>,
+) -> impl IntoResponse {
+    let package_hash = strip_hash_prefix(&package_hash);
+
+    // We need to know the network to fetch from the correct API.
+    // We can look up the contract in the DB first to get its network.
+    let network = match get_contract_package(&state.db, &user_id, &package_hash).await {
+        Ok(Some(pkg)) => pkg.network,
+        Ok(None) => "testnet".to_string(), // Default fallback if not in DB yet (or error out)
+        Err(_) => "testnet".to_string(),
+    };
+
+    match fetch_transactions(&network, &package_hash).await {
+        Ok(transactions) => Json(ApiResponse {
+            success: true,
+            message: "Transactions fetched successfully".to_string(),
+            error: None::<String>,
+            data: Some(transactions),
+        })
+        .into_response(),
+        Err(e) => Json(ApiResponse {
+            success: false,
+            message: "Failed to fetch transactions".to_string(),
+            error: Some(e),
+            data: None::<String>,
+        })
+        .into_response(),
     }
 }
 
