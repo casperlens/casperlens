@@ -1,6 +1,5 @@
 "use client";
 
-import { TransactionsTab } from "@/components/elements/transaction-tab";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -766,6 +765,152 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
   )
 }
 
+const TransactionsTab = ({ transactions }: { transactions: Transaction[] }) => {
+  if (!transactions || transactions.length === 0) {
+    return (
+      <Card>
+        <Empty className="h-full">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CircleAlert />
+            </EmptyMedia>
+            <EmptyTitle>No transactions found.</EmptyTitle>
+            <EmptyDescription>
+              There are no transactions associated with this contract.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </Card>
+    );
+  }
+
+  const formatHashLocal = (hash: string, start = 6, end = 6) => {
+    if (!hash) return "";
+    if (hash.length <= start + end + 3) return hash;
+    return `${hash.slice(0, start)}...${hash.slice(hash.length - end)}`;
+  };
+
+  const formatAmountLocal = (amount: string) => {
+    try {
+      const val = parseInt(amount);
+      if (isNaN(val)) return amount;
+      return (val / 1_000_000_000).toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 5,
+      }) + " CSPR";
+    } catch {
+      return amount;
+    }
+  };
+
+  const formatDateLocal = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleString();
+    } catch {
+      return dateStr;
+    }
+  };
+
+  return (
+    <Card className="h-full border-none shadow-none">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold flex items-center justify-between">
+          <span>Transaction History</span>
+          <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-1 rounded-full">
+            {transactions.length} found
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[600px] w-full rounded-md border">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-background">
+              <tr className="text-muted-foreground">
+                <th className="p-3 text-left font-medium">Status</th>
+                <th className="p-3 text-left font-medium">Hash</th>
+                <th className="p-3 text-left font-medium">Method</th>
+                <th className="p-3 text-left font-medium">From</th>
+                <th className="p-3 text-left font-medium">Cost</th>
+                <th className="p-3 text-left font-medium">Time</th>
+                <th className="p-3 text-right font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((tx) => (
+                <tr key={tx.deploy_hash} className="border-t">
+                  <td className="p-3">
+                    {tx.status?.toLowerCase() === "executed" || tx.status?.toLowerCase() === "processed" || !tx.error_message ? (
+                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20">
+                        Success
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20">
+                        Failed
+                      </Badge>
+                    )}
+                  </td>
+                  <td className="p-3 font-mono text-xs">
+                    <span title={tx.deploy_hash}>{formatHashLocal(tx.deploy_hash)}</span>
+                  </td>
+                  <td className="p-3">
+                    {tx.entry_point_id ? (
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        ID: {tx.entry_point_id}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-xs italic">Unknown</span>
+                    )}
+                  </td>
+                  <td className="p-3 font-mono text-xs">
+                    <span title={tx.caller_public_key}>
+                      {formatHashLocal(tx.caller_public_key)}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs">{formatAmountLocal(tx.cost)}</td>
+                  <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {formatDateLocal(tx.timestamp)}
+                  </td>
+                  <td className="p-3 text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(tx.deploy_hash);
+                          toast.success("Transaction Hash copied", {
+                            position: "top-right",
+                          });
+                        }}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        asChild
+                      >
+                        <a
+                          href={`https://testnet.cspr.live/deploy/${tx.deploy_hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Link />
+                        </a>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
+
 /**
  * Contract details page using shadcn UI components.
  * Full viewport layout: left column with metadata + latest version,
@@ -1425,7 +1570,7 @@ export default function ContractPage() {
           </TabsContent>
 
           <TabsContent value="transactions" className="h-full w-full grid grid-cols-1">
-            <TransactionsTab packageHash={contractData.package_hash} />
+            <TransactionsTab transactions={transactions} />
           </TabsContent>
 
           <TabsContent value="diffs" className="h-full w-full grid grid-cols-1">

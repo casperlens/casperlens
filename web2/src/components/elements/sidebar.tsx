@@ -1,8 +1,5 @@
 "use client";
 
-import { Home, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useWallet } from "./wallet-context";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -10,18 +7,20 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
+import { Home, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useWallet } from "./wallet-context";
 
 export function AppSidebar() {
   const router = useRouter();
   const { activeAccount, disconnect } = useWallet();
 
-  const displayName = "Session User"; 
+  const displayName = "Session User";
   const initials = "SU";
 
   return (
@@ -45,9 +44,6 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-          <SidebarGroupLabel className="text-md my-3">
-            Contracts
-          </SidebarGroupLabel>
           <SidebarGroupContent></SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -70,9 +66,9 @@ export function AppSidebar() {
                   {activeAccount}
                 </span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
                 onClick={disconnect}
                 title="End Session"
