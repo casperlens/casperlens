@@ -1,13 +1,5 @@
 "use client";
-import {
-  ClickUI,
-  ViewAccountOnExplorerMenuItem,
-} from "@make-software/csprclick-ui";
 import { SidebarTrigger } from "../ui/sidebar";
-
-const topBarSettings = {
-  accountMenuItems: [<ViewAccountOnExplorerMenuItem key="0" />],
-};
 
 export function Topbar() {
   return (
@@ -17,7 +9,7 @@ export function Topbar() {
           <SidebarTrigger size={"lg"} />
         </div>
         <div>
-          <ClickUI topBarSettings={topBarSettings} />
+          {/* Custom account menu can go here */}
         </div>
       </div>
     </>

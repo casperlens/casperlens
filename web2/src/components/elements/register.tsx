@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useWallet } from "./wallet-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,32 +17,35 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import type { ContractRegister } from "@/lib/types";
 
-//
-// Server-action-style handler compatible with useActionState (React v19).
-// Accepts (prevData, formData) so it can be used directly as a form action.
-//
 async function registerContractPackage(
   prevData: ContractRegister | null,
   formData: FormData,
 ) {
+  // ... (keep existing server action logic, it doesn't depend on client library) ...
   try {
     const package_hash_raw = (formData.get("package_hash") || "")
       .toString()
       .trim();
     const package_name = (formData.get("package_name") || "").toString().trim();
     const network = (formData.get("network") || "testnet").toString();
+    const userId = (formData.get("user_id") || "").toString();
+
+    if (!userId) {
+      return {
+        success: false,
+        error: "User ID not found. Please ensure wallet is connected.",
+      };
+    }
 
     if (!package_hash_raw) {
       return { success: false, error: "Package hash is required" };
     }
 
-    // Clean package hash - remove "hash-" prefix if present
     let package_hash = package_hash_raw;
     if (package_hash.startsWith("hash-")) {
       package_hash = package_hash.substring(5);
     }
 
-    // Validate hex-only
     if (!/^[a-fA-F0-9]+$/.test(package_hash)) {
       return {
         success: false,
@@ -54,15 +58,6 @@ async function registerContractPackage(
       return {
         success: false,
         error: "Package hash should not contain dots or dashes.",
-      };
-    }
-
-    const userId =
-      typeof window !== "undefined" ? localStorage.getItem("user_id") : null;
-    if (!userId) {
-      return {
-        success: false,
-        error: "User ID not found. Please refresh the page.",
       };
     }
 
@@ -108,7 +103,6 @@ async function registerContractPackage(
       return { success: false, error: errorMessage };
     }
 
-    // Return cleaned hash so client can navigate
     return {
       success: true,
       message: json.message || "Registered successfully",
@@ -122,21 +116,24 @@ async function registerContractPackage(
   }
 }
 
+// ... (keep RegisterFormProps and RegisterForm) ...
 type RegisterFormProps = {
   formAction: any;
   isPending: boolean;
   response?: any;
+  userId?: string;
 };
 
 const RegisterForm: React.FC<RegisterFormProps> = ({
   formAction,
   isPending,
   response,
+  userId,
 }) => {
-  // Form uses declarative action provided by `useActionState` (formAction)
-  // Inputs use uncontrolled/defaultValue so that the formAction FormData picks up values naturally.
   return (
     <form id="register-form" action={formAction} className="space-y-4">
+      <input type="hidden" name="user_id" value={userId || ""} />
+
       <div>
         <label
           htmlFor="package_hash"
@@ -172,7 +169,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      {/* Hidden network field - default to testnet */}
       <input type="hidden" name="network" value="testnet" />
 
       <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-400">
@@ -180,7 +176,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         contract package hash for the testnet network.
       </div>
 
-      {/* Response feedback rendered inside the form so user sees it before redirect */}
       {response?.message && (
         <div className="mt-2 rounded-md border border-green-300 bg-green-50 p-2 text-sm text-green-700">
           {response.message}
@@ -197,23 +192,30 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 };
 
 export const Register: React.FC = () => {
-  // useActionState in parent: provide the action and get response, formAction, isPending
   const [response, formAction, isPending] = useActionState(
     registerContractPackage,
     null as any,
   );
 
-  // Redirect on success (use cleaned_hash returned by the action)
+  const { activeAccount } = useWallet();
+  const [userId, setUserId] = useState<string>("");
+
+  useEffect(() => {
+     if (activeAccount) {
+        setUserId(activeAccount);
+     } else {
+        setUserId("");
+     }
+  }, [activeAccount]);
+
   useEffect(() => {
     if (response?.success && response.cleaned_hash) {
-      // small delay so the success UI is visible briefly
       setTimeout(() => {
         window.location.href = `/contract/${response.cleaned_hash}`;
       }, 300);
     }
   }, [response]);
 
-  // Make drawer direction responsive: bottom on small screens, right on lg+ (1024px)
   const [direction, setDirection] = useState<"bottom" | "right">("bottom");
   useEffect(() => {
     const updateDirection = () => {
@@ -239,16 +241,15 @@ export const Register: React.FC = () => {
         </DrawerHeader>
 
         <div className="p-4">
-          {/* pass form action and pending state down to the form */}
           <RegisterForm
             formAction={formAction}
             isPending={isPending}
             response={response}
+            userId={userId}
           />
         </div>
 
         <DrawerFooter className="sticky bottom-0 w-full bg-background/50 backdrop-blur-sm border-t">
-          {/* Submit button sits in the footer and targets the form by id */}
           <Button
             type="submit"
             form="register-form"
