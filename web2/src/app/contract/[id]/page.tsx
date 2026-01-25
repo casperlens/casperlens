@@ -1,16 +1,29 @@
 "use client";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -26,29 +39,52 @@ import type {
   EntryPoint,
   Key,
   ResponseData,
-  Transaction
+  Transaction,
 } from "@/lib/types";
 import { getUserId } from "@/lib/utils";
-import { CircleAlert, Copy, Diff, GitBranch, Link, Lock, Minus, Plus, Sparkle, Sparkles, Unlock } from "lucide-react";
+import {
+  CircleAlert,
+  Copy,
+  Diff,
+  GitBranch,
+  Link,
+  Lock,
+  Minus,
+  Plus,
+  Sparkle,
+  Sparkles,
+  Unlock,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Markdown from 'react-markdown';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Markdown from "react-markdown";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import remarkGfm from 'remark-gfm';
+import remarkGfm from "remark-gfm";
 
 const formatHash = (hash: string | undefined, start = 5, end = 5) => {
   if (!hash) return "";
   if (hash.length <= start + end + 3) return hash;
   return `${hash.slice(0, start)}...${hash.slice(hash.length - end)}`;
-}
+};
 
 const hasVersions = (data: ContractData) => {
   return data.versions && data.versions.length > 0;
-}
+};
 
 const versionTab = (v: ContractVersionData, i: number) => {
   return (
@@ -97,16 +133,12 @@ const versionTab = (v: ContractVersionData, i: number) => {
               {v.disabled ? (
                 <>
                   <Lock />
-                  <p>
-                    Disabled
-                  </p>
+                  <p>Disabled</p>
                 </>
               ) : (
                 <>
                   <Unlock />
-                  <p>
-                    Enabled
-                  </p>
+                  <p>Enabled</p>
                 </>
               )}
             </Badge>
@@ -121,14 +153,20 @@ const versionTab = (v: ContractVersionData, i: number) => {
             .replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
 
           const stringified =
-            val === null || val === undefined ? "" : typeof val === "object" ? JSON.stringify(val) : String(val);
+            val === null || val === undefined
+              ? ""
+              : typeof val === "object"
+                ? JSON.stringify(val)
+                : String(val);
 
           const displayValue = stringified;
 
           const showCopy =
             typeof stringified === "string" &&
             stringified.length > 0 &&
-            (k.toLowerCase().includes("hash") || k.toLowerCase().includes("id") || stringified.length > 20);
+            (k.toLowerCase().includes("hash") ||
+              k.toLowerCase().includes("id") ||
+              stringified.length > 20);
 
           return (
             <Card key={k} className="flex flex-col gap-2">
@@ -147,13 +185,13 @@ const versionTab = (v: ContractVersionData, i: number) => {
                     >
                       <Copy className="text-muted-foreground" />
                     </Button>
-                  ) : <></>}
+                  ) : (
+                    <></>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex items-center gap-3 xl:text-lg text-muted-foreground text-wrap ">
-                <p className="break-all">
-                  {displayValue}
-                </p>
+                <p className="break-all">{displayValue}</p>
               </CardContent>
             </Card>
           );
@@ -163,11 +201,13 @@ const versionTab = (v: ContractVersionData, i: number) => {
           <CardTitle>Entry Points</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
-          {v.entry_points && v.entry_points.length > 0 ? v.entry_points.map((ep, idx) => (
-            <Badge key={idx} variant="outline" className="px-3 py-1 text-sm">
-              {ep}
-            </Badge>
-          )) : (
+          {v.entry_points && v.entry_points.length > 0 ? (
+            v.entry_points.map((ep, idx) => (
+              <Badge key={idx} variant="outline" className="px-3 py-1 text-sm">
+                {ep}
+              </Badge>
+            ))
+          ) : (
             <p className="text-muted-foreground">No entry points available.</p>
           )}
         </CardContent>
@@ -177,18 +217,20 @@ const versionTab = (v: ContractVersionData, i: number) => {
           <CardTitle>Named Keys</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-2 flex-wrap">
-          {v.named_keys && v.named_keys.length > 0 ? v.named_keys.map((nk, idx) => (
-            <Badge key={idx} variant="outline" className="px-3 py-1 text-sm">
-              {nk}
-            </Badge>
-          )) : (
+          {v.named_keys && v.named_keys.length > 0 ? (
+            v.named_keys.map((nk, idx) => (
+              <Badge key={idx} variant="outline" className="px-3 py-1 text-sm">
+                {nk}
+              </Badge>
+            ))
+          ) : (
             <p className="text-muted-foreground">No named keys available.</p>
           )}
         </CardContent>
       </Card>
     </TabsContent>
   );
-}
+};
 
 const formatAccess = (access: any) => {
   if (typeof access === "string") return access;
@@ -200,15 +242,22 @@ const formatAccess = (access: any) => {
   return "Unknown";
 };
 
-const KeyValueCard = ({ title, value, highlight = false }: {
+const KeyValueCard = ({
+  title,
+  value,
+  highlight = false,
+}: {
   title: string;
   value: Key;
-  highlight?: boolean
+  highlight?: boolean;
 }) => (
-  <div className={`p-3 rounded-lg border transition-all group hover:shadow-sm col-span-full md:col-span-1 ${highlight
-    ? "border-primary/60 bg-accent/20"
-    : "border-border/30 hover:border-border/50"
-    }`}>
+  <div
+    className={`p-3 rounded-lg border transition-all group hover:shadow-sm col-span-full md:col-span-1 ${
+      highlight
+        ? "border-primary/60 bg-accent/20"
+        : "border-border/30 hover:border-border/50"
+    }`}
+  >
     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2.5 group-hover:text-muted-foreground/90 transition-colors">
       {title}
     </p>
@@ -220,42 +269,64 @@ const KeyValueCard = ({ title, value, highlight = false }: {
   </div>
 );
 
-const DetailCard = ({ title, value, highlight = false }: {
+const DetailCard = ({
+  title,
+  value,
+  highlight = false,
+}: {
   title: string;
   value: string;
-  highlight?: boolean
+  highlight?: boolean;
 }) => (
-  <div className={`p-3 rounded-lg border transition-all group hover:shadow-sm hover:border-border/80 ${highlight
-    ? "border-primary/60 bg-accent/20"
-    : "border-border/30 hover:border-border/50"
-    }`}>
+  <div
+    className={`p-3 rounded-lg border transition-all group hover:shadow-sm hover:border-border/80 ${
+      highlight
+        ? "border-primary/60 bg-accent/20"
+        : "border-border/30 hover:border-border/50"
+    }`}
+  >
     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 group-hover:text-muted-foreground/90 transition-colors">
       {title}
     </p>
-    <p className={`font-mono font-medium text-sm leading-tight ${highlight ? "text-primary font-semibold" : "text-foreground"
-      }`}>
+    <p
+      className={`font-mono font-medium text-sm leading-tight ${
+        highlight ? "text-primary font-semibold" : "text-foreground"
+      }`}
+    >
       {value}
     </p>
   </div>
 );
 
-const ParameterCard = ({ title, args, highlight = false }: {
+const ParameterCard = ({
+  title,
+  args,
+  highlight = false,
+}: {
   title: string;
   args: Record<string, any>;
-  highlight?: boolean
+  highlight?: boolean;
 }) => (
-  <div className={`p-3 rounded-lg border transition-all group hover:shadow-sm col-span-full md:col-span-2 ${highlight
-    ? "border-primary/60 bg-accent/20"
-    : "border-border/30 hover:border-border/50"
-    }`}>
+  <div
+    className={`p-3 rounded-lg border transition-all group hover:shadow-sm col-span-full md:col-span-2 ${
+      highlight
+        ? "border-primary/60 bg-accent/20"
+        : "border-border/30 hover:border-border/50"
+    }`}
+  >
     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2.5 group-hover:text-muted-foreground/90 transition-colors">
       {title}
     </p>
     {Object.keys(args).length > 0 ? (
       <div className="space-y-1.5 max-h-24 overflow-y-auto">
         {Object.entries(args).map(([key, value]) => (
-          <div key={key} className="p-2.5 bg-muted/30 rounded-md border border-border/20 hover:bg-muted/50 transition-colors">
-            <span className="font-mono text-xs font-medium text-foreground/90 block mb-1 truncate">{key}:</span>
+          <div
+            key={key}
+            className="p-2.5 bg-muted/30 rounded-md border border-border/20 hover:bg-muted/50 transition-colors"
+          >
+            <span className="font-mono text-xs font-medium text-foreground/90 block mb-1 truncate">
+              {key}:
+            </span>
             <pre className="font-mono text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed text-[0.75rem]">
               {JSON.stringify(value, null, 2)}
             </pre>
@@ -263,86 +334,145 @@ const ParameterCard = ({ title, args, highlight = false }: {
         ))}
       </div>
     ) : (
-      <p className="text-sm text-muted-foreground italic font-medium py-1">No parameters</p>
+      <p className="text-sm text-muted-foreground italic font-medium py-1">
+        No parameters
+      </p>
     )}
   </div>
 );
 
-const EntryPointTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDiff }) => {
+const EntryPointTab = ({
+  fetchedDiffData,
+}: {
+  fetchedDiffData: ContractVersionDiff;
+}) => {
   return (
     <ScrollArea className="h-full pr-3">
-      {fetchedDiffData.entry_points && fetchedDiffData.entry_points.length > 0 ? (
+      {fetchedDiffData.entry_points &&
+      fetchedDiffData.entry_points.length > 0 ? (
+        <Accordion
+          type="single"
+          className="divide-y divide-border"
+          defaultValue="ep-0"
+          collapsible
+        >
+          {fetchedDiffData.entry_points.map(
+            (diff: ContractEntryPointDiff, idx) => {
+              const type =
+                "Added" in diff
+                  ? "added"
+                  : "Removed" in diff
+                    ? "removed"
+                    : "modified";
 
-        <Accordion type="single" className="divide-y divide-border" defaultValue="ep-0" collapsible>
-          {fetchedDiffData.entry_points.map((diff: ContractEntryPointDiff, idx) => {
-            const type =
-              "Added" in diff ? "added"
-                : "Removed" in diff ? "removed"
-                  : "modified";
+              const entryPoint: EntryPoint =
+                "Added" in diff
+                  ? diff.Added
+                  : "Removed" in diff
+                    ? diff.Removed
+                    : diff.Modified.from;
 
-            const entryPoint: EntryPoint =
-              "Added" in diff ? diff.Added
-                : "Removed" in diff ? diff.Removed
-                  : diff.Modified.from;
+              const entryPointTo = "Modified" in diff ? diff.Modified.to : null;
 
-            const entryPointTo = "Modified" in diff ? diff.Modified.to : null;
-
-            return (
-              <AccordionItem key={idx} value={`ep-${idx}`}>
-                <AccordionTrigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-accent/50 transition-all group text-base font-medium leading-tight">
-                  <div className="flex items-center gap-2.5 flex-1">
-                    <Badge className={`inline-flex gap-1 items-center px-2.5 py-1 rounded-full text-xs font-medium ${type === "added" ? "badge-success"
-                      : type === "removed" ? "badge-error"
-                        : "badge-warning"
-                      }`}>
-                      {type === "added" ? <Plus /> : type === "removed" ? <Minus /> : <Diff />}
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </Badge>
-                    <span className="font-mono text-lg font-semibold truncate">
-                      {entryPoint.name}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-5 py-4 bg-background/30">
-                  <ScrollArea className="h-56 pr-4">
-                    <div className="space-y-5">
-                      {/* Original Version */}
-                      <div>
-                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
-                          Original Version
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <DetailCard title="Name" value={entryPoint.name} />
-                          <DetailCard title="Return Type" value={entryPoint.ret} />
-                          <DetailCard title="Access" value={formatAccess(entryPoint.access)} />
-                          <DetailCard title="Type" value={entryPoint.entry_point_type} />
-                          <ParameterCard title="Parameters" args={entryPoint.args} />
-                        </div>
-                      </div>
-
-                      {/* Modified To Version */}
-                      {type === "modified" && entryPointTo && (
+              return (
+                <AccordionItem key={idx} value={`ep-${idx}`}>
+                  <AccordionTrigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-accent/50 transition-all group text-base font-medium leading-tight">
+                    <div className="flex items-center gap-2.5 flex-1">
+                      <Badge
+                        className={`inline-flex gap-1 items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                          type === "added"
+                            ? "badge-success"
+                            : type === "removed"
+                              ? "badge-error"
+                              : "badge-warning"
+                        }`}
+                      >
+                        {type === "added" ? (
+                          <Plus />
+                        ) : type === "removed" ? (
+                          <Minus />
+                        ) : (
+                          <Diff />
+                        )}
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </Badge>
+                      <span className="font-mono text-lg font-semibold truncate">
+                        {entryPoint.name}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-5 py-4 bg-background/30">
+                    <ScrollArea className="h-56 pr-4">
+                      <div className="space-y-5">
+                        {/* Original Version */}
                         <div>
-                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1 border-t border-border/50 pt-3">
-                            To (v{fetchedDiffData.v2.contract_version})
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
+                            Original Version
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <DetailCard title="Name" value={entryPointTo.name} highlight />
-                            <DetailCard title="Return Type" value={entryPointTo.ret} highlight />
-                            <DetailCard title="Access" value={formatAccess(entryPointTo.access)} highlight />
-                            <DetailCard title="Type" value={entryPointTo.entry_point_type} highlight />
-                            <ParameterCard title="Parameters" args={entryPointTo.args} highlight />
+                            <DetailCard title="Name" value={entryPoint.name} />
+                            <DetailCard
+                              title="Return Type"
+                              value={entryPoint.ret}
+                            />
+                            <DetailCard
+                              title="Access"
+                              value={formatAccess(entryPoint.access)}
+                            />
+                            <DetailCard
+                              title="Type"
+                              value={entryPoint.entry_point_type}
+                            />
+                            <ParameterCard
+                              title="Parameters"
+                              args={entryPoint.args}
+                            />
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
 
+                        {/* Modified To Version */}
+                        {type === "modified" && entryPointTo && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1 border-t border-border/50 pt-3">
+                              To (v{fetchedDiffData.v2.contract_version})
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <DetailCard
+                                title="Name"
+                                value={entryPointTo.name}
+                                highlight
+                              />
+                              <DetailCard
+                                title="Return Type"
+                                value={entryPointTo.ret}
+                                highlight
+                              />
+                              <DetailCard
+                                title="Access"
+                                value={formatAccess(entryPointTo.access)}
+                                highlight
+                              />
+                              <DetailCard
+                                title="Type"
+                                value={entryPointTo.entry_point_type}
+                                highlight
+                              />
+                              <ParameterCard
+                                title="Parameters"
+                                args={entryPointTo.args}
+                                highlight
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            },
+          )}
+        </Accordion>
       ) : (
         <Empty>
           <EmptyHeader>
@@ -351,86 +481,123 @@ const EntryPointTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDi
             </EmptyMedia>
             <EmptyTitle>No diff data to display.</EmptyTitle>
             <EmptyDescription>
-              Please select two versions and click Compare to see the differences.
+              Please select two versions and click Compare to see the
+              differences.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
     </ScrollArea>
-  )
-}
+  );
+};
 
-const NamedKeysTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDiff }) => {
+const NamedKeysTab = ({
+  fetchedDiffData,
+}: {
+  fetchedDiffData: ContractVersionDiff;
+}) => {
   return (
     <ScrollArea className="h-full pr-3">
       {fetchedDiffData.named_keys && fetchedDiffData.named_keys.length > 0 ? (
-        <Accordion type="single" className="divide-y divide-border" defaultValue="nk-0" collapsible>
-          {fetchedDiffData.named_keys.map((diff: ContractNamedKeysDiff, idx) => {
-            const type =
-              "Added" in diff ? "added"
-                : "Removed" in diff ? "removed"
-                  : "modified";
+        <Accordion
+          type="single"
+          className="divide-y divide-border"
+          defaultValue="nk-0"
+          collapsible
+        >
+          {fetchedDiffData.named_keys.map(
+            (diff: ContractNamedKeysDiff, idx) => {
+              const type =
+                "Added" in diff
+                  ? "added"
+                  : "Removed" in diff
+                    ? "removed"
+                    : "modified";
 
-            const keyName: string =
-              "Added" in diff ? diff.Added.key
-                : "Removed" in diff ? diff.Removed.key
-                  : diff.Modified.key;
+              const keyName: string =
+                "Added" in diff
+                  ? diff.Added.key
+                  : "Removed" in diff
+                    ? diff.Removed.key
+                    : diff.Modified.key;
 
-            const keyValue: Key =
-              "Added" in diff ? diff.Added.value
-                : "Removed" in diff ? diff.Removed.value
-                  : diff.Modified.from;
+              const keyValue: Key =
+                "Added" in diff
+                  ? diff.Added.value
+                  : "Removed" in diff
+                    ? diff.Removed.value
+                    : diff.Modified.from;
 
-            const keyValueTo = "Modified" in diff ? diff.Modified.to : null;
+              const keyValueTo = "Modified" in diff ? diff.Modified.to : null;
 
-            return (
-              <AccordionItem key={idx} value={`nk-${idx}`}>
-                <AccordionTrigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-accent/50 transition-all group text-base font-medium leading-tight">
-                  <div className="flex items-center gap-2.5 flex-1">
-                    <Badge className={`inline-flex gap-1 items-center px-2.5 py-1 rounded-full text-xs font-medium ${type === "added" ? "badge-success"
-                      : type === "removed" ? "badge-error"
-                        : "badge-warning"
-                      }`}>
-                      {type === "added" ? <Plus /> : type === "removed" ? <Minus /> : <Diff />}
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </Badge>
-                    <span className="font-mono text-lg font-semibold truncate">
-                      {keyName}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-5 py-4 bg-background/30">
-                  <ScrollArea className="h-56 pr-4">
-                    <div className="space-y-5">
-                      {/* Original Version */}
-                      <div>
-                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
-                          Original Version
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <DetailCard title="Key Name" value={keyName} />
-                          <KeyValueCard title="Value" value={keyValue} />
-                        </div>
-                      </div>
-
-                      {/* Modified To Version */}
-                      {type === "modified" && keyValueTo && (
+              return (
+                <AccordionItem key={idx} value={`nk-${idx}`}>
+                  <AccordionTrigger className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-accent/50 transition-all group text-base font-medium leading-tight">
+                    <div className="flex items-center gap-2.5 flex-1">
+                      <Badge
+                        className={`inline-flex gap-1 items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                          type === "added"
+                            ? "badge-success"
+                            : type === "removed"
+                              ? "badge-error"
+                              : "badge-warning"
+                        }`}
+                      >
+                        {type === "added" ? (
+                          <Plus />
+                        ) : type === "removed" ? (
+                          <Minus />
+                        ) : (
+                          <Diff />
+                        )}
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </Badge>
+                      <span className="font-mono text-lg font-semibold truncate">
+                        {keyName}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-5 py-4 bg-background/30">
+                    <ScrollArea className="h-56 pr-4">
+                      <div className="space-y-5">
+                        {/* Original Version */}
                         <div>
-                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1 border-t border-border/50 pt-3">
-                            To (v{fetchedDiffData.v2.contract_version})
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
+                            Original Version
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <DetailCard title="Key Name" value={keyName} highlight />
-                            <KeyValueCard title="Value" value={keyValueTo} highlight />
+                            <DetailCard title="Key Name" value={keyName} />
+                            <KeyValueCard title="Value" value={keyValue} />
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
+
+                        {/* Modified To Version */}
+                        {type === "modified" && keyValueTo && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1 border-t border-border/50 pt-3">
+                              To (v{fetchedDiffData.v2.contract_version})
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <DetailCard
+                                title="Key Name"
+                                value={keyName}
+                                highlight
+                              />
+                              <KeyValueCard
+                                title="Value"
+                                value={keyValueTo}
+                                highlight
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            },
+          )}
         </Accordion>
       ) : (
         <Empty>
@@ -440,7 +607,8 @@ const NamedKeysTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDif
             </EmptyMedia>
             <EmptyTitle>No diff data to display.</EmptyTitle>
             <EmptyDescription>
-              Please select two versions and click Compare to see the differences.
+              Please select two versions and click Compare to see the
+              differences.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -451,22 +619,22 @@ const NamedKeysTab = ({ fetchedDiffData }: { fetchedDiffData: ContractVersionDif
 
 const SummaryTab = ({
   fetchedDiffData,
-  analysis
+  analysis,
 }: {
   fetchedDiffData: ContractVersionDiff;
-  analysis?: string
+  analysis?: string;
 }) => {
   const hasAnalysis = analysis && analysis.trim().length > 0;
-  const hasDiffData = fetchedDiffData.entry_points?.length > 0 || fetchedDiffData.named_keys?.length > 0;
+  const hasDiffData =
+    fetchedDiffData.entry_points?.length > 0 ||
+    fetchedDiffData.named_keys?.length > 0;
 
   return (
     <ScrollArea className="h-full pr-3">
       {hasAnalysis ? (
         <div className="prose prose-sm max-w-none p-5 space-y-4">
           <div className="prose-content">
-            <Markdown remarkPlugins={[remarkGfm]}>
-              {analysis}
-            </Markdown>
+            <Markdown remarkPlugins={[remarkGfm]}>{analysis}</Markdown>
           </div>
         </div>
       ) : hasDiffData ? (
@@ -475,9 +643,12 @@ const SummaryTab = ({
             <div className="flex items-center justify-center w-16 h-16 bg-accent/20 rounded-xl border-2 border-dashed border-accent p-3 mx-auto mb-4">
               <Sparkle className="h-8 w-8 text-accent-foreground" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">Analysis Ready</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              Analysis Ready
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Diff data detected! Analysis summary will appear here once generated.
+              Diff data detected! Analysis summary will appear here once
+              generated.
             </p>
           </div>
         </div>
@@ -489,7 +660,8 @@ const SummaryTab = ({
             </EmptyMedia>
             <EmptyTitle>No analysis data to display.</EmptyTitle>
             <EmptyDescription>
-              Please select two versions and click Compare to see the differences.
+              Please select two versions and click Compare to see the
+              differences.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -616,9 +788,7 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
     <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-3 xl:gap-6 max-h-full">
       <Card className="col-span-1">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">
-            Compare Versions
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold">Compare Versions</CardTitle>
         </CardHeader>
         <CardContent className="h-full flex flex-col justify-between">
           <form
@@ -628,24 +798,26 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
             <div className="space-y-4">
               <Combobox
                 items={versions}
-                itemToStringLabel={(opt: ContractVersionData) => `Version ${opt.contract_version}`}
-                itemToStringValue={(opt: ContractVersionData) => opt.contract_version.toString()}
+                itemToStringLabel={(opt: ContractVersionData) =>
+                  `Version ${opt.contract_version}`
+                }
+                itemToStringValue={(opt: ContractVersionData) =>
+                  opt.contract_version.toString()
+                }
                 onValueChange={(value: ContractVersionData | null, e) => {
                   if (value !== null) setV1(value);
                   setError("");
                 }}
               >
-                <ComboboxInput placeholder="Select Version 1" aria-invalid={error ? "true" : "false"} />
+                <ComboboxInput
+                  placeholder="Select Version 1"
+                  aria-invalid={error ? "true" : "false"}
+                />
                 <ComboboxContent>
-                  <ComboboxEmpty>
-                    No versions available
-                  </ComboboxEmpty>
+                  <ComboboxEmpty>No versions available</ComboboxEmpty>
                   <ComboboxList>
                     {(item: ContractVersionData) => (
-                      <ComboboxItem
-                        key={item.contract_version}
-                        value={item}
-                      >
+                      <ComboboxItem key={item.contract_version} value={item}>
                         Version {item.contract_version}
                       </ComboboxItem>
                     )}
@@ -655,24 +827,26 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
 
               <Combobox
                 items={versions}
-                itemToStringLabel={(opt: ContractVersionData) => `Version ${opt.contract_version}`}
-                itemToStringValue={(opt: ContractVersionData) => opt.contract_version.toString()}
+                itemToStringLabel={(opt: ContractVersionData) =>
+                  `Version ${opt.contract_version}`
+                }
+                itemToStringValue={(opt: ContractVersionData) =>
+                  opt.contract_version.toString()
+                }
                 onValueChange={(value: ContractVersionData | null, e) => {
                   if (value !== null) setV2(value);
                   setError("");
                 }}
               >
-                <ComboboxInput placeholder="Select Version 2" aria-invalid={error ? "true" : "false"} />
+                <ComboboxInput
+                  placeholder="Select Version 2"
+                  aria-invalid={error ? "true" : "false"}
+                />
                 <ComboboxContent>
-                  <ComboboxEmpty>
-                    No versions available
-                  </ComboboxEmpty>
+                  <ComboboxEmpty>No versions available</ComboboxEmpty>
                   <ComboboxList>
                     {(item: ContractVersionData) => (
-                      <ComboboxItem
-                        key={item.contract_version}
-                        value={item}
-                      >
+                      <ComboboxItem key={item.contract_version} value={item}>
                         Version {item.contract_version}
                       </ComboboxItem>
                     )}
@@ -680,22 +854,20 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
                 </ComboboxContent>
               </Combobox>
               {error && (
-                <Item variant="outline" className="bg-destructive/10 border-destructive">
+                <Item
+                  variant="outline"
+                  className="bg-destructive/10 border-destructive"
+                >
                   <ItemMedia>
                     <CircleAlert className="text-destructive" />
                   </ItemMedia>
                   <ItemContent>
-                    <ItemTitle className="text-destructive">
-                      {error}
-                    </ItemTitle>
+                    <ItemTitle className="text-destructive">{error}</ItemTitle>
                   </ItemContent>
                 </Item>
               )}
             </div>
-            <Button
-              type="submit"
-              disabled={isLoading}
-            >
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <span className="inline-flex items-center gap-2">
                   Comparing...
@@ -709,13 +881,15 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
               )}
             </Button>
           </form>
-
         </CardContent>
       </Card>
       <Card className="flex flex-1 col-span-3 min-h-full">
         {fetchedDiffData ? (
           <>
-            <Tabs defaultValue="entry_point" className="h-full w-full flex flex-col justify-start">
+            <Tabs
+              defaultValue="entry_point"
+              className="h-full w-full flex flex-col justify-start"
+            >
               <CardHeader className="flex flex-col items-start px-6">
                 <TabsList className="flex mb-4" variant="default">
                   <TabsTrigger value="entry_point" className="text-lg p-5">
@@ -739,8 +913,14 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
                 <TabsContent value="named_keys" className="h-full w-full">
                   <NamedKeysTab fetchedDiffData={fetchedDiffData} />
                 </TabsContent>
-                <TabsContent value="summary" className="max-h-full w-full overflow-clip">
-                  <SummaryTab fetchedDiffData={fetchedDiffData} analysis={analysis} />
+                <TabsContent
+                  value="summary"
+                  className="max-h-full w-full overflow-clip"
+                >
+                  <SummaryTab
+                    fetchedDiffData={fetchedDiffData}
+                    analysis={analysis}
+                  />
                 </TabsContent>
               </CardContent>
             </Tabs>
@@ -751,19 +931,18 @@ const DiffTab = ({ contractData }: { contractData: ContractData }) => {
               <EmptyMedia variant="icon">
                 <Diff />
               </EmptyMedia>
-              <EmptyTitle>
-                No diff data to display.
-              </EmptyTitle>
+              <EmptyTitle>No diff data to display.</EmptyTitle>
               <EmptyDescription>
-                Please select two versions and click Compare to see the differences.
+                Please select two versions and click Compare to see the
+                differences.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
-      </Card >
-    </div >
-  )
-}
+      </Card>
+    </div>
+  );
+};
 
 const TransactionsTab = ({ transactions }: { transactions: Transaction[] }) => {
   if (!transactions || transactions.length === 0) {
@@ -794,10 +973,12 @@ const TransactionsTab = ({ transactions }: { transactions: Transaction[] }) => {
     try {
       const val = parseInt(amount);
       if (isNaN(val)) return amount;
-      return (val / 1_000_000_000).toLocaleString("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 5,
-      }) + " CSPR";
+      return (
+        (val / 1_000_000_000).toLocaleString("en-US", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 5,
+        }) + " CSPR"
+      );
     } catch {
       return amount;
     }
@@ -839,18 +1020,28 @@ const TransactionsTab = ({ transactions }: { transactions: Transaction[] }) => {
               {transactions.map((tx) => (
                 <tr key={tx.deploy_hash} className="border-t">
                   <td className="p-3">
-                    {tx.status?.toLowerCase() === "executed" || tx.status?.toLowerCase() === "processed" || !tx.error_message ? (
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20">
+                    {tx.status?.toLowerCase() === "executed" ||
+                    tx.status?.toLowerCase() === "processed" ||
+                    !tx.error_message ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                      >
                         Success
                       </Badge>
                     ) : (
-                      <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20">
+                      <Badge
+                        variant="destructive"
+                        className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                      >
                         Failed
                       </Badge>
                     )}
                   </td>
                   <td className="p-3 font-mono text-xs">
-                    <span title={tx.deploy_hash}>{formatHashLocal(tx.deploy_hash)}</span>
+                    <span title={tx.deploy_hash}>
+                      {formatHashLocal(tx.deploy_hash)}
+                    </span>
                   </td>
                   <td className="p-3">
                     {tx.entry_point_id ? (
@@ -858,7 +1049,9 @@ const TransactionsTab = ({ transactions }: { transactions: Transaction[] }) => {
                         ID: {tx.entry_point_id}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground text-xs italic">Unknown</span>
+                      <span className="text-muted-foreground text-xs italic">
+                        Unknown
+                      </span>
                     )}
                   </td>
                   <td className="p-3 font-mono text-xs">
@@ -909,7 +1102,7 @@ const TransactionsTab = ({ transactions }: { transactions: Transaction[] }) => {
       </CardContent>
     </Card>
   );
-}
+};
 
 /**
  * Contract details page using shadcn UI components.
@@ -923,10 +1116,14 @@ export default function ContractPage() {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [packageHash, setPackageHash] = useState<string>("");
   const [loadingChart, setLoadingChart] = useState<boolean>(true);
-  const [granularity, setGranularity] = useState<"hour" | "day" | "week" | "month" | "year">("hour");
+  const [granularity, setGranularity] = useState<
+    "hour" | "day" | "week" | "month" | "year"
+  >("hour");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [lastCount, setLastCount] = useState<number>(90); // default: last 90 buckets
-  const [pendingGranularity, setPendingGranularity] = useState<"hour" | "day" | "week" | "month" | "year">("hour");
+  const [pendingGranularity, setPendingGranularity] = useState<
+    "hour" | "day" | "week" | "month" | "year"
+  >("hour");
   const [pendingLastCountStr, setPendingLastCountStr] = useState<string>("90");
 
   useEffect(() => {
@@ -936,8 +1133,8 @@ export default function ContractPage() {
 
   const chartConfig: ChartConfig = {
     transactions: {
-      label: "Transactions"
-    }
+      label: "Transactions",
+    },
   };
 
   useEffect(() => {
@@ -1006,7 +1203,7 @@ export default function ContractPage() {
         case "week": {
           // Start of ISO-like week (Monday)
           const day = date.getUTCDay(); // 0 = Sunday
-          const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+          const diff = day === 0 ? -6 : 1 - day; // move to Monday
           date.setUTCDate(date.getUTCDate() + diff);
           date.setUTCHours(0, 0, 0, 0);
           return date;
@@ -1104,7 +1301,7 @@ export default function ContractPage() {
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
 
         if (!res.ok) {
@@ -1177,18 +1374,15 @@ export default function ContractPage() {
               {contractData.contract_name || "Contract Package"}
             </h2>
             <div className="font-mono text-muted-foreground space-x-3 flex items-center">
-              <span className="font-semibold">
-                Package Hash:
-              </span>
-              <span>
-                {formatHash(contractData.package_hash)}
-              </span>
-              <Button variant="ghost"
+              <span className="font-semibold">Package Hash:</span>
+              <span>{formatHash(contractData.package_hash)}</span>
+              <Button
+                variant="ghost"
                 onClick={() => {
-                  navigator.clipboard?.writeText(contractData.package_hash)
+                  navigator.clipboard?.writeText(contractData.package_hash);
                   toast.success("Package hash copied to clipboard", {
                     position: "top-right",
-                  })
+                  });
                 }}
               >
                 <Copy className="text-muted-foreground" />
@@ -1197,10 +1391,7 @@ export default function ContractPage() {
           </div>
         </div>
 
-        <Tabs
-          defaultValue="overview"
-          className="flex-1 flex flex-col h-full"
-        >
+        <Tabs defaultValue="overview" className="flex-1 flex flex-col h-full">
           <TabsList className="flex mb-4" variant="line">
             <TabsTrigger value="overview" className="text-lg">
               Overview
@@ -1233,43 +1424,46 @@ export default function ContractPage() {
                     <div className="flex flex-col gap-2 justify-between">
                       <p className="text-lg text-muted-foreground font-semibold inline-flex items-center gap-2">
                         Package Hash
-                        <Button variant="ghost" className="rounded-full"
+                        <Button
+                          variant="ghost"
+                          className="rounded-full"
                           onClick={() => {
-                            navigator.clipboard?.writeText(contractData.package_hash)
+                            navigator.clipboard?.writeText(
+                              contractData.package_hash,
+                            );
                             toast.success("Package Hash copied to clipboard", {
                               position: "top-right",
-                            })
+                            });
                           }}
                         >
                           <Copy className="text-muted-foreground" />
                         </Button>
                       </p>
                       <div className="flex items-center gap-3 xl:text-md text-muted-foreground">
-                        <p className="break-all">
-                          {contractData.package_hash}
-                        </p>
+                        <p className="break-all">{contractData.package_hash}</p>
                       </div>
                     </div>
                     <Separator />
                     <div className="flex flex-col gap-2 justify-between">
                       <p className="text-lg text-muted-foreground font-semibold inline-flex items-center gap-2">
                         Owner
-                        <Button variant="ghost"
+                        <Button
+                          variant="ghost"
                           className="rounded-full"
                           onClick={() => {
-                            navigator.clipboard?.writeText(contractData.owner_id)
+                            navigator.clipboard?.writeText(
+                              contractData.owner_id,
+                            );
                             toast.success("Owner ID copied to clipboard", {
                               position: "top-right",
-                            })
+                            });
                           }}
                         >
                           <Copy className="text-muted-foreground" />
                         </Button>
                       </p>
                       <div className="flex items-center gap-3 xl:text-md text-muted-foreground">
-                        <p className="break-all">
-                          {contractData.owner_id}
-                        </p>
+                        <p className="break-all">{contractData.owner_id}</p>
                       </div>
                     </div>
                     <Separator />
@@ -1309,16 +1503,12 @@ export default function ContractPage() {
                           {contractData.lock_status ? (
                             <>
                               <Lock />
-                              <p>
-                                Locked
-                              </p>
+                              <p>Locked</p>
                             </>
                           ) : (
                             <>
                               <Unlock />
-                              <p>
-                                Unlocked
-                              </p>
+                              <p>Unlocked</p>
                             </>
                           )}
                         </Badge>
@@ -1327,9 +1517,7 @@ export default function ContractPage() {
                         <p className="text-lg text-muted-foreground font-semibold">
                           Age
                         </p>
-                        <p className="xl:text-lg">
-                          {contractData.age} days
-                        </p>
+                        <p className="xl:text-lg">{contractData.age} days</p>
                       </div>
                     </div>
                     <Separator />
@@ -1337,29 +1525,33 @@ export default function ContractPage() {
                 </CardContent>
                 <CardHeader className="mt-4">
                   <CardTitle className="text-2xl font-bold flex justify-between">
-                    <span>
-                      Versions
-                    </span>
+                    <span>Versions</span>
                     <span className="bg-muted px-3 py-1 rounded-full text-sm font-mono">
-                      {hasVersions(contractData) ? contractData.versions.length : 0}
+                      {hasVersions(contractData)
+                        ? contractData.versions.length
+                        : 0}
                     </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-full flex flex-col gap-3 pt-5">
-                  {hasVersions(contractData) ? contractData.versions.map((v, i) => (
-                    <Badge variant="secondary" className="px-3 py-1 text-sm" key={i}>
-                      <GitBranch />
-                      Version {v.contract_version}
-                    </Badge>
-                  )) : (
+                  {hasVersions(contractData) ? (
+                    contractData.versions.map((v, i) => (
+                      <Badge
+                        variant="secondary"
+                        className="px-3 py-1 text-sm"
+                        key={i}
+                      >
+                        <GitBranch />
+                        Version {v.contract_version}
+                      </Badge>
+                    ))
+                  ) : (
                     <Empty>
                       <EmptyHeader>
                         <EmptyMedia>
                           <GitBranch />
                         </EmptyMedia>
-                        <EmptyTitle>
-                          No versions found.
-                        </EmptyTitle>
+                        <EmptyTitle>No versions found.</EmptyTitle>
                       </EmptyHeader>
                     </Empty>
                   )}
@@ -1381,9 +1573,7 @@ export default function ContractPage() {
                         <EmptyMedia variant="icon">
                           <Spinner />
                         </EmptyMedia>
-                        <EmptyTitle>
-                          Loading analytics...
-                        </EmptyTitle>
+                        <EmptyTitle>Loading analytics...</EmptyTitle>
                         <EmptyDescription>
                           Detailed analytics and charts will be available here.
                         </EmptyDescription>
@@ -1397,26 +1587,50 @@ export default function ContractPage() {
                           e.preventDefault();
                           setGranularity(pendingGranularity);
                           const parsed = parseInt(pendingLastCountStr, 10);
-                          setLastCount(isNaN(parsed) || parsed < 1 ? 1 : parsed);
+                          setLastCount(
+                            isNaN(parsed) || parsed < 1 ? 1 : parsed,
+                          );
                         }}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Granularity</span>
-                          <Select value={pendingGranularity} onValueChange={(v) => setPendingGranularity(v as any)}>
-                            <SelectTrigger className="w-[150px]" aria-label="Select granularity">
+                          <span className="text-sm text-muted-foreground">
+                            Granularity
+                          </span>
+                          <Select
+                            value={pendingGranularity}
+                            onValueChange={(v) =>
+                              setPendingGranularity(v as any)
+                            }
+                          >
+                            <SelectTrigger
+                              className="w-[150px]"
+                              aria-label="Select granularity"
+                            >
                               <SelectValue placeholder="Hour" />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl">
-                              <SelectItem value="hour" className="rounded-lg">Hour</SelectItem>
-                              <SelectItem value="day" className="rounded-lg">Day</SelectItem>
-                              <SelectItem value="week" className="rounded-lg">Week</SelectItem>
-                              <SelectItem value="month" className="rounded-lg">Month</SelectItem>
-                              <SelectItem value="year" className="rounded-lg">Year</SelectItem>
+                              <SelectItem value="hour" className="rounded-lg">
+                                Hour
+                              </SelectItem>
+                              <SelectItem value="day" className="rounded-lg">
+                                Day
+                              </SelectItem>
+                              <SelectItem value="week" className="rounded-lg">
+                                Week
+                              </SelectItem>
+                              <SelectItem value="month" className="rounded-lg">
+                                Month
+                              </SelectItem>
+                              <SelectItem value="year" className="rounded-lg">
+                                Year
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Last</span>
+                          <span className="text-sm text-muted-foreground">
+                            Last
+                          </span>
                           <Input
                             type="text"
                             className="w-[120px] h-9 px-3 py-2 rounded-md border bg-background text-sm"
@@ -1428,17 +1642,19 @@ export default function ContractPage() {
                             aria-label="Enter last count"
                           />
                           <span className="text-sm text-muted-foreground">
-                            {pendingGranularity === "hour" ? "hours" :
-                              pendingGranularity === "day" ? "days" :
-                                pendingGranularity === "week" ? "weeks" :
-                                  pendingGranularity === "month" ? "months" : "years"}
+                            {pendingGranularity === "hour"
+                              ? "hours"
+                              : pendingGranularity === "day"
+                                ? "days"
+                                : pendingGranularity === "week"
+                                  ? "weeks"
+                                  : pendingGranularity === "month"
+                                    ? "months"
+                                    : "years"}
                           </span>
                         </div>
                         <div>
-                          <Button
-                            type="submit"
-                            variant="default"
-                          >
+                          <Button type="submit" variant="default">
                             Update
                           </Button>
                         </div>
@@ -1456,41 +1672,72 @@ export default function ContractPage() {
                             tickMargin={8}
                             minTickGap={32}
                             tickFormatter={(value) => {
-                              const d = new Date(value)
+                              const d = new Date(value);
                               switch (granularity) {
                                 case "hour":
-                                  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", hour12: false })
+                                  return d.toLocaleString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    hour12: false,
+                                  });
                                 case "day":
                                 case "week":
-                                  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                  return d.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  });
                                 case "month":
-                                  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                                  return d.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    year: "numeric",
+                                  });
                                 case "year":
-                                  return String(d.getUTCFullYear())
+                                  return String(d.getUTCFullYear());
                                 default:
-                                  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                  return d.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  });
                               }
                             }}
                           />
-                          <YAxis domain={[0, 'dataMax']} allowDecimals={false} />
+                          <YAxis
+                            domain={[0, "dataMax"]}
+                            allowDecimals={false}
+                          />
                           <ChartTooltip
                             cursor={false}
                             content={
                               <ChartTooltipContent
                                 labelFormatter={(value) => {
-                                  const d = new Date(value)
+                                  const d = new Date(value);
                                   switch (granularity) {
                                     case "hour":
-                                      return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", hour12: false })
+                                      return d.toLocaleString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        hour12: false,
+                                      });
                                     case "day":
                                     case "week":
-                                      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                      return d.toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                      });
                                     case "month":
-                                      return d.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                                      return d.toLocaleDateString("en-US", {
+                                        month: "short",
+                                        year: "numeric",
+                                      });
                                     case "year":
-                                      return String(d.getUTCFullYear())
+                                      return String(d.getUTCFullYear());
                                     default:
-                                      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                      return d.toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                      });
                                   }
                                 }}
                                 indicator="dot"
@@ -1511,21 +1758,30 @@ export default function ContractPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="versions" className="h-full w-full grid grid-cols-1">
+          <TabsContent
+            value="versions"
+            className="h-full w-full grid grid-cols-1"
+          >
             <div className="h-full col-span-1">
               {hasVersions(contractData) ? (
                 <>
-                  <Tabs orientation="horizontal" className="h-full lg:h-auto lg:hidden" defaultValue={contractData.versions[0].contract_version.toString()}>
+                  <Tabs
+                    orientation="horizontal"
+                    className="h-full lg:h-auto lg:hidden"
+                    defaultValue={contractData.versions[0].contract_version.toString()}
+                  >
                     <TabsList>
                       {contractData.versions.map((v, i) => (
-                        <TabsTrigger key={i} value={v.contract_version.toString()} className="text-lg">
+                        <TabsTrigger
+                          key={i}
+                          value={v.contract_version.toString()}
+                          className="text-lg"
+                        >
                           Version {v.contract_version}
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    {contractData.versions.map((v, i) => (
-                      versionTab(v, i)
-                    ))}
+                    {contractData.versions.map((v, i) => versionTab(v, i))}
                   </Tabs>
                   <Tabs
                     orientation="vertical"
@@ -1538,16 +1794,18 @@ export default function ContractPage() {
                       </h2>
                       <TabsList className="flex w-full" variant="default">
                         {contractData.versions.map((v, i) => (
-                          <TabsTrigger key={i} value={v.contract_version.toString()} className="text-lg p-3 w-full lg:text-sm xl:text-lg">
+                          <TabsTrigger
+                            key={i}
+                            value={v.contract_version.toString()}
+                            className="text-lg p-3 w-full lg:text-sm xl:text-lg"
+                          >
                             Version {v.contract_version}
                           </TabsTrigger>
                         ))}
                       </TabsList>
                     </div>
                     <ScrollArea className="lg:col-span-5 h-14/15 pr-5">
-                      {contractData.versions.map((v, i) => (
-                        versionTab(v, i)
-                      ))}
+                      {contractData.versions.map((v, i) => versionTab(v, i))}
                     </ScrollArea>
                   </Tabs>
                 </>
@@ -1557,9 +1815,7 @@ export default function ContractPage() {
                     <EmptyMedia variant="icon">
                       <GitBranch />
                     </EmptyMedia>
-                    <EmptyTitle>
-                      No versions found.
-                    </EmptyTitle>
+                    <EmptyTitle>No versions found.</EmptyTitle>
                     <EmptyDescription>
                       Detailed version history will be available here.
                     </EmptyDescription>
@@ -1569,7 +1825,10 @@ export default function ContractPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="transactions" className="h-full w-full grid grid-cols-1">
+          <TabsContent
+            value="transactions"
+            className="h-full w-full grid grid-cols-1"
+          >
             <TransactionsTab transactions={transactions} />
           </TabsContent>
 
@@ -1577,7 +1836,7 @@ export default function ContractPage() {
             <DiffTab contractData={contractData} />
           </TabsContent>
         </Tabs>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }

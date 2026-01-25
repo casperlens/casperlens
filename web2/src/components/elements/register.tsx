@@ -201,11 +201,11 @@ export const Register: React.FC = () => {
   const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
-     if (activeAccount) {
-        setUserId(activeAccount);
-     } else {
-        setUserId("");
-     }
+    if (activeAccount) {
+      setUserId(activeAccount);
+    } else {
+      setUserId("");
+    }
   }, [activeAccount]);
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 
 const DashboardContent = dynamic(
   () => import("@/components/elements/dashboard-content"),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function Page() {

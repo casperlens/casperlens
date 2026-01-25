@@ -1,12 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
@@ -18,7 +13,14 @@ import {
 } from "@/components/ui/table";
 import { Transaction } from "@/lib/types";
 import { getUserId } from "@/lib/utils";
-import { AlertCircle, CheckCircle, Clock, Copy, ExternalLink, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Copy,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -33,10 +35,12 @@ const formatAmount = (amount: string) => {
   try {
     const val = parseInt(amount);
     if (isNaN(val)) return amount;
-    return (val / 1_000_000_000).toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 5,
-    }) + " CSPR";
+    return (
+      (val / 1_000_000_000).toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 5,
+      }) + " CSPR"
+    );
   } catch {
     return amount;
   }
@@ -68,7 +72,7 @@ export function TransactionsTab({ packageHash }: { packageHash: string }) {
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
 
         if (!res.ok) {
@@ -149,28 +153,40 @@ export function TransactionsTab({ packageHash }: { packageHash: string }) {
               {transactions.map((tx) => (
                 <TableRow key={tx.deploy_hash}>
                   <TableCell>
-                    {tx.status?.toLowerCase() === "executed" || tx.status?.toLowerCase() === "processed" || !tx.error_message ? (
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20">
+                    {tx.status?.toLowerCase() === "executed" ||
+                    tx.status?.toLowerCase() === "processed" ||
+                    !tx.error_message ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                      >
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Success
                       </Badge>
                     ) : (
-                      <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20">
+                      <Badge
+                        variant="destructive"
+                        className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                      >
                         <AlertCircle className="w-3 h-3 mr-1" />
                         Failed
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
-                    <span title={tx.deploy_hash}>{formatHash(tx.deploy_hash)}</span>
+                    <span title={tx.deploy_hash}>
+                      {formatHash(tx.deploy_hash)}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {tx.entry_point_id ? (
                       <Badge variant="secondary" className="font-mono text-xs">
-                         ID: {tx.entry_point_id}
+                        ID: {tx.entry_point_id}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground text-xs italic">Unknown</span>
+                      <span className="text-muted-foreground text-xs italic">
+                        Unknown
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
@@ -178,7 +194,9 @@ export function TransactionsTab({ packageHash }: { packageHash: string }) {
                       {formatHash(tx.caller_public_key)}
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs">{formatAmount(tx.cost)}</TableCell>
+                  <TableCell className="text-xs">
+                    {formatAmount(tx.cost)}
+                  </TableCell>
                   <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                     {formatDate(tx.timestamp)}
                   </TableCell>
@@ -190,7 +208,9 @@ export function TransactionsTab({ packageHash }: { packageHash: string }) {
                         className="h-6 w-6"
                         onClick={() => {
                           navigator.clipboard?.writeText(tx.deploy_hash);
-                          toast.success("Hash copied");
+                          toast.success("Hash copied", {
+                            position: "top-right",
+                          });
                         }}
                       >
                         <Copy className="h-3 w-3" />

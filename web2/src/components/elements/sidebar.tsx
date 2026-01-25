@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Home, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
