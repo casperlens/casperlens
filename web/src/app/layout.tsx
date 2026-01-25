@@ -1,12 +1,17 @@
-import { Provider } from "jotai";
+import { ClientProviders } from "@/components/elements/client-providers";
 import type { Metadata } from "next";
-import { UserSessionInit } from "@/components/UserSessionInit";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 
+const font = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-roboto",
+});
+
 export const metadata: Metadata = {
-  title: "CasperLens - Blockchain Observability Platform",
-  description:
-    "Comprehensive observability platform for tracking and monitoring smart contracts on the Casper blockchain network",
+  title: "CasperLens",
+  description: "Advanced contract monitoring for Casper Network",
 };
 
 export default function RootLayout({
@@ -15,13 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col bg-black text-white antialiased root">
-        <UserSessionInit />
-        <Provider>
-          {/* Global app container */}
-          <div className="min-h-screen">{children}</div>
-        </Provider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${font.variable} antialiased`}>
+        <div id="app">
+          <div id="csprclick-ui"></div>
+        </div>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
