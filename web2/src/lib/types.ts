@@ -125,5 +125,5 @@ export interface Transaction {
 
 export interface ChartDataPoint {
   timestamp: string;
-  count: number;
+  transactions: number;
 }

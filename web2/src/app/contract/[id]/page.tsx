@@ -38,7 +38,7 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Markdown from 'react-markdown';
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import remarkGfm from 'remark-gfm';
 
 const formatHash = (hash: string | undefined, start = 5, end = 5) => {
@@ -779,7 +779,16 @@ export default function ContractPage() {
   const [packageHash, setPackageHash] = useState<string>("");
   const [loadingChart, setLoadingChart] = useState<boolean>(true);
   const [granularity, setGranularity] = useState<"hour" | "day" | "week" | "month" | "year">("hour");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [lastCount, setLastCount] = useState<number>(90); // default: last 90 buckets
+  const [pendingGranularity, setPendingGranularity] = useState<"hour" | "day" | "week" | "month" | "year">("hour");
+  const [pendingLastCountStr, setPendingLastCountStr] = useState<string>("90");
+
+  useEffect(() => {
+    setPendingGranularity(granularity);
+    setPendingLastCountStr(lastCount.toString());
+  }, [granularity, lastCount]);
+
   const chartConfig: ChartConfig = {
     transactions: {
       label: "Transactions"
@@ -837,53 +846,104 @@ export default function ContractPage() {
   }, []);
 
   const formatTransactionTimestamps = (transactions: Transaction[]) => {
-    // Helper to floor a date to the specified granularity
-    const floorDate = (d: Date, g: typeof granularity): string => {
+    // Normalize to bucket start for a given granularity (UTC-safe)
+    const floorDateToBucket = (d: Date, g: typeof granularity): Date => {
       const date = new Date(d);
       switch (g) {
         case "hour": {
-          date.setMinutes(0, 0, 0);
-          return date.toISOString().slice(0, 13) + ":00:00Z";
+          date.setUTCMinutes(0, 0, 0);
+          return date;
         }
         case "day": {
-          date.setHours(0, 0, 0, 0);
-          return date.toISOString().split("T")[0];
+          date.setUTCHours(0, 0, 0, 0);
+          return date;
         }
         case "week": {
-          // Set to start of week (Monday)
+          // Start of ISO-like week (Monday)
           const day = date.getUTCDay(); // 0 = Sunday
           const diff = (day === 0 ? -6 : 1 - day); // move to Monday
           date.setUTCDate(date.getUTCDate() + diff);
           date.setUTCHours(0, 0, 0, 0);
-          return date.toISOString().split("T")[0];
+          return date;
         }
         case "month": {
           date.setUTCDate(1);
           date.setUTCHours(0, 0, 0, 0);
-          return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+          return date;
         }
         case "year": {
-          return String(date.getUTCFullYear());
+          date.setUTCMonth(0, 1);
+          date.setUTCHours(0, 0, 0, 0);
+          return date;
         }
       }
     };
 
-    // Aggregate counts per bucket
+    // Convert a bucket date into a stable ISO timestamp string for X axis
+    const bucketKey = (d: Date, g: typeof granularity): string => {
+      const iso = d.toISOString();
+      switch (g) {
+        case "hour":
+          // yyyy-mm-ddThh:00:00Z
+          return iso.slice(0, 13) + ":00:00Z";
+        case "day":
+        case "week":
+          // yyyy-mm-dd
+          return iso.split("T")[0];
+        case "month":
+          // yyyy-mm-01 (full date for stable Date parsing)
+          return iso.split("T")[0];
+        case "year":
+          // yyyy-01-01 (full date for stable Date parsing)
+          return iso.split("T")[0];
+      }
+    };
+
+    // Step bucket date backwards by 'step' units of granularity
+    const stepBucket = (d: Date, g: typeof granularity, step: number): Date => {
+      const date = new Date(d);
+      switch (g) {
+        case "hour":
+          date.setUTCHours(date.getUTCHours() + step);
+          break;
+        case "day":
+          date.setUTCDate(date.getUTCDate() + step);
+          break;
+        case "week":
+          date.setUTCDate(date.getUTCDate() + step * 7);
+          break;
+        case "month":
+          date.setUTCMonth(date.getUTCMonth() + step);
+          break;
+        case "year":
+          date.setUTCFullYear(date.getUTCFullYear() + step);
+          break;
+      }
+      return floorDateToBucket(date, g);
+    };
+
+    // 1) Aggregate counts per bucket from cached transactions
     const aggregated: Record<string, number> = {};
     for (const tx of transactions) {
-      const bucket = floorDate(new Date(tx.timestamp), granularity);
-      aggregated[bucket] = (aggregated[bucket] ?? 0) + 1;
+      const bucketDate = floorDateToBucket(new Date(tx.timestamp), granularity);
+      const key = bucketKey(bucketDate, granularity);
+      aggregated[key] = (aggregated[key] ?? 0) + 1;
     }
 
-    // Convert to data points and sort by time ascending
-    const points: ChartDataPoint[] = Object.entries(aggregated)
-      .map(([t, c]) => ({ timestamp: t, count: c }))
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    // 2) Generate placeholder buckets over the last N buckets ending at "now"
+    const end = floorDateToBucket(new Date(), granularity);
+    const points: ChartDataPoint[] = [];
+    const safeLast = Math.max(1, lastCount); // enforce at least 1 bucket
+    for (let i = safeLast - 1; i >= 0; i--) {
+      const d = stepBucket(end, granularity, -i);
+      const key = bucketKey(d, granularity);
+      points.push({
+        timestamp: key,
+        transactions: aggregated[key] ?? 0,
+      });
+    }
 
-    // Apply last X count filter (take the last N buckets)
-    const sliced = lastCount > 0 ? points.slice(Math.max(points.length - lastCount, 0)) : points;
-
-    setChartData(sliced);
+    setChartData(points);
   };
 
   useEffect(() => {
@@ -908,6 +968,7 @@ export default function ContractPage() {
 
         const json = await res.json();
         if (json.success && json.data) {
+          setTransactions(json.data);
           formatTransactionTimestamps(json.data);
         } else {
           throw new Error(json.error || "Failed to load transactions");
@@ -923,7 +984,11 @@ export default function ContractPage() {
     if (packageHash) {
       fetchTransactions();
     }
-  }, [packageHash, granularity, lastCount]);
+  }, [packageHash]);
+
+  useEffect(() => {
+    formatTransactionTimestamps(transactions);
+  }, [granularity, lastCount, transactions]);
 
   // Loading state (full viewport card)
   if (loading) {
@@ -989,8 +1054,6 @@ export default function ContractPage() {
 
         <Tabs
           defaultValue="overview"
-          // value={activeTab}
-          // onValueChange={(v) => setActiveTab(v as any)}
           className="flex-1 flex flex-col h-full"
         >
           <TabsList className="flex mb-4" variant="line">
@@ -1065,62 +1128,64 @@ export default function ContractPage() {
                       </div>
                     </div>
                     <Separator />
-                    <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
-                      <p className="text-lg text-muted-foreground font-semibold">
-                        Network
-                      </p>
-                      <Badge
-                        variant={
-                          contractData.network === "mainnet"
-                            ? "default"
-                            : "outline"
-                        }
-                        className="space-x-2"
-                      >
-                        <Link data-icon="inline-start" />
-                        <p>
-                          {contractData.network === "mainnet"
-                            ? "Mainnet"
-                            : "Testnet"}
+                    <div className="flex flex-col gap-3 py-3">
+                      <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
+                        <p className="text-lg text-muted-foreground font-semibold">
+                          Network
                         </p>
-                      </Badge>
-                    </div>
-                    <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
-                      <p className="text-lg text-muted-foreground font-semibold">
-                        Status
-                      </p>
-                      <Badge
-                        variant={
-                          contractData.lock_status
-                            ? "destructive"
-                            : "secondary"
-                        }
-                        className={`space-x-2 ${contractData.lock_status ? "bg-red-600 text-red-100" : "bg-green-600 text-green-100"}`}
-                      >
-                        {contractData.lock_status ? (
-                          <>
-                            <Lock />
-                            <p>
-                              Locked
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <Unlock />
-                            <p>
-                              Unlocked
-                            </p>
-                          </>
-                        )}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <p className="text-lg text-muted-foreground font-semibold">
-                        Age
-                      </p>
-                      <p className="xl:text-lg">
-                        {contractData.age} days
-                      </p>
+                        <Badge
+                          variant={
+                            contractData.network === "mainnet"
+                              ? "default"
+                              : "outline"
+                          }
+                          className="space-x-2"
+                        >
+                          <Link data-icon="inline-start" />
+                          <p>
+                            {contractData.network === "mainnet"
+                              ? "Mainnet"
+                              : "Testnet"}
+                          </p>
+                        </Badge>
+                      </div>
+                      <div className="flex flex-col gap-2 xl:flex-row justify-between xl:items-center">
+                        <p className="text-lg text-muted-foreground font-semibold">
+                          Status
+                        </p>
+                        <Badge
+                          variant={
+                            contractData.lock_status
+                              ? "destructive"
+                              : "secondary"
+                          }
+                          className={`space-x-2 ${contractData.lock_status ? "bg-red-600 text-red-100" : "bg-green-600 text-green-100"}`}
+                        >
+                          {contractData.lock_status ? (
+                            <>
+                              <Lock />
+                              <p>
+                                Locked
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <Unlock />
+                              <p>
+                                Unlocked
+                              </p>
+                            </>
+                          )}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <p className="text-lg text-muted-foreground font-semibold">
+                          Age
+                        </p>
+                        <p className="xl:text-lg">
+                          {contractData.age} days
+                        </p>
+                      </div>
                     </div>
                     <Separator />
                   </div>
@@ -1159,6 +1224,11 @@ export default function ContractPage() {
 
             <div className="lg:col-span-2 xl:col-span-3 lg:row-span-2">
               <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold">
+                    Transaction Analytics
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="h-full flex flex-col p-6 transition-all">
                   {loadingChart ? (
                     <Empty>
@@ -1176,10 +1246,18 @@ export default function ContractPage() {
                     </Empty>
                   ) : (
                     <>
-                      <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <form
+                        className="flex flex-wrap items-center gap-3 mb-4"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          setGranularity(pendingGranularity);
+                          const parsed = parseInt(pendingLastCountStr, 10);
+                          setLastCount(isNaN(parsed) || parsed < 1 ? 1 : parsed);
+                        }}
+                      >
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-muted-foreground">Granularity</span>
-                          <Select value={granularity} onValueChange={(v) => setGranularity(v as any)}>
+                          <Select value={pendingGranularity} onValueChange={(v) => setPendingGranularity(v as any)}>
                             <SelectTrigger className="w-[150px]" aria-label="Select granularity">
                               <SelectValue placeholder="Hour" />
                             </SelectTrigger>
@@ -1195,45 +1273,36 @@ export default function ContractPage() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-muted-foreground">Last</span>
                           <Input
-                            type="number"
+                            type="text"
                             className="w-[120px] h-9 px-3 py-2 rounded-md border bg-background text-sm"
-                            min={1}
-                            value={lastCount}
+                            value={pendingLastCountStr}
                             onChange={(e) => {
-                              const v = Number(e.target.value);
-                              if (Number.isFinite(v) && v >= 1) {
-                                setLastCount(v);
-                              }
+                              setPendingLastCountStr(e.target.value);
                             }}
+                            placeholder="Enter count"
                             aria-label="Enter last count"
                           />
                           <span className="text-sm text-muted-foreground">
-                            {granularity === "hour" ? "hours" :
-                              granularity === "day" ? "days" :
-                                granularity === "week" ? "weeks" :
-                                  granularity === "month" ? "months" : "years"}
+                            {pendingGranularity === "hour" ? "hours" :
+                              pendingGranularity === "day" ? "days" :
+                                pendingGranularity === "week" ? "weeks" :
+                                  pendingGranularity === "month" ? "months" : "years"}
                           </span>
                         </div>
-                      </div>
+                        <div>
+                          <Button
+                            type="submit"
+                            variant="default"
+                          >
+                            Update
+                          </Button>
+                        </div>
+                      </form>
                       <ChartContainer
                         config={chartConfig}
                         className="aspect-auto h-full w-full"
                       >
                         <AreaChart data={chartData}>
-                          <defs>
-                            <linearGradient id="fillCount" x1="0" y1="0" x2="0" y2="1">
-                              <stop
-                                offset="5%"
-                                stopColor="var(--color-accent)"
-                                stopOpacity={0.8}
-                              />
-                              <stop
-                                offset="95%"
-                                stopColor="var(--color-accent-foreground)"
-                                stopOpacity={0.1}
-                              />
-                            </linearGradient>
-                          </defs>
                           <CartesianGrid vertical={false} />
                           <XAxis
                             dataKey="timestamp"
@@ -1242,30 +1311,50 @@ export default function ContractPage() {
                             tickMargin={8}
                             minTickGap={32}
                             tickFormatter={(value) => {
-                              const date = new Date(value)
-                              return date.toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                              })
+                              const d = new Date(value)
+                              switch (granularity) {
+                                case "hour":
+                                  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", hour12: false })
+                                case "day":
+                                case "week":
+                                  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                case "month":
+                                  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                                case "year":
+                                  return String(d.getUTCFullYear())
+                                default:
+                                  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                              }
                             }}
                           />
+                          <YAxis domain={[0, 'dataMax']} allowDecimals={false} />
                           <ChartTooltip
                             cursor={false}
                             content={
                               <ChartTooltipContent
                                 labelFormatter={(value) => {
-                                  return new Date(value).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                  })
+                                  const d = new Date(value)
+                                  switch (granularity) {
+                                    case "hour":
+                                      return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", hour12: false })
+                                    case "day":
+                                    case "week":
+                                      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                    case "month":
+                                      return d.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                                    case "year":
+                                      return String(d.getUTCFullYear())
+                                    default:
+                                      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                  }
                                 }}
                                 indicator="dot"
                               />
                             }
                           />
                           <Area
-                            dataKey="count"
-                            type="natural"
+                            dataKey="transactions"
+                            type="basis"
                             stroke="var(--color-accent)"
                           />
                         </AreaChart>
