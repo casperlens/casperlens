@@ -6,11 +6,11 @@
   "tailwind": {
     "config": "",
     "css": "src/app/globals.css",
-    "baseColor": "neutral",
+    "baseColor": "gray",
     "cssVariables": true,
     "prefix": ""
   },
-  "iconLibrary": "lucide",
+  "iconLibrary": "lucide-react",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
